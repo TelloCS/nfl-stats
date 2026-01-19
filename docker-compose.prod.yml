@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: prod
+    environment:
+      - DEBUG=0
+    volumes:
+      - static_volume:/app/backend/staticfiles
+      - media_volume:/app/backend/mediafiles
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod
+    volumes:
+      - frontend_static:/usr/share/nginx/html
+
+  nginx:
+    image: nginx:1.25-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - frontend_static:/usr/share/nginx/html:ro
+      - static_volume:/app/backend/staticfiles:ro
+      - media_volume:/app/backend/mediafiles:ro
+    ports:
+      - '80:80'
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  frontend_static:
+  static_volume:
+  media_volume:

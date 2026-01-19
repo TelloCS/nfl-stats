@@ -1,0 +1,21 @@
+name: backend
+
+on:
+  pull_request:
+    branches:
+      - main
+  pull:
+    branches:
+      - main
+
+jobs:
+  services:
+    db:
+      postgres:
+        image: postgres:17
+      env:
+        POSTGRES_DB: nfl
+        POSTGRES_USER: nfl
+        POSTGRES_PASSWORD: nfl
+  
+

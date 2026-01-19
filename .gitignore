@@ -60,6 +60,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+mediafiles
+staticfiles
 
 # Flask stuff:
 instance/
@@ -149,6 +151,7 @@ activemq-data/
 
 # Environments
 .env
+.env.prod
 .envrc
 .venv
 env/
@@ -356,3 +359,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+celerybeat-schedule*
+management

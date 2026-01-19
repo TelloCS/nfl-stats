@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    user: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    ports:
+      - 127.0.0.1:5432:5432
+    env_file:
+      - .env
+
+  redis:
+    image: redis:7-alpine
+    user: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: redis-server --save 20 1 --loglevel warning
+    ports:
+      - 127.0.0.1:6379:6379
+
+  worker:
+    build:
+      context: ./backend
+      target: dev
+    command: celery -A nfl worker --loglevel=info
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  beat:
+    build:
+      context: ./backend
+      target: dev
+    command: celery -A nfl beat --loglevel=info
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+        - ./backend:/app/backend/
+        - static_volume:/app/backend/staticfiles
+        - media_volume:/app/backend/mediafiles
+    ports:
+      - 127.0.0.1:8000:8000
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    ports:
+      - 127.0.0.1:5173:5173
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+  
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
