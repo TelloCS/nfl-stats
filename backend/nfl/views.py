@@ -6,6 +6,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import NotFound
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -16,23 +19,22 @@ from .filters import *
 from django.db.models import F, Window, Prefetch
 from django.db.models.functions import DenseRank
 
+ONE_WEEK = 60 * 60 * 24 * 7
+
 class TeamListAPIView(generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nickname',]
 
-    # @method_decorator(cache_page(60 * 10, key_prefix='team_list'))
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='30/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
 
         data = {"teams": serializer.data}
         return Response(data)
-    
-    # def get_queryset(self):
-    #     time.sleep(2)
-    #     return super().get_queryset()
     
 class TeamRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Team.objects.all()
@@ -54,6 +56,8 @@ class PlayerListAPIView(generics.ListAPIView):
     filterset_class = PlayerFilter
     pagination_class = None
 
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='30/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
@@ -67,16 +71,12 @@ class PlayerGameStatsRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = PlayerStatsSerializer
     lookup_field = 'slug'
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     isinstance = self.get_object()
-    #     serializer = self.get_serializer(isinstance)
-    #     return Response(
-    #         # {
-    #         #     'labels': ['Rush Att', 'REC', 'YDS', ],
-    #         #     'data': serializer.data
-    #         # },
-    #         serializer.data
-    #     )
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'players': serializer.data})
 
 class TeamStatsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Team.objects.all()
@@ -92,6 +92,11 @@ class TeamStatsRetrieveAPIView(generics.RetrieveAPIView):
 class TeamRanksListView(generics.ListAPIView):
     serializer_class = TeamRanksSerializer
     pagination_class = None
+
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = Team.objects.all()
@@ -300,11 +305,15 @@ class TeamRanksListView(generics.ListAPIView):
 # TESTING
 class PlayerGameStatsMatchupsListView(generics.ListAPIView):
     queryset = PlayerGameStats.objects.all()
-    # .select_related('homeTeam', 'awayTeam').prefetch_related('game')
     serializer_class = GameTest
     pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerMatchupsFilter
+
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class EventListView(generics.ListAPIView):
     queryset = Game.objects.all()
@@ -312,3 +321,8 @@ class EventListView(generics.ListAPIView):
     pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = UpcomingGameFilter
+
+    @method_decorator(cache_page(ONE_WEEK))
+    @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
