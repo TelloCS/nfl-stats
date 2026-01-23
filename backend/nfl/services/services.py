@@ -131,13 +131,17 @@ class Players(EndpointGenerator):
     def transform(self) -> None:
         positions = {'QB', 'WR', 'RB', 'TE'}
 
+        team_abbreviatons = {team.abbreviation: team for team in models.Team.objects.all()}
         for team in self.raw:
             for position in team["athletes"]:
                 if position["position"] == "offense":
                     for athlete in position["items"]:
                         if athlete["position"]["abbreviation"] in positions:
-                            teams = {team.abbreviation: team for team in models.Team.objects.all()}
-                            team_instance = teams.get(str(team['team']["abbreviation"]))
+                            team_instance = team_abbreviatons.get(str(team['team']["abbreviation"]))
+
+                            if not team_instance:
+                                logger.warning(f"Skipping profile for unknown player: {str(athlete.get('displayName', ''))}")
+                                continue
                             
                             defaults = {
                                 "slug": generate_slug(athlete["displayName"]),
@@ -162,8 +166,10 @@ class Players(EndpointGenerator):
                                 defaults=defaults
                             )
 
-                            if created: logger.info(f"CREATED: PLAYER {obj.full_name.upper()}")
-                            else: logger.debug(f"UPDATED: PLAYER {obj.full_name.upper()}")
+                            if created:
+                                logger.info(f"CREATED: PLAYER {obj.full_name.upper()}")
+                            else:
+                                logger.debug(f"UPDATED: PLAYER {obj.full_name.upper()}")
 
     def helper(self):
         positions = {'QB', 'WR', 'RB', 'TE'}
@@ -199,21 +205,28 @@ class PlayerStats(EndpointGenerator):
             return await response.json()
     
     def transform(self, util: list) -> None:
-        games = {game.event: game for game in models.Game.objects.all()}
-        players = {player.full_name: player for player in models.Player.objects.all()}
+        games_map = {game.event: game for game in models.Game.objects.all()}
+        players_map = {player.full_name: player for player in models.Player.objects.all()}
         
-        for player, u in zip(self.raw, util):
-            for type in player.get("seasonTypes", []):
-                for category in type["categories"]:
-                    games_played = len(category['events'])
-                    for event in category["events"]:
-                        stats = {}
-                        
-                        for name, stat in zip(player["names"], event["stats"]):
-                            stats[name] = stat
+        for player_data, u in zip(self.raw, util):
+            player_instance = players_map.get(str(u['full_name']))
+            if not player_instance:
+                logger.warning(f"Player not found in DB: {u['full_name']}")
+                continue
 
-                        player_instance = player.get(u['full_name'])
-                        game_instace = games.get(event['eventId'])
+            for season_type in player_data.get("seasonTypes", []):
+                for category in season_type["categories"]:
+                    games_played = len(category['events'])
+                    
+                    for event in category["events"]:
+                        event_id = str(event.get('eventId'))
+                        game_instance = games_map.get(event_id)
+
+                        if not game_instance:
+                            logger.debug(f"Game ID {event_id} not found in DB. Skipping.")
+                            continue
+                        
+                        stats = {name: stat for name, stat in zip(player_data["names"], event["stats"])}
                         
                         defaults = {
                             'is_starter': stats.get('isStarter', True),
@@ -253,21 +266,25 @@ class PlayerStats(EndpointGenerator):
 
                         _, created = models.PlayerGameStats.objects.update_or_create(
                             player=player_instance,
-                            game=game_instace,
+                            game=game_instance,
                             defaults=defaults
                         )
 
-                        if created: logger.info(f"CREATED: PLAYER_STATS {u['full_name'].upper()}")
-                        else: logger.debug(f"UPDATED: PLAYER_STATS {u['full_name'].upper()}")
+                        if created:
+                            logger.info(f"CREATED: PLAYER_STATS {str(u['full_name']).upper()}")
+                        else:
+                            logger.debug(f"UPDATED: PLAYER_STATS {str(u['full_name']).upper()}")
 
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
 
     def check(self, value: Any):
-        if value == '-':
+        if value == '-' or value is None:
             return 0
-        else:
+        try:
             return value
+        except ValueError:
+            return 0
         
 class Events(EndpointGenerator):
     base_url = os.getenv('EVENTS_URL')
@@ -277,12 +294,12 @@ class Events(EndpointGenerator):
         self.raw = []
 
     async def spawn_tasks(self, session: ClientSession, upcoming_week: int):
-        previous_week = upcoming_week - 1
+        # previous_week = upcoming_week - 1
         async with TaskGroup() as taskgroup:
             tasks = [
                 taskgroup.create_task(
                     self.send_api_request(session=session, week=week)
-                ) for week in range(previous_week, upcoming_week)
+                ) for week in range(1, upcoming_week)
             ]
         self.raw = [t.result() for t in tasks]
 
@@ -291,19 +308,21 @@ class Events(EndpointGenerator):
             return await response.json()
         
     def transform(self) -> None:
-        teams = {team.abbreviation: team for team in models.Team.objects.all()}
-
+        if not self.raw:
+            return
+        
+        team_abbreviatons = {team.abbreviation: team for team in models.Team.objects.all()}
         for data in self.raw:
             for event in data['events']:
                 for comp in event['competitions']:
                     for team in comp['competitors']:
                         if team['homeAway'] == 'home':
                             home_team = team['team']['abbreviation']
-                            home_team_instance = teams.get(home_team)
+                            home_team_instance = team_abbreviatons.get(home_team)
                             home_score = team['score']
                         else:
                             away_team = team['team']['abbreviation']
-                            away_team_instance = teams.get(away_team)
+                            away_team_instance = team_abbreviatons.get(away_team)
                             away_score = team['score']
 
                 defaults = {
@@ -346,8 +365,17 @@ class OffensePassing(WebScraping):
             html = await response.text()
             self.raw = Table(html=html, source=OffensePassing.source).parser
     
-    def transform(self) -> dict:
+    def transform(self):
+        if not self.raw:
+            return
+
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'pass_attempts': int(item['Att']),
                 'completions': int(item['Cmp']),
@@ -358,17 +386,20 @@ class OffensePassing(WebScraping):
                 'interceptions': int(item['INT']),
                 'pass_rating': float(item['Rate'] ),
                 'sacks': int(item['Sck']),
-                'sack_yards': int(item['SckY'])
+                'sack_yards': int(item['SckY']),
+                'team': team_instance
             }
             self.res.append(defaults)
 
-            obj, created = models.TeamOffensePassingStats.objects.update_or_create(
-                team=item['Team'],
+            _, created = models.TeamOffensePassingStats.objects.update_or_create(
+                team=team_instance,
                 defaults=defaults
             )
 
-            if created: logger.info(f"CREATED: TEAM OFFENSE_PASSING {obj.team.upper()}")
-            else: logger.debug(f"UPDATED: TEAM OFFENSE_PASSING {obj.team.upper()}")
+            if created:
+                logger.info(f"CREATED: TEAM OFFENSE_PASSING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM OFFENSE_PASSING {str(item['Team']).upper()}")
     
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -387,15 +418,35 @@ class OffenseRushing(WebScraping):
             self.raw = Table(html=html, source=OffenseRushing.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'rush_attempts': int(item['Att']),
                 'rush_yards': int(item['Rush Yds']),
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
                 'rush_fumbles': int(item['Rush FUM']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamOffenseRushingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+            
+            if created:
+                logger.info(f"CREATED: TEAM OFFENSE_RUSHING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM OFFENSE_RUSHING {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -414,15 +465,35 @@ class OffenseReceiving(WebScraping):
             self.raw = Table(html=html, source=OffenseReceiving.source).parser
     
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'receptions': int(item['Rec']),
                 'rec_yards': int(item['Yds']),
                 'yards_per_reception': float(item['Yds/Rec']),
                 'rec_touchdowns': int(item['TD']),
                 'rec_fumbles': int(item['Rec FUM']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamOffenseReceivingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM OFFENSE_RECEIVING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM OFFENSE_RECEIVING {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -441,7 +512,16 @@ class DefensePassing(WebScraping):
             self.raw = Table(html=html, source=DefensePassing.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+            
             defaults = {
                 'pass_attempts': int(item['Att']),
                 'completions': int(item['Cmp']),
@@ -451,9 +531,20 @@ class DefensePassing(WebScraping):
                 'pass_touchdowns': int(item['TD']),
                 'interceptions': int(item['INT']),
                 'pass_rating': float(item['Rate'] ),
-                'sacks': int(item['Sck'])
+                'sacks': int(item['Sck']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamDefensePassingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM DEFENSE_PASSING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM DEFENSE_PASSING {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -472,15 +563,36 @@ class DefenseRushing(WebScraping):
             self.raw = Table(html=html, source=DefenseRushing.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'rush_attempts': int(item['Att']),
                 'rush_yards': int(item['Rush Yds']),
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
                 'rush_fumbles': int(item['Rush FUM']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamDefenseRushingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM DEFENSE_RUSHING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM DEFENSE_RUSHING {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -499,22 +611,42 @@ class DefenseReceiving(WebScraping):
             self.raw = Table(html=html, source=DefenseReceiving.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+            
             defaults = {
                 'receptions': int(item['Rec']),
                 'rec_yards': int(item['Yds']),
                 'yards_per_reception': float(item['Yds/Rec']),
                 'rec_touchdowns': int(item['TD']),
                 'rec_fumbles': int(item['Rec FUM']),
-                'pass_defended': int(item['PDef'])
+                'pass_defended': int(item['PDef']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamDefenseReceivingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM DEFENSE_RECEIVING {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM DEFENSE_RECEIVING {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
 
 class AdvanceOffense(WebScraping):
-    base_url = "https://sumersports.com/teams/offensive/"
+    base_url = os.getenv('ADVANCE_OFFENSE_URL')
     source = "sumer"
 
     def __init__(self):
@@ -526,8 +658,17 @@ class AdvanceOffense(WebScraping):
             html = await response.text()
             self.raw = Table(html=html, source=AdvanceOffense.source).parser
 
-    def transform(self):
+    def transform(self) -> None:
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'season_year': int(item['Season']),
                 'expected_points_added_per_play': float(item['EPA/Play']),
@@ -537,9 +678,20 @@ class AdvanceOffense(WebScraping):
                 'expected_points_added_per_rush': float(item['EPA/Rush']),
                 'average_depth_of_target': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
-                'interception_pct': float(item['Int %'].split('%')[0])
+                'interception_pct': float(item['Int %'].split('%')[0]),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamAdvanceOffenseStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM OFF_ADVANCE_STATS {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM OFF_ADVANCE_STATS {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -558,7 +710,16 @@ class AdvanceDefense(WebScraping):
             self.raw = Table(html=html, source=AdvanceDefense.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'season_year': int(item['Season']),
                 'expected_points_added_per_play': float(item['EPA/Play']),
@@ -569,8 +730,19 @@ class AdvanceDefense(WebScraping):
                 'average_depth_of_target_against': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
                 'interception_pct': float(item['Int %'].split('%')[0]),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamAdvanceDefenseStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM DEF_ADVANCE_STATS {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM DEF_ADVANCE_STATS {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -589,14 +761,34 @@ class CoverageSchemes(WebScraping):
             self.raw = Table(html=html, source=CoverageSchemes.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'man_rate': float(item['Man Rate'].split('%')[0]),
                 'zone_rate': float(item['Zone Rate'].split('%')[0]),
                 'middle_closed_rate': float(item['Middle Closed Rate'].split('%')[0]),
-                'middle_open_rate': float(item['Middle Open Rate'].split('%')[0])
+                'middle_open_rate': float(item['Middle Open Rate'].split('%')[0]),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamCoverageSchemeStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM COVERAGE_SCHEME_STATS {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM COVERAGE_SCHEME_STATS {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -615,15 +807,35 @@ class OffenseTendencies(WebScraping):
             self.raw = Table(html=html, source=OffenseTendencies.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'motion_rate': float(item['Motion Rate'].split('%')[0]),
                 'play_action_rate': float(item['Play Action Rate'].split('%')[0]),
                 'airyards_per_att': float(item['AirYards/Att'].split('%')[0]),
                 'shotgun_rate': float(item['Shotgun Rate'].split('%')[0]),
-                'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0])
+                'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0]),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamOffensePlayCallingStats.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM TENDENCIES_STATS {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM TENDENCIES_STATS {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -642,15 +854,35 @@ class CoverageStatsByPosition(WebScraping):
             self.raw = Table(html=html, source=CoverageStatsByPosition.source).parser
 
     def transform(self):
+        if not self.raw:
+            return
+        
+        team_nicknames = {team.nickname: team for team in models.Team.objects.all()}
         for item in self.raw:
+            team_instance = team_nicknames.get(str(item['Team']))
+            if not team_instance:
+                logger.warning(f"Skipping stats for unknown team: {item['Team']}")
+                continue
+
             defaults = {
                 'yards_allowed_wr': float(item['YPT Allowed WR']),
                 'yards_allowed_te': float(item['YPT Allowed TE']),
                 'yards_allowed_rb': float(item['YPT Allowed RB']),
                 'yards_allowed_outside': float(item['YPT Allowed Outside']),
-                'yards_allowed_slot': float(item['YPT Allowed Slot'])
+                'yards_allowed_slot': float(item['YPT Allowed Slot']),
+                'team': team_instance
             }
             self.res.append(defaults)
+
+            _, created = models.TeamCoverageStatsByPosition.objects.update_or_create(
+                team=team_instance,
+                defaults=defaults
+            )
+
+            if created:
+                logger.info(f"CREATED: TEAM COVERAGE_STATS_BY_POSITION {str(item['Team']).upper()}")
+            else:
+                logger.debug(f"UPDATED: TEAM COVERAGE_STATS_BY_POSITION {str(item['Team']).upper()}")
         
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -689,7 +921,7 @@ class SnapCount(WebScraping):
     def to_df(self) -> None:
         print(pd.DataFrame(self.raw))
 
-# Might deprecated this
+# Might deprecate this
 def generate_slug(name: str) -> str:
     name = ''.join([c for c in name if c not in string.punctuation])
     name = name.lower().replace(' ', '-')
@@ -729,26 +961,60 @@ class NFLPipeline(object):
                         await generator.spawn_tasks(session, player_ids[:2])
 
 def main():
-    pl = NFLPipeline(upcoming_week=18)
+    pl = NFLPipeline(upcoming_week=19)
 
     teams = Teams()
     events = Events()
     players = Players()
     stats = PlayerStats()
     offense_passing = OffensePassing()
+    offense_rushing = OffenseRushing()
+    offense_receiving = OffenseReceiving()
+    defense_passing = DefensePassing()
+    defense_rushing = DefenseRushing()
+    defense_receiving = DefenseReceiving()
+    advance_offense = AdvanceOffense()
+    advance_defense = AdvanceDefense()
+    coverage_schemes = CoverageSchemes()
+    offense_tendencies = OffenseTendencies()
+    coverage_position = CoverageStatsByPosition()
 
     pl.create_endpoint(teams)
-    pl.create_generator(events)
+    # pl.create_generator(events)
     pl.create_generator(players)
     pl.create_generator(stats)
-    pl.create_endpoint(offense_passing)
+    # pl.create_endpoint(offense_passing)
+    # pl.create_endpoint(offense_rushing)
+    # pl.create_endpoint(offense_receiving)
+    # pl.create_endpoint(defense_passing)
+    # pl.create_endpoint(defense_rushing)
+    # pl.create_endpoint(defense_receiving)
+    # pl.create_endpoint(advance_offense)
+    # pl.create_endpoint(advance_defense)
+    # pl.create_endpoint(coverage_schemes)
+    # pl.create_endpoint(offense_tendencies)
+    # pl.create_endpoint(coverage_position)
+
 
     # Perform Async operations to extract raw data
     run(pl.extract_data())
 
     # Then transform after async opperations are done
     teams.transform()
-    events.transform()
+    # events.transform()
     players.transform()
     stats.transform(players.util)
-    offense_passing.transform()
+    # offense_passing.transform()
+    # offense_rushing.transform()
+    # offense_receiving.transform()
+    # defense_passing.transform()
+    # defense_rushing.transform()
+    # defense_receiving.transform()
+    # advance_offense.transform()
+    # advance_defense.transform()
+    # coverage_schemes.transform()
+    # offense_tendencies.transform()
+    # coverage_position.transform()
+
+    # games = {game.event: game for game in models.Game.objects.all()}
+    # print(games.get('401772830'))

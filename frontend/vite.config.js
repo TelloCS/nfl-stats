@@ -16,9 +16,19 @@ export default defineConfig({
       clientPort: 5173,
     },
     proxy: {
+      '/auth': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+        secure: false,
+      },
       '/nfl': {
         target: 'http://backend:8000',
         changeOrigin: true,
+      },
+      '/static': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

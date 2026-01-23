@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { useAuth } from '../hooks/useAuth';
 import { Birdhouse } from 'lucide-react';
 
 export default function Layout() {
+  const { user, isLoading, logout } = useAuth();
   const [input, setInput] = useState("");
   const [res, setResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -41,9 +43,29 @@ export default function Layout() {
     setShowResults(true)
   };
 
+  if (isLoading) return <nav>Loading...</nav>;
+
   return (
     <>
       <div className="bg-gray-50">
+        <div className="mx-auto max-w-[1400px] h-[60px] flex justify-end items-center px-8 border-b-1 border-neutral-200">
+          {user ? (
+            <>
+              <span className="text-gray-600 text-sm border-r-1 border-neutral-200 p-2">Welcome, {user.username}</span>
+              <button
+                onClick={() => logout()}
+                className="text-red-500 text-blue-500 text-sm p-2 hover:underline"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <div className="flex gap-4 items-center">
+              <a href="/auth/login/" className="text-indigo-400 text-sm hover:underline">Login</a>
+              <a href="/auth/signup/" className="bg-indigo-400 rounded-md text-white text-sm p-2 hover:underline">Register</a>
+            </div>
+          )}
+        </div>
         <div className="mx-auto max-w-[1400px] h-[80px]">
           <nav className="flex h-full px-8 items-center justify-between">
             <ul className="flex items-center justify-center gap-6 font-semibold">
@@ -67,7 +89,7 @@ export default function Layout() {
             <div className="relative w-full sm:w-64">
               <div>
                 <input
-                  className="block w-full p-2.5 pl-4 text-sm rounded-full border-2 border-neutral-200 focus:outline-none focus:ring-1 focus:ring-neutral-200 transition duration-150" 
+                  className="block w-full p-2.5 pl-4 text-sm rounded-full border-2 border-neutral-200 focus:outline-none focus:ring-1 focus:ring-neutral-200 transition duration-150"
                   type="text"
                   placeholder="Search player name..."
                   value={input}
