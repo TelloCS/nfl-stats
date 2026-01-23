@@ -3,7 +3,7 @@ import Layout from "./Layout";
 import { useParams } from "react-router-dom";
 import { RankingTabsV2, PositionStatMap } from '../components/Config';
 import UpcomingGames from '../components/UpcomingGames';
-import TinyBarChart from "../components/PlayerStats";
+import TinyBarChart from "../pages/PlayerStats";
 
 function Player() {
     const { player_id, player_slug } = useParams();

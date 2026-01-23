@@ -1,10 +1,13 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { PositionStatMap, NFL_POSITIONS } from '../components/Config';
-import UpcomingGames from '../components/UpcomingGames';
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
+import UpcomingGames from '../components/UpcomingGames';
 
-const PosVsOpp = () => {
+import createPositionOpponentQueryOptions from "../queryOptions/createPositionOpponentQueryOptions";
+import createTeamsQueryOptions from "../queryOptions/createTeamsQueryOptions";
+
+const PositionOpponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedPosition, setSelectedPosition] = useState(searchParams.get("position") || 'QB');
     const [selectedOpponent, setSelectedOpponent] = useState(searchParams.get("opponent") || 'CIN');
@@ -14,31 +17,11 @@ const PosVsOpp = () => {
         opponent: selectedOpponent
     });
 
-    const [teamAbbreviation, setTeamAbbreviation] = useState([]);
     const [sort, setSort] = useState({ keyToSort: '', direction: '' });
     const [statsToShow, setStatsToShow] = useState(PositionStatMap[searchQuery.position]);
 
-    const { data: logs, isLoading } = useQuery({
-        queryKey: ['gameLogs', searchQuery.position, searchQuery.opponent],
-        queryFn: async () => {
-            const response = await fetch(`/nfl/player/stats/gamelogs/?position=${searchQuery.position}&opponent=${searchQuery.opponent}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            return await response.json();
-        }
-    });
-
-    useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                const data = await fetch('/nfl/teams/');
-                const resp = await data.json();
-                setTeamAbbreviation(resp?.teams || []);
-            } catch (error) {
-                console.error("Failed to fetch teams", error);
-            }
-        };
-        fetchTeams();
-    }, []);
+    const { data: positionOpponentData, isLoading: positionOpponentIsLoading } = useQuery(createPositionOpponentQueryOptions(searchQuery.position, searchQuery.opponent));
+    const { data: teamsData, isLoading: teamsIsLoading } = useQuery(createTeamsQueryOptions())
 
     const handleHeaderClick = (header) => {
         setSort((prev) => ({
@@ -70,8 +53,8 @@ const PosVsOpp = () => {
     };
 
     const sortedGameLogs = useMemo(() => {
-        return getSortedArray(logs);
-    }, [logs, sort]);
+        return getSortedArray(positionOpponentData);
+    }, [positionOpponentData, sort]);
 
     const handleSearch = () => {
         setSearchQuery({
@@ -86,8 +69,6 @@ const PosVsOpp = () => {
         });
     };
     
-    console.log(NFL_POSITIONS)
-
     return (
         <>  
             <UpcomingGames />
@@ -99,7 +80,7 @@ const PosVsOpp = () => {
                             onChange={(e) => setSelectedOpponent(e.target.value)} 
                             className="bg-white border-2 border-neutral-200 px-4 rounded-md h-10 hover:cursor-pointer min-w-[120px]"
                         >
-                            {teamAbbreviation.map((team) => (
+                            {teamsData?.teams.map((team) => (
                                 <option key={team.id || team.abbreviation} value={team.abbreviation}>
                                     {team.abbreviation}
                                 </option>
@@ -121,9 +102,9 @@ const PosVsOpp = () => {
                         <button
                             onClick={handleSearch}
                             className="bg-blue-500 text-white px-8 rounded-md h-10 font-bold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                            disabled={isLoading}
+                            disabled={positionOpponentIsLoading}
                         >
-                            {isLoading ? 'Searching...' : 'Search'}
+                            {positionOpponentIsLoading ? 'Searching...' : 'Search'}
                         </button>
                     </div>
                 </div>
@@ -157,7 +138,7 @@ const PosVsOpp = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-200">
-                            {isLoading ? (
+                            {positionOpponentIsLoading ? (
                                 <tr>
                                     <td colSpan="100%" className="p-12 text-center text-gray-500 text-lg">
                                         Loading player data...
@@ -196,4 +177,4 @@ const PosVsOpp = () => {
     );
 };
 
-export default PosVsOpp;
+export default PositionOpponent;

@@ -224,7 +224,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-tuesday': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=0, hour=21, minute=25),
+        'schedule': crontab(day_of_week=3, hour=18, minute=51),
     },
 }
 

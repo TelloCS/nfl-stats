@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import Layout from "./Layout";
 import { NFLTeamStatMap } from '../components/Config';
 import UpcomingGames from '../components/UpcomingGames';
+import { useQuery } from "@tanstack/react-query";
+import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOptions';
 
 
 function TeamStats() {
-    const [ teamData, setTeamData ] = useState([])
-    const [ teamDataCache, setTeamDataCahe ] = useState([])
-    const [ loading, setLoading ] = useState(false)
     const [ table, setTable ] = useState('team_offense_passing');
     const [ activeTab, setActiveTab ] = useState(NFLTeamStatMap[0]);
     const [ statsToShow, setStatsToShow ] = useState(NFLTeamStatMap[0].stats)
     const [ sort, setSort ] = useState({ keyToSort: '', direction: '' });
+
+    const {data: teamData, isLoading: teamsIsLoading} = useQuery(createTeamStatsQueryOptions())
 
     function handleHeaderClick(header) {
         setSort({
@@ -41,22 +42,6 @@ function TeamStats() {
         
         return sorted;
     }
-
-    useEffect(() => {
-        const fetchTeamData = async () => {
-            setLoading(true)
-            
-            try {
-                const data = await fetch("/nfl/team/stats/");
-                const json = await data.json();
-                setTeamData(json);
-            } catch (error) {
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchTeamData()
-        }, [])
 
     return (
         <>  
@@ -104,7 +89,7 @@ function TeamStats() {
                                         </tr>
                                     </thead>
                                     <tbody className="">
-                                        {getSortedArray(teamData).map((team, index) => (
+                                        {getSortedArray(teamData)?.map((team, index) => (
                                             <tr key={index} className="">
                                                 <td className="h-[48px] text-nowrap border-b border-neutral-200 bg-[#ffffff] m-0 p-0 text-left text-sm">
                                                     {team.nickname}

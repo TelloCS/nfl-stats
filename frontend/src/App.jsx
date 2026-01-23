@@ -3,20 +3,19 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
-import Player from './pages/Player';
 import Team from './pages/Team';
-import PosVsOpp from './pages/PosVsOpp'
+import PositionOpponent from './pages/PositionOpponent'
 import TeamStats from './pages/TeamStats'
-import PlayerStats from './components/PlayerStats'
+import PlayerStats from './pages/PlayerStats'
+import GenericErrorPage from './pages/GenericErrorPage';
 
-const queryClient = new QueryClient({
-
-})
+const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: <Layout />,
+        errorElement: <GenericErrorPage />,
         children: [
             {
                 index: true,
@@ -24,7 +23,7 @@ const router = createBrowserRouter([
             },
             {
                 path: '/player/stats/id/:player_id/:player_slug/',
-                element:<Player />
+                element:<PlayerStats />
             },
             {
                 path: '/team/stats/id/:team_id/:team_slug/',
@@ -32,7 +31,7 @@ const router = createBrowserRouter([
             },
             {
                 path: '/position-vs-opponent/',
-                element: <PosVsOpp />
+                element: <PositionOpponent />
             },
             {
                 path: '/team/stats/',
