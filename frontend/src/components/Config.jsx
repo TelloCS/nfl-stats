@@ -1,5 +1,3 @@
-import React from "react";
-
 export const PositionStatMap = {
     'QB': [
         { key: 'completions', label: 'Cmp' },
@@ -26,15 +24,15 @@ export const PositionStatMap = {
         { key: 'rush_touchdowns', label: 'Rush TD' },
 
 
-        { key: 'receptions', label: 'Rec' },
+        { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
-        { key: 'rec_yards', label: 'Rec Yds' },
+        { key: 'rec_yards', label: 'Receiving Yards' },
         { key: 'yards_per_reception', label: 'YPR' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
     ],
     'WR': [
-        { key: 'receptions', label: 'Rec' },
+        { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
         { key: 'rec_yards', label: 'Rec Yds' },
         { key: 'yards_per_reception', label: 'Yds/Rec' },
@@ -48,7 +46,7 @@ export const PositionStatMap = {
         { key: 'rush_touchdowns', label: 'Rush TD' },
     ],
     'TE': [
-        { key: 'receptions', label: 'Rec' },
+        { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
         { key: 'rec_yards', label: 'Rec Yds' },
         { key: 'yards_per_reception', label: 'YPR' },
@@ -67,6 +65,41 @@ export const PositionStatMap = {
 export const NFL_POSITIONS = [
     { value: 'QB' }, { value: 'RB' }, { value: 'WR' }, { value: 'TE' },
 ];
+
+export const NFL_TEAMS = [
+    { value: 'ARI' },
+    { value: 'ATL' },
+    { value: 'BAL' },
+    { value: 'BUF' },
+    { value: 'CAR' },
+    { value: 'CHI' },
+    { value: 'CIN' },
+    { value: 'CLE' },
+    { value: 'DAL' },
+    { value: 'DEN' },
+    { value: 'DET' },
+    { value: 'GB' },
+    { value: 'HOU' },
+    { value: 'IND' },
+    { value: 'JAX' },
+    { value: 'KC' },
+    { value: 'LAC' },
+    { value: 'LAR' },
+    { value: 'LV' },
+    { value: 'MIA' },
+    { value: 'MIN' },
+    { value: 'NE' },
+    { value: 'NO' },
+    { value: 'NYG' },
+    { value: 'NYJ' },
+    { value: 'PHI' },
+    { value: 'PIT' },
+    { value: 'SEA' },
+    { value: 'SF' },
+    { value: 'TB' },
+    { value: 'TEN' },
+    { value: 'WSH' },
+]
 
 export const NFLTeamStatMap = [
     {

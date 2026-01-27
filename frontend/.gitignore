@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Not currently in use
+useAuth.jsx
+useAuthv2.jsx
+SampleGraph.jsx
+DropdownFilter.jsx
+Player.jsx
+Team.jsx

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query'
-import { PositionStatMap } from "../Config";
-import createPlayerStatsQueryOptions from '../../queryOptions/createPlayerStatsQueryOptions';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Loader } from 'lucide-react';
+import { PositionStatMap } from "../Config";
+import CustomLoader from "../CustomLoader";
+import createPlayerStatsQueryOptions from '../../queryOptions/createPlayerStatsQueryOptions';
 
 export default function PlayerGraph() {
     const [activeStat, setActiveStat] = useState("");
@@ -22,13 +22,11 @@ export default function PlayerGraph() {
         }
     }, [availableStats, activeStat]);
 
-    // if (isPending) return <Loader />;
-
     return (
         <div className="bg-gray-50 min-h-screen p-4">
             {isPending ?
             <div className="flex justify-center items-center h-[500px]">
-                <Loader /> 
+                <CustomLoader /> 
             </div>
             : <div className="container mx-auto">    
                 <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
@@ -69,7 +67,7 @@ export default function PlayerGraph() {
 
                     <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-gray-100 min-h-[450px]">
                         <h3 className="text-lg font-semibold mb-4 text-gray-800">Additional Insights</h3>
-                        <div className="text-gray-500 italic">
+                        <div className="text-gray-500">
                             Your other content will now sit perfectly to the right...
                         </div>
                     </div>

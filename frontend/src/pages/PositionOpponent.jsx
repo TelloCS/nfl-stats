@@ -1,16 +1,15 @@
 import { useState, useMemo } from "react";
-import { PositionStatMap, NFL_POSITIONS } from '../components/Config';
+import { PositionStatMap, NFL_POSITIONS, NFL_TEAMS } from '../components/Config';
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import UpcomingGames from '../components/UpcomingGames';
 
 import createPositionOpponentQueryOptions from "../queryOptions/createPositionOpponentQueryOptions";
-import createTeamsQueryOptions from "../queryOptions/createTeamsQueryOptions";
 
-const PositionOpponent = () => {
+export default function PositionOpponent() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedPosition, setSelectedPosition] = useState(searchParams.get("position") || 'QB');
-    const [selectedOpponent, setSelectedOpponent] = useState(searchParams.get("opponent") || 'CIN');
+    const [selectedOpponent, setSelectedOpponent] = useState(searchParams.get("opponent") || 'ARI');
 
     const [searchQuery, setSearchQuery] = useState({
         position: selectedPosition,
@@ -21,7 +20,6 @@ const PositionOpponent = () => {
     const [statsToShow, setStatsToShow] = useState(PositionStatMap[searchQuery.position]);
 
     const { data: positionOpponentData, isLoading: positionOpponentIsLoading } = useQuery(createPositionOpponentQueryOptions(searchQuery.position, searchQuery.opponent));
-    const { data: teamsData, isLoading: teamsIsLoading } = useQuery(createTeamsQueryOptions())
 
     const handleHeaderClick = (header) => {
         setSort((prev) => ({
@@ -80,9 +78,9 @@ const PositionOpponent = () => {
                             onChange={(e) => setSelectedOpponent(e.target.value)} 
                             className="bg-white border-2 border-neutral-200 px-4 rounded-md h-10 hover:cursor-pointer min-w-[120px]"
                         >
-                            {teamsData?.teams.map((team) => (
-                                <option key={team.id || team.abbreviation} value={team.abbreviation}>
-                                    {team.abbreviation}
+                            {NFL_TEAMS.map((team) => (
+                                <option key={team.value} value={team.value}>
+                                    {team.label || team.value}
                                 </option>
                             ))}
                         </select>
@@ -101,7 +99,7 @@ const PositionOpponent = () => {
 
                         <button
                             onClick={handleSearch}
-                            className="bg-blue-500 text-white px-8 rounded-md h-10 font-bold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                            className="bg-[#333333] text-white px-8 rounded-md h-10 font-bold hover:bg-indigo-400 transition-colors disabled:bg-gray-400"
                             disabled={positionOpponentIsLoading}
                         >
                             {positionOpponentIsLoading ? 'Searching...' : 'Search'}
@@ -176,5 +174,3 @@ const PositionOpponent = () => {
         </>
     );
 };
-
-export default PositionOpponent;

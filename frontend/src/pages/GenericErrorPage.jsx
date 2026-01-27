@@ -5,7 +5,6 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
   const error = useRouteError();
   const navigate = useNavigate();
 
-  // Determine the error message
   let errorMessage = message || "An unexpected error occurred.";
   let errorStatus = "";
 
@@ -19,7 +18,6 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="max-w-md w-full text-center">
-        {/* Icon & Status */}
         <div className="flex justify-center mb-6">
           <div className="p-4 bg-red-100 rounded-full">
             <AlertCircle className="w-12 h-12 text-red-600" />
@@ -33,7 +31,6 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
           {errorMessage}
         </p>
 
-        {/* Action Buttons */}
         <div className="flex flex-col gap-3">
           <button
             onClick={() => (resetErrorBoundary ? resetErrorBoundary() : window.location.reload())}
@@ -61,7 +58,6 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
           </div>
         </div>
 
-        {/* Helpful Footer */}
         <p className="mt-8 text-sm text-gray-400">
           If this persists, please contact support with ID: 
           <span className="font-mono ml-1 uppercase">{Math.random().toString(36).substr(2, 9)}</span>

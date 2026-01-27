@@ -362,3 +362,7 @@ vite.config.ts.timestamp-*
 
 celerybeat-schedule*
 management
+
+# Not currently in use
+static/
+templates/

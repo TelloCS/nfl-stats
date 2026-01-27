@@ -9,13 +9,26 @@ on:
       - main
 
 jobs:
-  services:
-    db:
-      postgres:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      db:
         image: postgres:17
-      env:
-        POSTGRES_DB: nfl
-        POSTGRES_USER: nfl
-        POSTGRES_PASSWORD: nfl
-  
+        env:
+          POSTGRES_DB: nfl
+          POSTGRES_USER: nfl
+          POSTGRES_PASSWORD: nfl
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
 

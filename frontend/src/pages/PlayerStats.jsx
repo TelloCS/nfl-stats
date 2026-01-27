@@ -1,15 +1,11 @@
 import UpcomingGames from "../components/UpcomingGames";
-import  PlayerGraph from "../components/Dashboard/PlayerGraph";
-import SampleGraph from "../components/Dashboard/SampleGraph";
+import  PlayerGraph from "../components/dashboard/PlayerGraph";
 
-const PlayerStats = () => {
+export default function PlayerStats() {
   return (
     <>
       <UpcomingGames />
       <PlayerGraph />
-      {/* <SampleGraph /> */}
     </>
   );
 };
-
-export default PlayerStats;

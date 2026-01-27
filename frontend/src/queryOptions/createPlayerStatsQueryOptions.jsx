@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { queryOptions } from "@tanstack/react-query";
 
 export default function createPlayerStatsQueryOptions(player_id, player_slug) {
