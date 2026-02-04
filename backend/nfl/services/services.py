@@ -958,7 +958,7 @@ class NFLPipeline(object):
                     elif isinstance(generator, Players):
                         player_ids = await generator.spawn_tasks(session, team_ids[:1])
                     elif isinstance(generator, PlayerStats):
-                        await generator.spawn_tasks(session, player_ids[:2])
+                        await generator.spawn_tasks(session, player_ids)
 
 def main():
     pl = NFLPipeline(upcoming_week=19)

@@ -69,14 +69,14 @@ class PlayerListAPIView(generics.ListAPIView):
 class PlayerGameStatsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Player.objects.all()
     serializer_class = PlayerStatsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PlayerStatFilter
     lookup_field = 'slug'
 
     @method_decorator(cache_page(ONE_WEEK))
     @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({'players': serializer.data})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 class TeamStatsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Team.objects.all()
@@ -302,16 +302,15 @@ class TeamRanksListView(generics.ListAPIView):
         
         return queryset
 
-# TESTING
 class PlayerGameStatsMatchupsListView(generics.ListAPIView):
-    queryset = PlayerGameStats.objects.all()
+    queryset = PlayerGameStats.objects.all().select_related('player', 'game', 'player__team')
     serializer_class = GameTest
     pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerMatchupsFilter
 
     @method_decorator(cache_page(ONE_WEEK))
-    @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
+    @method_decorator(ratelimit(key='ip', rate='60/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

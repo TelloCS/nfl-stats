@@ -1,5 +1,5 @@
 import { useRouteError, useNavigate, isRouteErrorResponse } from "react-router-dom";
-import { AlertCircle, ArrowLeft, RefreshCw, Home } from "lucide-react";
+import { AlertCircle, ArrowLeft, RefreshCw, Home, Clock } from "lucide-react";
 
 const GenericErrorPage = ({ message, resetErrorBoundary }) => {
   const error = useRouteError();
@@ -7,10 +7,18 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
 
   let errorMessage = message || "An unexpected error occurred.";
   let errorStatus = "";
+  let isRateLimited = false;
 
   if (isRouteErrorResponse(error)) {
     errorStatus = error.status;
-    errorMessage = error.statusText || error.data?.message || errorMessage;
+
+    // Check for 429 status
+    if (error.status === 429) {
+      isRateLimited = true;
+      errorMessage = "Too many requests. Please wait a moment before trying again.";
+    } else {
+      errorMessage = error.statusText || error.data?.message || errorMessage;
+    }
   } else if (error instanceof Error) {
     errorMessage = error.message;
   }
@@ -19,8 +27,12 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="max-w-md w-full text-center">
         <div className="flex justify-center mb-6">
-          <div className="p-4 bg-red-100 rounded-full">
-            <AlertCircle className="w-12 h-12 text-red-600" />
+          <div className={`p-4 rounded-full ${isRateLimited ? 'bg-amber-100' : 'bg-red-100'}`}>
+            {isRateLimited ? (
+              <Clock className="w-12 h-12 text-amber-600" />
+            ) : (
+              <AlertCircle className="w-12 h-12 text-red-600" />
+            )}
           </div>
         </div>
 
@@ -34,12 +46,13 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => (resetErrorBoundary ? resetErrorBoundary() : window.location.reload())}
-            className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+            className={`flex items-center justify-center gap-2 w-full py-3 px-4 text-white rounded-lg font-medium transition-colors ${isRateLimited ? 'bg-amber-600 hover:bg-amber-700' : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
           >
             <RefreshCw className="w-4 h-4" />
             Try Again
           </button>
-          
+
           <div className="flex gap-3">
             <button
               onClick={() => navigate(-1)}
@@ -59,7 +72,7 @@ const GenericErrorPage = ({ message, resetErrorBoundary }) => {
         </div>
 
         <p className="mt-8 text-sm text-gray-400">
-          If this persists, please contact support with ID: 
+          If this persists, please contact support with ID:
           <span className="font-mono ml-1 uppercase">{Math.random().toString(36).substr(2, 9)}</span>
         </p>
       </div>

@@ -245,7 +245,7 @@ export const RankingTabsV2 = [
         key: 'team_offense_passing',
         label: 'Off. Passing',
         stats: [
-            { key: 'off_pass_yards_rank', label: 'Yds'},
+            { key: 'off_pass_yards_rank', label: 'Yards'},
             { key: 'off_pass_tds_rank', label: 'TD'},
             { key: 'off_pass_rating_rank', label: 'Rate'}
         ]
@@ -254,17 +254,17 @@ export const RankingTabsV2 = [
         key: 'team_offense_rushing',
         label: 'Off. Rushing',
         stats: [
-            { key: 'off_rush_yards_rank', label: 'Yds'},
+            { key: 'off_rush_yards_rank', label: 'Yards'},
             { key: 'off_rush_tds_rank', label: 'TD'},
-            { key: 'off_rush_attempts_rank', label: 'Att'},
+            { key: 'off_rush_attempts_rank', label: 'Attempts'},
         ]
     },
     {
         key: 'team_offense_receiving',
         label: 'Off. Receiving',
         stats: [
-            { key: 'off_receptions_rank', label: 'Rec'},
-            { key: 'off_rec_yards_rank', label: 'Yds'},
+            { key: 'off_receptions_rank', label: 'Receptions'},
+            { key: 'off_rec_yards_rank', label: 'Yards'},
             { key: 'off_rec_tds_rank', label: 'TD'},
         ]
     },
@@ -272,7 +272,7 @@ export const RankingTabsV2 = [
         key: 'team_defense_passing',
         label: 'Def. Passing',
         stats: [
-            { key: 'def_pass_yards_rank', label: 'Yds'},
+            { key: 'def_pass_yards_rank', label: 'Yards'},
             { key: 'def_pass_tds_rank', label: 'TD'},
             { key: 'def_pass_rating_rank', label: 'Rate'}
         ]
@@ -281,17 +281,17 @@ export const RankingTabsV2 = [
         key: 'team_defense_rushing',
         label: 'Def. Rushing',
         stats: [
-            { key: 'def_rush_yards_rank', label: 'Yds'},
+            { key: 'def_rush_yards_rank', label: 'Yards'},
             { key: 'def_rush_tds_rank', label: 'TD'},
-            { key: 'def_rush_attempts_rank', label: 'Att'},
+            { key: 'def_rush_attempts_rank', label: 'Attempts'},
         ]
     },
     {
         key: 'team_defense_receiving',
         label: 'Def. Receiving',
         stats: [
-            { key: 'def_receptions_rank', label: 'Rec'},
-            { key: 'def_rec_yards_rank', label: 'Yds'},
+            { key: 'def_receptions_rank', label: 'Receptions'},
+            { key: 'def_rec_yards_rank', label: 'Yards'},
             { key: 'def_rec_tds_rank', label: 'TD'},
             { key: 'def_pass_defended_rank', label: 'PDef'},
         ]
@@ -338,11 +338,11 @@ export const RankingTabsV2 = [
         key: 'team_coverage_stats_by_position',
         label: 'Coverage Stats By Position',
         stats: [
-            { key: 'yards_allowed_wr_rank', label: 'Yds Allowed WR'},
-            { key: 'yards_allowed_te_rank', label: 'Yds Allowed TE'},
-            { key: 'yards_allowed_rb_rank', label: 'Yds Allowed RB'},
-            { key: 'yards_allowed_outside_rank', label: 'Yds Allowed Outside'},
-            { key: 'yards_allowed_slot_rank', label: 'Yds Allowed Slot'},
+            { key: 'yards_allowed_wr_rank', label: 'Yards Allowed WR'},
+            { key: 'yards_allowed_te_rank', label: 'Yards Allowed TE'},
+            { key: 'yards_allowed_rb_rank', label: 'Yards Allowed RB'},
+            { key: 'yards_allowed_outside_rank', label: 'Yards Allowed Outside'},
+            { key: 'yards_allowed_slot_rank', label: 'Yards Allowed Slot'},
         ]
     },
 ]

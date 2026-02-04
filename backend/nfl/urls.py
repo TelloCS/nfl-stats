@@ -14,6 +14,6 @@ urlpatterns = [
     # need to add fantasy score per game
     path('player/stats/id/<int:pk>/<str:slug>', PlayerGameStatsRetrieveAPIView.as_view(), name='player-game-stats-view'),
 
-    path('player/stats/gamelogs/', PlayerGameStatsMatchupsListView.as_view()),
+    path('player/stats/gamelogs', PlayerGameStatsMatchupsListView.as_view()),
     path('events/', EventListView.as_view())
 ]
