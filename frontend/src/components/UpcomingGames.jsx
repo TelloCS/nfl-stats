@@ -3,7 +3,7 @@ import createUpcomingGamesQueryOptions from "../queryOptions/createUpcomingGames
 import formatDate from "../helpers/utils/"
 
 export default function UpcomingGames() {
-    const { data, isPending } = useQuery(createUpcomingGamesQueryOptions())
+    const { data, isPending } = useQuery(createUpcomingGamesQueryOptions(18, 'Final'))
 
     return (
         <>
