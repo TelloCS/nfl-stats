@@ -43,5 +43,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run Tests
+        working-directory: ./backend
+        env:
+          DB_HOST: localhost 
+          DB_NAME: nfl
+          DB_USER: nfl
+          DB_PASSWORD: nfl
+          DB_PORT: 5432
         run: |
           python manage.py test

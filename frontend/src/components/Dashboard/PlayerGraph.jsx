@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { PositionStatMap, RankingTabsV2 } from "../Config";
 import CustomLoader from "../CustomLoader";
 import createPlayerStatsQueryOptions from '../../queryOptions/createPlayerStatsQueryOptions';
