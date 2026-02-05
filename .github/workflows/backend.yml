@@ -2,15 +2,12 @@ name: backend
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main", "testing/pipeline" ]
     paths:
       - 'backend/**'
   pull_request:
     branches:
       - main
-    paths:
-      - 'backend/**'
 
 jobs:
   backend:
