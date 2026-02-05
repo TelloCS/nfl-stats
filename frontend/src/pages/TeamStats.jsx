@@ -12,7 +12,7 @@ export default function TeamStats() {
     const [statsToShow, setStatsToShow] = useState(NFLTeamStatMap[0].stats)
     const [sort, setSort] = useState({ keyToSort: '', direction: '' });
 
-    const { data: teamData, isPending } = useQuery(createTeamStatsQueryOptions())
+    const { data: teamData } = useQuery(createTeamStatsQueryOptions())
 
     function handleHeaderClick(header) {
         setSort({

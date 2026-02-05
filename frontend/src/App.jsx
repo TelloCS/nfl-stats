@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicRoute from "./components/PublicRoute";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
-import Team from './pages/Team';
 import PositionOpponent from './pages/PositionOpponent';
 import TeamStats from './pages/TeamStats';
 import PlayerStats from './pages/PlayerStats';

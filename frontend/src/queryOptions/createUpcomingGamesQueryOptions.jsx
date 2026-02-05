@@ -9,6 +9,6 @@ export default function createUpcomingGamesQueryOptions(week, status){
 
 const getUpcomingGames = async (week, status) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    const response = await fetch(`/nfl/events/?week=18&status=Final`);
+    const response = await fetch(`/nfl/events/?week=${week}&status=${status}`);
     return response.json()
 }
