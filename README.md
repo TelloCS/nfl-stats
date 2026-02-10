@@ -66,7 +66,7 @@ REST_FRAMEWORK = {
 <img width="1643" height="872" alt="image" src="https://github.com/user-attachments/assets/ae0f8c9f-c715-4d15-adcb-926d131c83b3" />
 
 ## Credits and references
-- https://gist.github.com/nntrn/ee26cb2a0716de0947a0a4e9a157bc1c [Source of EPSN API endpoints]
+- https://gist.github.com/nntrn/ee26cb2a0716de0947a0a4e9a157bc1c [Source of ESPN API endpoints]
 - https://www.nfl.com/stats/team-stats/
 - https://www.sharpfootballanalysis.com
 - https://sumersports.com/
