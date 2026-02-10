@@ -122,7 +122,7 @@ class PlayerGameStats(models.Model):
     class Meta:
         unique_together = ('player', 'game')
         verbose_name_plural = 'Player Game Stats'
-        ordering = ['game__week']
+        ordering = ['-game__week', 'id']
 
 class TeamOffensePassingStats(models.Model):
     team = models.OneToOneField(

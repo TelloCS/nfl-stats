@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from .models import *
-from .pagination import *
+from .pagination import PlayerGameStatsMatchupsPagination
 from .serializers import (
     TeamSerializer,
     PlayerSerializer,
@@ -88,9 +88,9 @@ class TeamRanksListView(generics.ListAPIView):
         return super().list(request, *args, **kwargs)
 
 class PlayerGameStatsMatchupsListView(generics.ListAPIView):
-    queryset = PlayerGameStats.objects.all().select_related('player', 'game', 'player__team')
+    queryset = PlayerGameStats.objects.all().select_related('player', 'game', 'player__team').order_by('-game__week', 'id')
     serializer_class = PlayerGameStatsMatchupsSerializer
-    pagination_class = None
+    pagination_class = PlayerGameStatsMatchupsPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerMatchupsFilter
 

@@ -9,56 +9,56 @@ import TeamStats from './pages/TeamStats';
 import PlayerStats from './pages/PlayerStats';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import GenericErrorPage from './pages/GenericErrorPage';
+import ErrorPage from './pages/ErrorPage';
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
-    {
-        element: <PublicRoute />,
-        errorElement: <GenericErrorPage />,
-        children: [
-            {
-                path: '/signup',
-                element: <Register />,
-            },
-            {
-                path: '/login',
-                element: <Login />,
-            },
-        ]
-    },
-    {
-        path: '/',
-        element: <Layout />,
-        errorElement: <GenericErrorPage />,
-        children: [
-            {
-                index: true,
-                element: <Home />
-            },
-            {
-                path: '/player/stats/id/:player_id/:player_slug/',
-                element: <PlayerStats />
-            },
-            {
-                path: '/position-vs-opponent/',
-                element: <PositionOpponent />
-            },
-            {
-                path: '/team/stats/',
-                element: <TeamStats />
-            }
-        ]
-    }
+  {
+    element: <PublicRoute />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '/signup',
+        element: <Register />,
+      },
+      {
+        path: '/login',
+        element: <Login />,
+      },
+    ]
+  },
+  {
+    path: '/',
+    element: <Layout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: '/player/stats/id/:player_id/:player_slug/',
+        element: <PlayerStats />
+      },
+      {
+        path: '/position-vs-opponent/',
+        element: <PositionOpponent />
+      },
+      {
+        path: '/team/stats/',
+        element: <TeamStats />
+      }
+    ]
+  }
 ]);
 
 function App() {
-    return (
-        <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-        </QueryClientProvider>
-    );
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 export default App;

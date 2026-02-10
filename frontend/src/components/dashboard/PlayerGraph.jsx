@@ -130,7 +130,7 @@ export default function PlayerGraph() {
               </div>
 
               <div className="flex gap-1.5 mb-4 pb-2 overflow-x-auto">
-                {RankingTabsV2.map((tab) => (
+                {TeamRankingStatMap.map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTabKey(tab.key)}

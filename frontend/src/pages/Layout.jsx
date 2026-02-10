@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../actions/authentication";
@@ -27,7 +27,7 @@ export default function Layout() {
     }
   });
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     if (searchBarCache[input]) {
       setResults(searchBarCache[input]);
       return;
@@ -39,12 +39,12 @@ export default function Layout() {
       setResults(json?.players);
       setSearhBarCache(prev => ({ ...prev, [input]: json?.players }));
     }
-  };
+  }, [input, searchBarCache]);
 
   useEffect(() => {
     const timer = setTimeout(fetchPlayers, 300);
     return () => clearTimeout(timer);
-  }, [input]);
+  }, [fetchPlayers]);
 
   const handleBlur = () => {
     blurTimeoutRef.current = setTimeout(() => setShowResults(false), 300);
