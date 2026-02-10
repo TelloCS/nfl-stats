@@ -88,7 +88,7 @@ class TeamRanksListView(generics.ListAPIView):
         return super().list(request, *args, **kwargs)
 
 class PlayerGameStatsMatchupsListView(generics.ListAPIView):
-    queryset = PlayerGameStats.objects.all().select_related('player', 'game', 'player__team').order_by('-game__week', 'id')
+    queryset = PlayerGameStats.objects.all().select_related('player', 'game', 'player__team')
     serializer_class = PlayerGameStatsMatchupsSerializer
     pagination_class = PlayerGameStatsMatchupsPagination
     filter_backends = [DjangoFilterBackend]
