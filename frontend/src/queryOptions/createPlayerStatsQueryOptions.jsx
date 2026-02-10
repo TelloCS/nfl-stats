@@ -4,7 +4,8 @@ export default function createPlayerStatsQueryOptions(player_id, player_slug) {
     return queryOptions({
         queryKey: ['playerStats', player_id, player_slug],
         queryFn : () => getPlayerStats(player_id, player_slug),
-        staleTime: Infinity
+        staleTime: Infinity,
+        retry: false
     })
 }
 

@@ -3,7 +3,8 @@ import { queryOptions } from '@tanstack/react-query'
 export default function createTeamsQueryOptions() {
     return queryOptions({
         queryKey: ['teams'],
-        queryFn : getTeams
+        queryFn : getTeams,
+        retry: false
     })
 }
 

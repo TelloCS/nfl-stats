@@ -15,6 +15,7 @@ from .models import (
     TeamCoverageSchemeStats,
     TeamOffensePlayCallingStats,
     TeamCoverageStatsByPosition,
+    TeamRankSnapshot
 )
 
 admin.site.register(Team)
@@ -32,3 +33,4 @@ admin.site.register(TeamAdvanceDefenseStats)
 admin.site.register(TeamCoverageSchemeStats)
 admin.site.register(TeamOffensePlayCallingStats)
 admin.site.register(TeamCoverageStatsByPosition)
+admin.site.register(TeamRankSnapshot)

@@ -42,10 +42,6 @@ const router = createBrowserRouter([
                 element: <PlayerStats />
             },
             {
-                path: '/team/stats/id/:team_id/:team_slug/',
-                element: <Team />
-            },
-            {
                 path: '/position-vs-opponent/',
                 element: <PositionOpponent />
             },

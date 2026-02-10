@@ -22,8 +22,6 @@ export const PositionStatMap = {
         { key: 'yards_per_rush_attempt', label: 'YPC' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
-
-
         { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
         { key: 'rec_yards', label: 'Receiving Yards' },
@@ -38,7 +36,6 @@ export const PositionStatMap = {
         { key: 'yards_per_reception', label: 'Yds/Rec' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
-
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
         { key: 'yards_per_rush_attempt', label: 'YPC' },
@@ -62,11 +59,11 @@ export const PositionStatMap = {
     'DEFAULT': []
 };
 
-export const NFL_POSITIONS = [
+export const Positions = [
     { value: 'QB' }, { value: 'RB' }, { value: 'WR' }, { value: 'TE' },
 ];
 
-export const NFL_TEAMS = [
+export const TeamAbbreviations = [
     { value: 'ARI' },
     { value: 'ATL' },
     { value: 'BAL' },
@@ -101,7 +98,7 @@ export const NFL_TEAMS = [
     { value: 'WSH' },
 ]
 
-export const NFLTeamStatMap = [
+export const TeamStatMap = [
     {
         key: 'team_offense_passing',
         label: 'Off. Passing',
@@ -240,7 +237,7 @@ export const NFLTeamStatMap = [
     },
 ]
 
-export const RankingTabsV2 = [
+export const TeamRankingStatMap = [
     {
         key: 'team_offense_passing',
         label: 'Off. Passing',
@@ -346,3 +343,19 @@ export const RankingTabsV2 = [
         ]
     },
 ]
+
+export const FilterConfig = {
+  season_year: [
+    { label: "2025", value: 2025 },
+    { label: "2024", value: 2024 }
+  ],
+  season_type: [
+    { label: "Regular Season", value: 2 },
+    { label: "Playoffs", value: 3 }
+  ],
+  location: [
+    { label: "All", value: "" },
+    { label: "Home", value: "home" },
+    { label: "Away", value: "away" }
+  ]
+};

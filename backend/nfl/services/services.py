@@ -219,6 +219,9 @@ class PlayerStats(EndpointGenerator):
                     games_played = len(category['events'])
                     
                     for event in category["events"]:
+                        if category['splitType'] != '2':
+                            continue
+
                         event_id = str(event.get('eventId'))
                         game_instance = games_map.get(event_id)
 
@@ -956,7 +959,7 @@ class NFLPipeline(object):
                     if isinstance(generator, Events):
                         await generator.spawn_tasks(session, upcoming_week=self.upcoming_week)
                     elif isinstance(generator, Players):
-                        player_ids = await generator.spawn_tasks(session, team_ids[:1])
+                        player_ids = await generator.spawn_tasks(session, team_ids)
                     elif isinstance(generator, PlayerStats):
                         await generator.spawn_tasks(session, player_ids)
 
@@ -967,20 +970,20 @@ def main():
     events = Events()
     players = Players()
     stats = PlayerStats()
-    offense_passing = OffensePassing()
-    offense_rushing = OffenseRushing()
-    offense_receiving = OffenseReceiving()
-    defense_passing = DefensePassing()
-    defense_rushing = DefenseRushing()
-    defense_receiving = DefenseReceiving()
-    advance_offense = AdvanceOffense()
-    advance_defense = AdvanceDefense()
-    coverage_schemes = CoverageSchemes()
-    offense_tendencies = OffenseTendencies()
-    coverage_position = CoverageStatsByPosition()
+    # offense_passing = OffensePassing()
+    # offense_rushing = OffenseRushing()
+    # offense_receiving = OffenseReceiving()
+    # defense_passing = DefensePassing()
+    # defense_rushing = DefenseRushing()
+    # defense_receiving = DefenseReceiving()
+    # advance_offense = AdvanceOffense()
+    # advance_defense = AdvanceDefense()
+    # coverage_schemes = CoverageSchemes()
+    # offense_tendencies = OffenseTendencies()
+    # coverage_position = CoverageStatsByPosition()
 
     pl.create_endpoint(teams)
-    # pl.create_generator(events)
+    pl.create_generator(events)
     pl.create_generator(players)
     pl.create_generator(stats)
     # pl.create_endpoint(offense_passing)
@@ -1001,7 +1004,7 @@ def main():
 
     # Then transform after async opperations are done
     teams.transform()
-    # events.transform()
+    events.transform()
     players.transform()
     stats.transform(players.util)
     # offense_passing.transform()
@@ -1015,6 +1018,3 @@ def main():
     # coverage_schemes.transform()
     # offense_tendencies.transform()
     # coverage_position.transform()
-
-    # games = {game.event: game for game in models.Game.objects.all()}
-    # print(games.get('401772830'))

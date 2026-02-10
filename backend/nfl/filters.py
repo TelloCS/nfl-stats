@@ -1,9 +1,6 @@
-from django_filters import FilterSet, CharFilter, DateFilter, NumberFilter, ChoiceFilter
+from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter
 from django.db.models import Q, F, Prefetch
-from .models import (
-    Player,
-    PlayerGameStats
-)
+from .models import Player, PlayerGameStats
 
 class PlayerFilter(FilterSet):
     fullName = CharFilter(
@@ -49,7 +46,6 @@ class PlayerStatFilter(FilterSet):
             )
         ).distinct()
 
-# currently working on this
 class PlayerMatchupsFilter(FilterSet):
     position = CharFilter(field_name='player__position', lookup_expr='exact')
     opponent = CharFilter(method='filter_by_opponent')
@@ -63,7 +59,7 @@ class PlayerMatchupsFilter(FilterSet):
 
     class Meta:
         model = PlayerGameStats
-        fields = ('position', 'opponent',)
+        fields = ('position', 'opponent', 'season_year', 'season_type', 'location')
 
     def filter_by_opponent(self, queryset, name, opponent):
         if not opponent: return queryset
@@ -80,7 +76,6 @@ class PlayerMatchupsFilter(FilterSet):
             return queryset.filter(player__team=F('game__awayTeam'))
         return queryset
     
-# working on it 
 class UpcomingGameFilter(FilterSet):
     week = NumberFilter(
         field_name='week',

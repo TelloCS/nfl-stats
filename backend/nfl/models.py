@@ -314,3 +314,59 @@ class Total(models.Model):
 
     class Meta:
         unique_together = ('team', 'display_name')
+
+class TeamRankSnapshot(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE, related_name='rank_snapshot')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    off_pass_yards_rank = models.IntegerField(default=0)
+    off_pass_tds_rank = models.IntegerField(default=0)
+    off_pass_rating_rank = models.IntegerField(default=0)
+
+    off_rush_yards_rank = models.IntegerField(default=0)
+    off_rush_tds_rank = models.IntegerField(default=0)
+    off_rush_attempts_rank = models.IntegerField(default=0)
+
+    off_receptions_rank = models.IntegerField(default=0)
+    off_rec_yards_rank = models.IntegerField(default=0)
+    off_rec_tds_rank = models.IntegerField(default=0)
+    
+    def_pass_yards_rank = models.IntegerField(default=0)
+    def_pass_tds_rank = models.IntegerField(default=0)
+    def_pass_rating_rank = models.IntegerField(default=0)
+
+    def_rush_yards_rank = models.IntegerField(default=0)
+    def_rush_tds_rank = models.IntegerField(default=0)
+    def_rush_attempts_rank = models.IntegerField(default=0)
+
+    def_receptions_rank = models.IntegerField(default=0)
+    def_rec_yards_rank = models.IntegerField(default=0)
+    def_rec_tds_rank = models.IntegerField(default=0)
+    def_pass_defended_rank = models.IntegerField(default=0)
+
+    off_expected_points_added_per_play_rank = models.IntegerField(default=0)
+    off_expected_points_added_per_pass_rank = models.IntegerField(default=0)
+    off_expected_points_added_per_rush_rank = models.IntegerField(default=0)
+
+    def_expected_points_added_per_play_rank = models.IntegerField(default=0)
+    def_expected_points_added_allowed_per_pass_rank = models.IntegerField(default=0)
+    def_expected_points_added_allowed_per_rush_rank = models.IntegerField(default=0)
+
+    man_rate_rank = models.IntegerField(default=0)
+    zone_rate_rank = models.IntegerField(default=0)
+    middle_closed_rate_rank = models.IntegerField(default=0)
+    middle_open_rate_rank = models.IntegerField(default=0)
+
+    motion_rate_rank = models.IntegerField(default=0)
+    play_action_rate_rank = models.IntegerField(default=0)
+    shotgun_rate_rank = models.IntegerField(default=0)
+    nohuddle_rate_rank = models.IntegerField(default=0)
+
+    yards_allowed_wr_rank = models.IntegerField(default=0)
+    yards_allowed_te_rank = models.IntegerField(default=0)
+    yards_allowed_rb_rank = models.IntegerField(default=0)
+    yards_allowed_outside_rank = models.IntegerField(default=0)
+    yards_allowed_slot_rank = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Team Rank Snapshot"

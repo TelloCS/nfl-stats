@@ -178,7 +178,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False  # False for Localhost
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", 'http://localhost:5173').split(' ')
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", 'http://localhost:5173').split(' ')
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
@@ -199,9 +199,9 @@ CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Chicago')
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    'ingest-nfl-data-every-tuesday': {
+    'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=3, hour=18, minute=51),
+        'schedule': crontab(day_of_week=0, hour=14, minute=15),
     },
 }
 

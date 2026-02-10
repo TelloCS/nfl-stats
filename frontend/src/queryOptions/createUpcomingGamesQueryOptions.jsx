@@ -4,6 +4,7 @@ export default function createUpcomingGamesQueryOptions(week, status){
     return queryOptions({
         queryKey: ['upcomingGames', week, status],
         queryFn : () => getUpcomingGames(week, status),
+        retry: false
     })
 }
 

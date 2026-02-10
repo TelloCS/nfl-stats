@@ -73,7 +73,7 @@ export default function Layout() {
             <div className="flex items-center gap-8">
               <div className="relative w-full sm:w-64">
                 <input
-                  className="block w-full p-2.5 pl-4 text-sm rounded-full border-2 border-neutral-200 focus:outline-none focus:ring-1 focus:ring-neutral-200 transition duration-150"
+                  className="bg-white block w-full p-2.5 pl-4 text-sm rounded-full border-2 border-neutral-200 focus:outline-none focus:ring-1 focus:ring-neutral-200 transition duration-150"
                   type="text"
                   placeholder="Search player name..."
                   value={input}
@@ -115,7 +115,7 @@ export default function Layout() {
                   </>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <Link to="/signup" className="text-neutral-900 rounded-full text-sm hover:underline font-bold">Sign up</Link>
+                    <Link to="/signup" className="text-neutral-900 text-sm hover:underline font-bold">Sign up</Link>
                     <Link to="/login" className="text-white bg-neutral-900 rounded-full text-sm py-3 px-5 hover:underline font-bold">Log in</Link>
                   </div>
                 )}
