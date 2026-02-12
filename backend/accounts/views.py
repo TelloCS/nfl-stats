@@ -1,20 +1,17 @@
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.views import LoginView
-from django.views.generic import CreateView
-from django_ratelimit.decorators import ratelimit
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from .forms import CustomUserCreationForm
 from .serializers import UserInfoSerializer
 from rest_framework import status
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
-
+from django_ratelimit.decorators import ratelimit
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 class UserProfileView(APIView):
@@ -24,6 +21,7 @@ class UserProfileView(APIView):
         serializer = UserInfoSerializer(request.user)
         return Response(serializer.data)
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='dispatch')
 @method_decorator(csrf_protect, name='dispatch')
 class SignUpView(APIView):
     permission_classes = (AllowAny,)
@@ -37,6 +35,17 @@ class SignUpView(APIView):
 
         if p1 != p2:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        validator = UnicodeUsernameValidator()
+        try:
+            validator(username)
+        except ValidationError as e:
+            return Response({'error': e.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            validate_password(p1)
+        except ValidationError as e:
+            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
@@ -49,13 +58,21 @@ class SignUpView(APIView):
             )
             return Response({'success': 'User created'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+            print(f"Signup Error: {e}")
+            return Response({'error': 'Something went wrong creating account'}, status=status.HTTP_400_BAD_REQUEST)
+
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='dispatch')
 @method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        if getattr(request, 'ratelimited', False):
+            return Response(
+                {'error': 'Too many login attempts. Please try again later.'}, 
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
         if request.user.is_authenticated:
             return Response({'error': 'Already logged in'}, status=status.HTTP_400_BAD_REQUEST)
         

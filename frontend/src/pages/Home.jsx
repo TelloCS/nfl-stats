@@ -40,10 +40,10 @@ export default function Home() {
                 NFL Stats Hub
               </h1>
               <p className="text-xl sm:text-2xl text-white mb-8 font-light">
-                Advanced Player Analytics & Historical Data
+                Team/Player Analytics & Historical Data
               </p>
               <p className="text-lg sm:text-xl text-white mb-12 max-w-2xl mx-auto">
-                Data-driven insights for football domination. Access comprehensive player stats, trends, and analytics to make winning decisions.
+                Data-driven insights for football. Access comprehensive player stats, and trends.
               </p>
             </div>
           </div>

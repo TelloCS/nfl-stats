@@ -3,7 +3,8 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../actions/authentication";
 import { useUser } from "../hooks/useUser";
-import { ChartColumn  } from 'lucide-react';
+import { ChartColumn } from 'lucide-react';
+import UserDropdown from '../components/UserDropdown';
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -101,18 +102,7 @@ export default function Layout() {
               </div>
               <div className="flex gap-4">
                 {user ? (
-                  <>
-                    <span className="text-gray-600 text-md">
-                      Welcome, <strong>{user.username}</strong>
-                    </span>
-                    <button
-                      onClick={() => logoutMutation.mutate()}
-                      disabled={logoutMutation.isPending}
-                      className="cursor-pointer rounded-full text-sm text-red-500 text-md hover:underline font-bold"
-                    >
-                      {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
-                    </button>
-                  </>
+                  <UserDropdown user={user} onLogout={() => logoutMutation.mutate()} />
                 ) : (
                   <div className="flex items-center gap-4">
                     <Link to="/signup" className="text-neutral-900 text-sm hover:underline font-bold">Sign up</Link>

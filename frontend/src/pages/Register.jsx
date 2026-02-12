@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { register } from '../actions/authentication';
-import CSRFToken from '../components/CSRFToken';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
+import CSRFToken from '../components/CSRFToken';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -14,41 +14,30 @@ export default function Register() {
     password2: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-
-  const PasswordToggle = () => (
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600"
-    >
-      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-    </button>
-  );
+  const [validationError, setValidationError] = useState(null);
 
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      alert("Account created successfully! Please log in.");
-      navigate('/login');
+      navigate('/login', { state: { message: "Account created! Please log in." } });
     },
-    onError: (error) => {
-      const errorData = error.response?.data?.error;
-      const message = Array.isArray(errorData)
-        ? errorData.join(' ')
-        : (errorData || "Registration failed");
-      alert(message);
+    onError: () => {
+      setValidationError(null);
     }
   });
 
   const { username, email, password1, password2 } = formData;
 
-  const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = e => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setValidationError(null);
+  };
 
   const onSubmit = e => {
     e.preventDefault();
 
     if (password1 !== password2) {
-      alert("Passwords do not match");
+      setValidationError("Passwords do not match");
       return;
     }
 
@@ -70,8 +59,9 @@ export default function Register() {
           <div className='bg-neutral-100 p-3 rounded-2xl mb-4'>
             <UserPlus size={28} className="text-neutral-700" />
           </div>
-          <h1 className='text-2xl font-bold text-neutral-800'>Sign Up</h1>
+          <h1 className='text-2xl font-bold text-neutral-800'>Create Account</h1>
         </div>
+
         <form onSubmit={onSubmit} className='space-y-4'>
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -87,6 +77,7 @@ export default function Register() {
               required
             />
           </div>
+
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <User size={18} className="text-neutral-400" />
@@ -101,6 +92,7 @@ export default function Register() {
               required
             />
           </div>
+
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Lock size={18} className="text-neutral-400" />
@@ -115,8 +107,9 @@ export default function Register() {
               minLength='10'
               required
             />
-            <PasswordToggle />
+            <PasswordToggle isVisible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
           </div>
+
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Lock size={18} className="text-neutral-400" />
@@ -131,8 +124,8 @@ export default function Register() {
               minLength='10'
               required
             />
-            <PasswordToggle />
           </div>
+
           <button
             className='w-full py-2.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-lg hover:bg-neutral-800 focus:ring-4 focus:outline-none focus:ring-neutral-300 transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-2'
             type='submit'
@@ -141,11 +134,13 @@ export default function Register() {
             {registerMutation.isPending ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        {registerMutation.isError && (
-          <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center">
-            {registerMutation.error.response?.data?.error || "Registration failed"}
+
+        {(validationError || registerMutation.isError) && (
+          <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center animate-in fade-in slide-in-from-top-1">
+            {validationError || registerMutation.error?.response?.data?.error || "Registration failed"}
           </div>
         )}
+
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-neutral-200"></div>
@@ -154,12 +149,14 @@ export default function Register() {
             <span className="px-2 bg-white text-neutral-500">or</span>
           </div>
         </div>
+
         <button
           onClick={handleGuestAccess}
           className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 focus:ring-4 focus:outline-none focus:ring-neutral-100 transition-colors'
         >
           Continue as Guest
         </button>
+
         <p className='text-center text-sm text-neutral-500 mt-6'>
           Already have an account?{' '}
           <span
@@ -173,3 +170,13 @@ export default function Register() {
     </div>
   );
 }
+
+const PasswordToggle = ({ isVisible, onToggle }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600 transition-colors"
+  >
+    {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+);
