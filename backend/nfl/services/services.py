@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import logging
 import os
 from nfl import models
+from datetime import datetime
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -297,12 +298,12 @@ class Events(EndpointGenerator):
         self.raw = []
 
     async def spawn_tasks(self, session: ClientSession, upcoming_week: int):
-        # previous_week = upcoming_week - 1
+        previous_week = upcoming_week - 1
         async with TaskGroup() as taskgroup:
             tasks = [
                 taskgroup.create_task(
                     self.send_api_request(session=session, week=week)
-                ) for week in range(1, upcoming_week)
+                ) for week in range(previous_week, upcoming_week + 1)
             ]
         self.raw = [t.result() for t in tasks]
 
@@ -890,40 +891,6 @@ class CoverageStatsByPosition(WebScraping):
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
 
-# Needs Work
-class SnapCount(WebScraping):
-    base_url = os.getenv('SNAP_COUNT_URL')
-    source = "footballguys"
-
-    def __init__(self, fetching: bool):
-        self.fetching = fetching
-        self.raw = []
-        self.res = []
-
-    async def send_api_request(self, session: ClientSession):
-        if self.fetching == False:
-            with open('snap-count.html', 'r', encoding='utf-8') as f:
-                content = f.read()
-        
-            self.raw = Table(html=content, source=SnapCount.source).parser2
-            print('Read from file')
-
-        if self.fetching == True:
-            async with session.get(url=SnapCount.base_url) as response:
-                html = await response.text()
-
-                with open('snap-count.html', 'w', encoding='utf-8') as f:
-                    f.write(html)
-
-                self.raw = Table(html=html, source=SnapCount.source).parser2
-                print('API Request')
-
-    def transform(self):
-        return self.raw
-                
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.raw))
-
 # Might deprecate this
 def generate_slug(name: str) -> str:
     name = ''.join([c for c in name if c not in string.punctuation])
@@ -963,40 +930,55 @@ class NFLPipeline(object):
                     elif isinstance(generator, PlayerStats):
                         await generator.spawn_tasks(session, player_ids)
 
+    def is_nfl_season(self):
+        today = datetime.now().date()
+        current_month = today.month
+
+        if current_month >= 9 or current_month <= 1:
+            return True
+        return False
+
 def main():
-    pl = NFLPipeline(upcoming_week=19)
+    pl = NFLPipeline(upcoming_week=18)
+
+    if not pl.is_nfl_season():
+        print("NFL is currently on break")
+        return
+    
+    print("NFL is currently live")
+    exit(1)
 
     teams = Teams()
     events = Events()
     players = Players()
     stats = PlayerStats()
-    # offense_passing = OffensePassing()
-    # offense_rushing = OffenseRushing()
-    # offense_receiving = OffenseReceiving()
-    # defense_passing = DefensePassing()
-    # defense_rushing = DefenseRushing()
-    # defense_receiving = DefenseReceiving()
-    # advance_offense = AdvanceOffense()
-    # advance_defense = AdvanceDefense()
-    # coverage_schemes = CoverageSchemes()
-    # offense_tendencies = OffenseTendencies()
-    # coverage_position = CoverageStatsByPosition()
+    offense_passing = OffensePassing()
+    offense_rushing = OffenseRushing()
+    offense_receiving = OffenseReceiving()
+    defense_passing = DefensePassing()
+    defense_rushing = DefenseRushing()
+    defense_receiving = DefenseReceiving()
+    advance_offense = AdvanceOffense()
+    advance_defense = AdvanceDefense()
+    coverage_schemes = CoverageSchemes()
+    offense_tendencies = OffenseTendencies()
+    coverage_position = CoverageStatsByPosition()
 
     pl.create_endpoint(teams)
     pl.create_generator(events)
     pl.create_generator(players)
     pl.create_generator(stats)
-    # pl.create_endpoint(offense_passing)
-    # pl.create_endpoint(offense_rushing)
-    # pl.create_endpoint(offense_receiving)
-    # pl.create_endpoint(defense_passing)
-    # pl.create_endpoint(defense_rushing)
-    # pl.create_endpoint(defense_receiving)
-    # pl.create_endpoint(advance_offense)
-    # pl.create_endpoint(advance_defense)
-    # pl.create_endpoint(coverage_schemes)
-    # pl.create_endpoint(offense_tendencies)
-    # pl.create_endpoint(coverage_position)
+    pl.create_endpoint(offense_passing)
+    pl.create_endpoint(offense_rushing)
+    pl.create_endpoint(offense_receiving)
+    pl.create_endpoint(defense_passing)
+    pl.create_endpoint(defense_rushing)
+    pl.create_endpoint(defense_receiving)
+    pl.create_endpoint(advance_offense)
+    pl.create_endpoint(advance_defense)
+    pl.create_endpoint(coverage_schemes)
+    pl.create_endpoint(offense_tendencies)
+    pl.create_endpoint(coverage_position)
 
 
     # Perform Async operations to extract raw data
@@ -1007,14 +989,14 @@ def main():
     events.transform()
     players.transform()
     stats.transform(players.util)
-    # offense_passing.transform()
-    # offense_rushing.transform()
-    # offense_receiving.transform()
-    # defense_passing.transform()
-    # defense_rushing.transform()
-    # defense_receiving.transform()
-    # advance_offense.transform()
-    # advance_defense.transform()
-    # coverage_schemes.transform()
-    # offense_tendencies.transform()
-    # coverage_position.transform()
+    offense_passing.transform()
+    offense_rushing.transform()
+    offense_receiving.transform()
+    defense_passing.transform()
+    defense_rushing.transform()
+    defense_receiving.transform()
+    advance_offense.transform()
+    advance_defense.transform()
+    coverage_schemes.transform()
+    offense_tendencies.transform()
+    coverage_position.transform()
