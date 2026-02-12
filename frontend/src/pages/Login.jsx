@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { login } from '../actions/authentication';
-import CSRFToken from '../components/CSRFToken';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import CSRFToken from '../components/CSRFToken';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,27 +12,26 @@ export default function Login() {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || null);
 
   const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      console.log("Login Successful:", data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       navigate('/');
     },
-    onError: (error) => {
-      console.error("Login Failed:", error.response?.data);
-      alert(error.response?.data?.error || "Login failed");
+    onError: () => {
+      setSuccessMessage(null);
     }
   });
 
   const { email, password } = formData;
 
-  const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const onSubmit = e => {
+  const onSubmit = (e) => {
     e.preventDefault();
     loginMutation.mutate({ email, password });
   };
@@ -54,6 +53,14 @@ export default function Login() {
           </div>
           <h1 className='text-2xl font-bold text-neutral-800'>Sign in with email</h1>
         </div>
+
+        {successMessage && (
+          <div className="mb-6 p-3 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg text-center flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-1">
+            <CheckCircle size={16} />
+            {successMessage}
+          </div>
+        )}
+
         <form onSubmit={onSubmit} className='space-y-4'>
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -69,6 +76,7 @@ export default function Login() {
               required
             />
           </div>
+
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Lock size={18} className="text-neutral-400" />
@@ -91,19 +99,23 @@ export default function Login() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+
           <button
             className='w-full py-2.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-lg hover:bg-neutral-800 focus:ring-4 focus:outline-none focus:ring-neutral-300 transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-2'
             type='submit'
             disabled={loginMutation.isPending}
           >
-            {loginMutation.isPending ? 'Authenticating...' : 'Sign In'}
+            {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
           </button>
+
         </form>
+
         {loginMutation.isError && (
           <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center">
-            {loginMutation.error.response?.data?.error || "Authentication failed"}
+            {loginMutation.error.response?.data?.error || "Invalid email or password"}
           </div>
         )}
+
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-neutral-200"></div>
@@ -112,12 +124,14 @@ export default function Login() {
             <span className="px-2 bg-white text-neutral-500">or</span>
           </div>
         </div>
+
         <button
           onClick={handleGuestAccess}
           className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 focus:ring-4 focus:outline-none focus:ring-neutral-100 transition-colors'
         >
           Continue as Guest
         </button>
+
         <p className='text-center text-sm text-neutral-500 mt-6'>
           Don't have an account?{' '}
           <span
