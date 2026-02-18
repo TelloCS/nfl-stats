@@ -6,7 +6,7 @@ import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import PositionOpponent from './pages/PositionOpponent';
 import TeamStats from './pages/TeamStats';
-import PlayerStats from './pages/PlayerStats';
+import PlayerDashboard from './pages/PlayerDashboard';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ErrorPage from './pages/ErrorPage';
@@ -39,7 +39,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/player/stats/id/:player_id/:player_slug/',
-        element: <PlayerStats />
+        element: <PlayerDashboard />
       },
       {
         path: '/position-vs-opponent/',

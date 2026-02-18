@@ -80,10 +80,8 @@ export default function TeamStats() {
                     {team.full_name}
                   </td>
 
-                  {/* DYNAMIC CELLS */}
                   {columnsToShow.map((stat) => (
                     <td key={stat.key} className="px-2 h-[48px] text-nowrap border-b border-neutral-200 bg-white text-center text-sm">
-                      {/* We access the data using the same logic as the getter */}
                       {team[tableKey]?.[stat.key] ?? '-'}
                     </td>
                   ))}
