@@ -1,6 +1,6 @@
 from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter
 from django.db.models import Q, F, Prefetch
-from .models import Player, PlayerGameStats
+from .models import Player, PlayerGameStats, Game
 
 class PlayerFilter(FilterSet):
     fullName = CharFilter(

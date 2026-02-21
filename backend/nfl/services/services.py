@@ -9,11 +9,29 @@ from dotenv import load_dotenv
 import logging
 import os
 from nfl import models
-from datetime import datetime
+from datetime import datetime, timezone
+import requests
+from dateutil import parser
+from django.core.cache import cache
 
 load_dotenv()
 logger = logging.getLogger(__name__)
 print(f"DEBUG: My logger name is: {logger.name}")
+
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US, en;q=0.5",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "DNT": "1",
+    "Referer": "https://www.google.com/"
+}
 
 class Endpoint(ABC):
     base_url = None
@@ -51,7 +69,8 @@ class Teams(Endpoint):
         self.raw = None
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=Teams.base_url) as response:
+        override_accept = {"Accept": "application/json"}
+        async with session.get(url=Teams.base_url, headers=override_accept) as response:
             self.raw = await response.json()
             return self.helper()
     
@@ -126,18 +145,27 @@ class Players(EndpointGenerator):
         return self.helper()
 
     async def send_api_request(self, session: ClientSession, team_id: str) -> None:
-        async with session.get(url=self.base_url.format(team_id=team_id)) as response:
+        override_accept = {"Accept": "application/json"}
+        async with session.get(url=self.base_url.format(team_id=team_id), headers=override_accept) as response:
             return await response.json()
 
     def transform(self) -> None:
         positions = {'QB', 'WR', 'RB', 'TE'}
+        category = {'offense', 'injuredReserveOrOut'}
 
         team_abbreviatons = {team.abbreviation: team for team in models.Team.objects.all()}
         for team in self.raw:
             for position in team["athletes"]:
-                if position["position"] == "offense":
+                if position["position"] in category:
                     for athlete in position["items"]:
                         if athlete["position"]["abbreviation"] in positions:
+                            
+                            util_map = {
+                                'player_id': str(athlete.get('id', '')),
+                                "full_name": str(athlete.get('displayName', '')),
+                            }
+                            self.util.append(util_map)
+
                             team_instance = team_abbreviatons.get(str(team['team']["abbreviation"]))
 
                             if not team_instance:
@@ -146,24 +174,20 @@ class Players(EndpointGenerator):
                             
                             defaults = {
                                 "slug": generate_slug(athlete["displayName"]),
-                                "first_name": str(athlete['firstName']),
+                                "espn_id": str(athlete.get('id', '')),
+                                "first_name": str(athlete.get('firstName', '')),
                                 "last_name": str(athlete.get('lastName', '')),
                                 "full_name": str(athlete.get('displayName', '')),
                                 "position": str(athlete['position']['abbreviation']),
                                 "jersey": str(athlete.get('jersey', '')),
-                                "experience": int(athlete['experience']['years']),
+                                "experience": int(athlete.get('experience', {}).get('years', 0)),
                                 'team': team_instance
                             }
 
-                            util_map = {
-                                'player_id': athlete.get('id', ''),
-                                "full_name": str(athlete.get('displayName', '')),
-                            }
-                            self.util.append(util_map)
                             self.res.append(defaults)
 
                             obj, created = models.Player.objects.update_or_create(
-                                full_name=str(athlete.get('displayName', '')),
+                                espn_id=defaults['espn_id'],  
                                 defaults=defaults
                             )
 
@@ -174,9 +198,11 @@ class Players(EndpointGenerator):
 
     def helper(self):
         positions = {'QB', 'WR', 'RB', 'TE'}
+        category = {'offense', 'injuredReserveOrOut'}
+        
         for team in self.raw:
             for position in team["athletes"]:
-                if position["position"] == "offense":
+                if position["position"] in category:
                     for athlete in position["items"]:
                         if athlete["position"]["abbreviation"] in positions:
                             self.player_ids.append(athlete['id'])
@@ -202,17 +228,21 @@ class PlayerStats(EndpointGenerator):
         self.raw = [t.result() for t in tasks]
 
     async def send_api_request(self, session: ClientSession, player_id: str):
-        async with session.get(PlayerStats.base_url.format(player_id=player_id)) as response:
+        override_accept = {"Accept": "application/json"}
+        async with session.get(PlayerStats.base_url.format(player_id=player_id), headers=override_accept) as response:
             return await response.json()
     
     def transform(self, util: list) -> None:
         games_map = {game.event: game for game in models.Game.objects.all()}
-        players_map = {player.full_name: player for player in models.Player.objects.all()}
+        players_map = {player.espn_id: player for player in models.Player.objects.all()}
         
+        if len(self.raw) != len(util):
+            logger.error(f"CRITICAL MISMATCH: Stats Raw ({len(self.raw)}) vs Util ({len(util)}).")
+            raise ValueError("Zip alignment failed! Aborting stats transformation.")
+
         for player_data, u in zip(self.raw, util):
-            player_instance = players_map.get(str(u['full_name']))
+            player_instance = players_map.get(str(u['player_id']))
             if not player_instance:
-                logger.warning(f"Player not found in DB: {u['full_name']}")
                 continue
 
             for season_type in player_data.get("seasonTypes", []):
@@ -297,19 +327,38 @@ class Events(EndpointGenerator):
         self.res = []
         self.raw = []
 
-    async def spawn_tasks(self, session: ClientSession, upcoming_week: int):
-        previous_week = upcoming_week - 1
+    async def spawn_tasks(self, session: ClientSession, year: int = None, season_type: int = None, start_week: int = None, end_week: int = None) -> None:
+        if start_week is not None and end_week is not None:
+            weeks_to_fetch = range(start_week, end_week + 1)
+        elif start_week is not None:
+            weeks_to_fetch = [start_week]
+        else:
+            weeks_to_fetch = [None]
+
         async with TaskGroup() as taskgroup:
             tasks = [
                 taskgroup.create_task(
-                    self.send_api_request(session=session, week=week)
-                ) for week in range(previous_week, upcoming_week + 1)
+                    self.send_api_request(session, year, season_type, week)
+                ) for week in weeks_to_fetch
             ]
         self.raw = [t.result() for t in tasks]
 
-    async def send_api_request(self, session: ClientSession, week: int) -> None:
-        async with session.get(Events.base_url.format(week=week)) as response:
-            return await response.json()
+    async def send_api_request(self, session: ClientSession, year: int = None, season_type: int = None, week: int = None):
+        override_accept = {"Accept": "application/json"}
+        if year and season_type and week:
+            params = {
+                "dates": year,
+                "seasontype": season_type,
+                "week": week
+            }
+
+            print(f"Fetching: Year {year} | Type {season_type} | Week {week}")
+            async with session.get(Events.base_url, params=params, headers=override_accept) as response:
+                return await response.json()
+        else:
+            print("Fetching LIVE data")
+            async with session.get(Events.base_url) as response:
+                return await response.json()
         
     def transform(self) -> None:
         if not self.raw:
@@ -320,6 +369,10 @@ class Events(EndpointGenerator):
             for event in data['events']:
                 for comp in event['competitions']:
                     for team in comp['competitors']:
+                        if team['team']['abbreviation'] not in team_abbreviatons:
+                            home_team_instance, away_team_instance = None, None
+                            continue
+
                         if team['homeAway'] == 'home':
                             home_team = team['team']['abbreviation']
                             home_team_instance = team_abbreviatons.get(home_team)
@@ -328,6 +381,9 @@ class Events(EndpointGenerator):
                             away_team = team['team']['abbreviation']
                             away_team_instance = team_abbreviatons.get(away_team)
                             away_score = team['score']
+
+                if not home_team_instance and not away_team_instance:
+                    continue
 
                 defaults = {
                     'date': event['date'],
@@ -891,17 +947,19 @@ class CoverageStatsByPosition(WebScraping):
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
 
-# Might deprecate this
 def generate_slug(name: str) -> str:
     name = ''.join([c for c in name if c not in string.punctuation])
     name = name.lower().replace(' ', '-')
     return name
 
 class NFLPipeline(object):
-    def __init__(self, upcoming_week):
+    def __init__(self, year: int = None, season_type: int = None, start_week: int = None, end_week: int = None):
         self.endpoints: list = []
         self.generators: list = []
-        self.upcoming_week = upcoming_week
+        self.year = year
+        self.season_type = season_type
+        self.start_week = start_week
+        self.end_week = end_week
 
     def create_endpoint(self, endpoint) -> None:
         self.endpoints.append(endpoint)
@@ -910,7 +968,7 @@ class NFLPipeline(object):
         self.generators.append(generator)
     
     async def extract_data(self):
-       async with ClientSession() as session:
+       async with ClientSession(headers=DEFAULT_HEADERS) as session:
             if not self.endpoints:
                 print('No endpoints to process.')
             else:
@@ -924,30 +982,91 @@ class NFLPipeline(object):
             else:
                 for generator in self.generators:
                     if isinstance(generator, Events):
-                        await generator.spawn_tasks(session, upcoming_week=self.upcoming_week)
+                        await generator.spawn_tasks(session, year=self.year, season_type=self.season_type, start_week=self.start_week, end_week=self.end_week)
                     elif isinstance(generator, Players):
                         player_ids = await generator.spawn_tasks(session, team_ids)
                     elif isinstance(generator, PlayerStats):
                         await generator.spawn_tasks(session, player_ids)
 
-    def is_nfl_season(self):
-        today = datetime.now().date()
-        current_month = today.month
+def should_pipeline_run() -> dict:
+    base_url = os.getenv("EVENTS_URL")
 
-        if current_month >= 9 or current_month <= 1:
-            return True
-        return False
+    try:
+        response = requests.get(base_url, timeout=10, headers=DEFAULT_HEADERS)
+
+        if response.status_code != 200:
+            return None
+        
+        data: dict = response.json()
+        season = data['leagues'][0]['season']
+        current_year = season['year']
+        current_type = season['type']['id']
+        current_week = data['week']['number']
+        events = data.get('events', [])
+
+        if not events:
+            print("No events found. Pipeline Skip.")
+            return None
+
+        last_event = events[-1]
+        status = last_event['status']['type']
+        game_date_str = last_event['date']
+        
+        game_date = parser.parse(game_date_str).astimezone(timezone.utc)
+        current_date = datetime.now(timezone.utc)
+        
+        is_complete = status.get('completed', False)
+        days_since_game = (current_date - game_date).days
+
+        print(f"Latest Event: {last_event.get('shortName', 'Unknown')}")
+        print(f"Status: {'Final' if is_complete else 'Active'}")
+        print(f"Time since kickoff: {days_since_game} days")
+
+        if is_complete and days_since_game > 3:
+            print("Event is stale (> 3 days post-game). Pipeline SKIP.")
+            return None
+
+        print(f"Pipeline GO: Year {current_year} | Type {current_type} | Week {current_week}")
+        
+        return {
+            "year": current_year,
+            "season_type": current_type,
+            "start_week": current_week,
+            "end_week": current_week
+        }
+
+    except Exception as e:
+        print(f"Error checking season status: {e}")
+        return None
 
 def main():
-    pl = NFLPipeline(upcoming_week=18)
+    manual_config = {
+        "year": 2025,
+        "season_type": 2,
+        "start_week": 1,
+        "end_week": 6
+    }
 
-    if not pl.is_nfl_season():
-        print("NFL is currently on break")
-        return
+    # manual_config = None
     
-    print("NFL is currently live")
-    exit(1)
+    if manual_config:
+        print(f"MANUAL MODE: Forcing run for {manual_config}")
+        context = manual_config
+    else:
+        print("AUTO MODE: Checking if NFL is in season...")
+        context = should_pipeline_run()
+        
+        if not context:
+            print("NFL is out of season. Exiting.")
+            return
 
+    pl = NFLPipeline(
+        year=context['year'],
+        season_type=context['season_type'],
+        start_week=context['start_week'],
+        end_week=context['end_week']
+    )
+    
     teams = Teams()
     events = Events()
     players = Players()
@@ -1000,3 +1119,4 @@ def main():
     coverage_schemes.transform()
     offense_tendencies.transform()
     coverage_position.transform()
+    cache.clear()

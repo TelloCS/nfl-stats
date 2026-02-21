@@ -35,16 +35,6 @@ class Table(object):
 
     @property
     def parser2(self):
-        """
-        one table -> theads and tbodies
-
-        h = ['h1', 'h2', 'hn', ...]
-        d = ['d1', 'd2', 'dn', ...]
-
-        dict(zip(h, d))
-        
-        """
-
         soup = BeautifulSoup(self.html, 'lxml')
         thead = soup.find('table').find_all('thead')
         tbody = soup.find('table').find_all('tbody')

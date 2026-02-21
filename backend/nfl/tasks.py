@@ -4,6 +4,7 @@ from celery.utils.log import get_task_logger
 from django.db import transaction
 from django.db.models import F, Window
 from django.db.models.functions import DenseRank
+from django.core.cache import cache
 from .models import (
     Team, TeamRankSnapshot, 
     TeamOffensePassingStats, TeamOffenseRushingStats, TeamOffenseReceivingStats,
@@ -163,5 +164,15 @@ def update_team_rank_snapshots():
                 )
                 count += 1
             logger.info("Updated TeamRankSnapshot Model")
+
+        cache_keys_to_delete = [
+            "team_list",
+            "team_stats",
+            "team_ranks"
+        ]
+
+        cache.delete_many(cache_keys_to_delete)
+        logger.info("Team and Rank caches invalidated successfully.")
+
     except Exception as e:
         logger.error(f"Scheduled task failed for TeamRankSnapshot Model: {e}")

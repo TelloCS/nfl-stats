@@ -3,7 +3,7 @@ import createUpcomingGamesQueryOptions from "../queryOptions/createUpcomingGames
 import formatDate from "../helpers/utils/"
 
 export default function UpcomingGames() {
-  const { data, isPending } = useQuery(createUpcomingGamesQueryOptions(18, 'Final'))
+  const { data, isPending } = useQuery(createUpcomingGamesQueryOptions(2, 'Final'))
 
   return (
     <>
@@ -11,7 +11,9 @@ export default function UpcomingGames() {
         <div className="flex justify-center items-center">
         </div>
         : <div className="flex items-center justify-center">
-          <div className="container mx-auto flex flex-wrap px-8 py-4 gap-4">
+          {!data ?
+            <></>
+          : <div className="container mx-auto flex flex-wrap px-8 py-4 gap-4">
             {data?.map((game, index) => {
               return (
                 <div key={index} className="text-center text-xs w-[120px] h-full">
@@ -33,7 +35,7 @@ export default function UpcomingGames() {
                 </div>
               );
             })}
-          </div>
+          </div>}
         </div>}
     </>
   )

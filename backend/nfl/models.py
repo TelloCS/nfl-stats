@@ -18,6 +18,7 @@ class Team(models.Model):
 
 class Player(models.Model):
     slug = models.SlugField(max_length=255, unique=True, help_text="URL-friendly identifier")
+    espn_id = models.CharField(max_length=255, unique=True, help_text="Unique ID from ESPN API")
 
     first_name = models.CharField(max_length=50, blank=True, default="")
     last_name = models.CharField(max_length=50, blank=True, default="")
@@ -27,14 +28,10 @@ class Player(models.Model):
     jersey = models.CharField(max_length=3, blank=True, default="")
     experience = models.IntegerField(default=0)
 
-
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team', null=False)
 
     def __str__(self):
-        return f"{self.full_name}"
-    
-    class Meta:
-        unique_together = ('full_name', 'team')
+        return f"{self.full_name} ({self.position})"
     
 class Game(models.Model):
     date = models.DateTimeField()
@@ -113,8 +110,6 @@ class PlayerGameStats(models.Model):
 
     fumbles = models.IntegerField(default=0)
     fumbles_lost = models.IntegerField(default=0)
-
-    # draftkings_fantasy_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
     def __str__(self):
         return f"{self.player.full_name} Stats for Game {self.game.id}"
