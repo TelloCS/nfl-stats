@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Team(models.Model):
     slug = models.SlugField(max_length=255, unique=True, help_text="URL-friendly identifier")
 
@@ -12,9 +13,10 @@ class Team(models.Model):
 
     def __str__(self):
         return f"{self.full_name}"
-    
+
     class Meta:
         ordering = ['abbreviation']
+
 
 class Player(models.Model):
     slug = models.SlugField(max_length=255, unique=True, help_text="URL-friendly identifier")
@@ -32,7 +34,8 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.position})"
-    
+
+
 class Game(models.Model):
     date = models.DateTimeField()
     name = models.CharField(max_length=255)
@@ -40,7 +43,7 @@ class Game(models.Model):
     season_year = models.IntegerField()
     season_type = models.IntegerField()
     week = models.IntegerField()
-    
+
     homeTeam = models.ForeignKey(
         Team,
         on_delete=models.PROTECT,
@@ -65,10 +68,11 @@ class Game(models.Model):
 
     def __str__(self):
         return f"{self.awayTeam.abbreviation} @ {self.homeTeam.abbreviation} - Week {self.week} ({self.date})"
-    
+
     class Meta:
         unique_together = ('homeTeam', 'awayTeam', 'date')
         ordering = ['date']
+
 
 class PlayerGameStats(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='stats', null=False)
@@ -90,7 +94,6 @@ class PlayerGameStats(models.Model):
     pass_rating = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     adjusted_qbr = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
-
     rush_attempts = models.IntegerField(default=0)
     rush_yards = models.IntegerField(default=0)
     rush_touchdowns = models.IntegerField(default=0)
@@ -98,14 +101,12 @@ class PlayerGameStats(models.Model):
     yards_per_rush_attempt = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     long_rushing = models.IntegerField(default=0)
 
-
     receptions = models.IntegerField(default=0)
     rec_targets = models.IntegerField(default=0)
     rec_yards = models.IntegerField(default=0)
     rec_touchdowns = models.IntegerField(default=0)
 
-
-    yards_per_reception =  models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    yards_per_reception = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     long_reception = models.IntegerField(default=0)
 
     fumbles = models.IntegerField(default=0)
@@ -113,11 +114,12 @@ class PlayerGameStats(models.Model):
 
     def __str__(self):
         return f"{self.player.full_name} Stats for Game {self.game.id}"
-    
+
     class Meta:
         unique_together = ('player', 'game')
         verbose_name_plural = 'Player Game Stats'
         ordering = ['-game__week', 'id']
+
 
 class TeamOffensePassingStats(models.Model):
     team = models.OneToOneField(
@@ -125,7 +127,7 @@ class TeamOffensePassingStats(models.Model):
         on_delete=models.CASCADE,
         related_name='team_offense_passing',
         null=False)
-    
+
     pass_attempts = models.IntegerField(default=0)
     completions = models.IntegerField(default=0)
     completion_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -137,18 +139,20 @@ class TeamOffensePassingStats(models.Model):
     sacks = models.IntegerField(default=0)
     sack_yards = models.IntegerField(default=0)
 
+
 class TeamOffenseRushingStats(models.Model):
     team = models.OneToOneField(
         Team,
         on_delete=models.CASCADE,
         related_name='team_offense_rushing',
         null=False)
-    
+
     rush_attempts = models.IntegerField(default=0)
     rush_yards = models.IntegerField(default=0)
     yards_per_carry = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     rush_touchdowns = models.IntegerField(default=0)
     rush_fumbles = models.IntegerField(default=0)
+
 
 class TeamOffenseReceivingStats(models.Model):
     team = models.OneToOneField(
@@ -156,20 +160,21 @@ class TeamOffenseReceivingStats(models.Model):
         on_delete=models.CASCADE,
         related_name='team_offense_receiving',
         null=False)
-    
+
     receptions = models.IntegerField(default=0)
     rec_yards = models.IntegerField(default=0)
     yards_per_reception = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     rec_touchdowns = models.IntegerField(default=0)
     rec_fumbles = models.IntegerField(default=0)
-    
+
+
 class TeamDefensePassingStats(models.Model):
     team = models.OneToOneField(
         Team,
         on_delete=models.CASCADE,
         related_name='team_defense_passing',
         null=False)
-    
+
     pass_attempts = models.IntegerField(default=0)
     completions = models.IntegerField(default=0)
     completion_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -179,19 +184,21 @@ class TeamDefensePassingStats(models.Model):
     interceptions = models.IntegerField(default=0)
     pass_rating = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     sacks = models.IntegerField(default=0)
-    
+
+
 class TeamDefenseRushingStats(models.Model):
     team = models.OneToOneField(
         Team,
         on_delete=models.CASCADE,
         related_name='team_defense_rushing',
         null=False)
-    
+
     rush_attempts = models.IntegerField(default=0)
     rush_yards = models.IntegerField(default=0)
     yards_per_carry = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     rush_touchdowns = models.IntegerField(default=0)
     rush_fumbles = models.IntegerField(default=0)
+
 
 class TeamDefenseReceivingStats(models.Model):
     team = models.OneToOneField(
@@ -199,13 +206,14 @@ class TeamDefenseReceivingStats(models.Model):
         on_delete=models.CASCADE,
         related_name='team_defense_receiving',
         null=False)
-    
+
     receptions = models.IntegerField(default=0)
     rec_yards = models.IntegerField(default=0)
     yards_per_reception = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     rec_touchdowns = models.IntegerField(default=0)
     rec_fumbles = models.IntegerField(default=0)
     pass_defended = models.IntegerField(default=0)
+
 
 class TeamAdvanceOffenseStats(models.Model):
     team = models.OneToOneField(
@@ -224,6 +232,7 @@ class TeamAdvanceOffenseStats(models.Model):
     scramble_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     interception_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
+
 class TeamAdvanceDefenseStats(models.Model):
     team = models.OneToOneField(
         Team,
@@ -241,17 +250,19 @@ class TeamAdvanceDefenseStats(models.Model):
     scramble_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     interception_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
+
 class TeamCoverageSchemeStats(models.Model):
     team = models.OneToOneField(
         Team,
         on_delete=models.CASCADE,
         related_name='team_coverage_rates',
         null=False)
-    
+
     man_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     zone_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     middle_closed_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     middle_open_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+
 
 class TeamOffensePlayCallingStats(models.Model):
     team = models.OneToOneField(
@@ -266,6 +277,7 @@ class TeamOffensePlayCallingStats(models.Model):
     shotgun_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     nohuddle_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
+
 class TeamCoverageStatsByPosition(models.Model):
     team = models.OneToOneField(
         Team,
@@ -279,6 +291,7 @@ class TeamCoverageStatsByPosition(models.Model):
     yards_allowed_outside = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     yards_allowed_slot = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
+
 class PointSpread(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='point_spread', null=False)
     display_name = models.CharField(max_length=255, blank=True, default="")
@@ -290,6 +303,7 @@ class PointSpread(models.Model):
     class Meta:
         unique_together = ('team', 'display_name')
 
+
 class Moneyline(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='moneyline', null=False)
     display_name = models.CharField(max_length=255, blank=True, default="")
@@ -298,6 +312,7 @@ class Moneyline(models.Model):
 
     class Meta:
         unique_together = ('team', 'display_name')
+
 
 class Total(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='total', null=False)
@@ -309,6 +324,7 @@ class Total(models.Model):
 
     class Meta:
         unique_together = ('team', 'display_name')
+
 
 class TeamRankSnapshot(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE, related_name='rank_snapshot')
@@ -325,7 +341,7 @@ class TeamRankSnapshot(models.Model):
     off_receptions_rank = models.IntegerField(default=0)
     off_rec_yards_rank = models.IntegerField(default=0)
     off_rec_tds_rank = models.IntegerField(default=0)
-    
+
     def_pass_yards_rank = models.IntegerField(default=0)
     def_pass_tds_rank = models.IntegerField(default=0)
     def_pass_rating_rank = models.IntegerField(default=0)

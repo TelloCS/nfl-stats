@@ -6,7 +6,7 @@ from django.db.models import F, Window
 from django.db.models.functions import DenseRank
 from django.core.cache import cache
 from .models import (
-    Team, TeamRankSnapshot, 
+    TeamRankSnapshot,
     TeamOffensePassingStats, TeamOffenseRushingStats, TeamOffenseReceivingStats,
     TeamDefensePassingStats, TeamDefenseRushingStats, TeamDefenseReceivingStats,
     TeamAdvanceOffenseStats, TeamAdvanceDefenseStats, TeamCoverageSchemeStats,
@@ -14,6 +14,7 @@ from .models import (
 )
 
 logger = get_task_logger(__name__)
+
 
 @shared_task
 def weekly_nfl_sync():
@@ -23,29 +24,27 @@ def weekly_nfl_sync():
         with transaction.atomic():
             main()
             logger.info("Main pipeline finished successfully")
-        
+
         update_team_rank_snapshots.delay()
         logger.info("Triggered follow-up rank update task")
 
     except Exception as e:
         logger.error(f"Scheduled task failed: {e}")
 
+
 @shared_task
 def update_team_rank_snapshots():
     """
-    Calculates ranks and updates TeamRankSnapshot. 
+    Calculates ranks and updates TeamRankSnapshot.
     Annotation keys MUST match the TeamRankSnapshot field names exactly.
     """
-    
-    # Helpers for clean ranking
-    def rank_desc(field): 
+
+    def rank_desc(field):
         return Window(expression=DenseRank(), order_by=F(field).desc())
-    
-    def rank_asc(field): 
+
+    def rank_asc(field):
         return Window(expression=DenseRank(), order_by=F(field).asc())
 
-    # --- 1. Calculate Ranks for Each Category ---
-    
     # Offense Passing
     off_pass = TeamOffensePassingStats.objects.annotate(
         off_pass_yards_rank=rank_desc('pass_yards'),
@@ -94,16 +93,20 @@ def update_team_rank_snapshots():
         off_expected_points_added_per_play_rank=rank_desc('expected_points_added_per_play'),
         off_expected_points_added_per_pass_rank=rank_desc('expected_points_added_per_pass'),
         off_expected_points_added_per_rush_rank=rank_desc('expected_points_added_per_rush')
-    ).values('team_id', 'off_expected_points_added_per_play_rank', 
-             'off_expected_points_added_per_pass_rank', 'off_expected_points_added_per_rush_rank')
+    ).values(
+        'team_id', 'off_expected_points_added_per_play_rank',
+        'off_expected_points_added_per_pass_rank', 'off_expected_points_added_per_rush_rank'
+    )
 
     # Advanced Defense
     adv_def = TeamAdvanceDefenseStats.objects.annotate(
         def_expected_points_added_per_play_rank=rank_asc('expected_points_added_per_play'),
         def_expected_points_added_allowed_per_pass_rank=rank_asc('expected_points_added_allowed_per_pass'),
         def_expected_points_added_allowed_per_rush_rank=rank_asc('expected_points_added_allowed_per_rush')
-    ).values('team_id', 'def_expected_points_added_per_play_rank', 
-             'def_expected_points_added_allowed_per_pass_rank', 'def_expected_points_added_allowed_per_rush_rank')
+    ).values(
+        'team_id', 'def_expected_points_added_per_play_rank',
+        'def_expected_points_added_allowed_per_pass_rank', 'def_expected_points_added_allowed_per_rush_rank'
+    )
 
     # Coverage Scheme
     cov_scheme = TeamCoverageSchemeStats.objects.annotate(
@@ -128,8 +131,10 @@ def update_team_rank_snapshots():
         yards_allowed_rb_rank=rank_asc('yards_allowed_rb'),
         yards_allowed_outside_rank=rank_asc('yards_allowed_outside'),
         yards_allowed_slot_rank=rank_asc('yards_allowed_slot')
-    ).values('team_id', 'yards_allowed_wr_rank', 'yards_allowed_te_rank', 'yards_allowed_rb_rank', 
-             'yards_allowed_outside_rank', 'yards_allowed_slot_rank')
+    ).values(
+        'team_id', 'yards_allowed_wr_rank', 'yards_allowed_te_rank', 'yards_allowed_rb_rank',
+        'yards_allowed_outside_rank', 'yards_allowed_slot_rank'
+    )
 
     master_data = {}
 
@@ -141,7 +146,6 @@ def update_team_rank_snapshots():
             stats_only = {k: v for k, v in item.items() if k != 'team_id'}
             master_data[tid].update(stats_only)
 
-    # Execute merges
     merge_results(off_pass)
     merge_results(off_rush)
     merge_results(off_rec)

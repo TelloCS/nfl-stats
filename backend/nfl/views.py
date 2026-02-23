@@ -4,7 +4,12 @@ from django.views.decorators.cache import cache_page
 from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
-from .models import *
+from .models import (
+    Team,
+    Player,
+    PlayerGameStats,
+    Game
+)
 from .pagination import PlayerGameStatsMatchupsPagination
 from .serializers import (
     TeamSerializer,
@@ -17,10 +22,10 @@ from .serializers import (
 )
 from .filters import (
     PlayerFilter,
-    PlayerMatchupsFilter,
-    UpcomingGameFilter
+    PlayerMatchupsFilter
 )
 from .mixins import KeyBasedCacheMixin
+
 
 class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
     queryset = Team.objects.all()
@@ -45,7 +50,8 @@ class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
         data = {"teams": serializer.data}
         self.store_in_cache(request, data)
         return Response(data)
-          
+
+
 class PlayerListAPIView(generics.ListAPIView):
     queryset = Player.objects.all()
     serializer_class = PlayerSerializer
@@ -58,10 +64,11 @@ class PlayerListAPIView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-        
+
         return Response({
             'players': serializer.data
         })
+
 
 class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIView):
     queryset = Player.objects.all()
@@ -86,6 +93,7 @@ class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIVie
         self.store_in_cache(request, response.data)
         return Response(response.data)
 
+
 class TeamStatsListView(KeyBasedCacheMixin, generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamStatsSerializer
@@ -106,12 +114,13 @@ class TeamStatsListView(KeyBasedCacheMixin, generics.ListAPIView):
         self.store_in_cache(request, data)
         return Response(data)
 
+
 class TeamRanksListView(KeyBasedCacheMixin, generics.ListAPIView):
     queryset = Team.objects.select_related('rank_snapshot').all()
     serializer_class = TeamRanksSerializer
     pagination_class = None
     cache_timeout = 60 * 60 * 24
-    
+
     def get_cache_key(self, request):
         cache_key = 'team_ranks'
         return cache_key
@@ -126,6 +135,7 @@ class TeamRanksListView(KeyBasedCacheMixin, generics.ListAPIView):
         self.store_in_cache(request, data)
         return Response(data)
 
+
 class PlayerGameStatsMatchupsListView(generics.ListAPIView):
     queryset = PlayerGameStats.objects.select_related('player', 'game', 'player__team')
     serializer_class = PlayerGameStatsMatchupsSerializer
@@ -138,17 +148,15 @@ class PlayerGameStatsMatchupsListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+
 class EventListView(KeyBasedCacheMixin, generics.ListAPIView):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
     pagination_class = None
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = UpcomingGameFilter
     cache_timeout = 60 * 60 * 24
 
     def get_cache_key(self, request):
-        cache_key = 'event_list'
-        return cache_key
+        return "events_list:latest"
 
     @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
@@ -156,7 +164,33 @@ class EventListView(KeyBasedCacheMixin, generics.ListAPIView):
         if cached_data:
             return Response(cached_data)
 
-        response = super().list(request, *args, **kwargs)
-        data = response.data
+        target_game = Game.objects.exclude(status__icontains='Final').order_by('date').first()
+        status_label = 'Scheduled'
+
+        if not target_game:
+            target_game = Game.objects.filter(status__icontains='Final').order_by('-date').first()
+            status_label = 'Final'
+
+        if not target_game:
+            return Response({'meta': {}, 'games': []})
+
+        queryset = Game.objects.filter(
+            season_year=target_game.season_year,
+            season_type=target_game.season_type,
+            week=target_game.week
+        ).order_by('date')
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = {
+            'meta': {
+                'week': target_game.week,
+                'season_year': target_game.season_year,
+                'season_type': target_game.season_type,
+                'status': status_label
+            },
+            'games': serializer.data
+        }
+
         self.store_in_cache(request, data)
         return Response(data)

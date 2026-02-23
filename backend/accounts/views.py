@@ -11,8 +11,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth import get_user_model
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
 
 class UserProfileView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -21,11 +24,12 @@ class UserProfileView(APIView):
         serializer = UserInfoSerializer(request.user)
         return Response(serializer.data)
 
+
 @method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='dispatch')
 @method_decorator(csrf_protect, name='dispatch')
 class SignUpView(APIView):
     permission_classes = (AllowAny,)
-    
+
     def post(self, request):
         data = request.data
         email = data.get('email')
@@ -35,7 +39,7 @@ class SignUpView(APIView):
 
         if p1 != p2:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         validator = UnicodeUsernameValidator()
         try:
             validator(username)
@@ -58,8 +62,9 @@ class SignUpView(APIView):
             )
             return Response({'success': 'User created'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            print(f"Signup Error: {e}")
+            logger.exception(f"Signup Error: {e}")
             return Response({'error': 'Something went wrong creating account'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='dispatch')
 @method_decorator(csrf_protect, name='dispatch')
@@ -69,34 +74,38 @@ class LoginView(APIView):
     def post(self, request):
         if getattr(request, 'ratelimited', False):
             return Response(
-                {'error': 'Too many login attempts. Please try again later.'}, 
+                {'error': 'Too many login attempts. Please try again later.'},
                 status=status.HTTP_429_TOO_MANY_REQUESTS
             )
 
         if request.user.is_authenticated:
             return Response({'error': 'Already logged in'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         data = request.data
         email = data.get('email')
         password = data.get('password')
 
         try:
             user = authenticate(request=request, username=email, password=password)
-            
+
             if user is not None:
                 login(request=request, user=user)
-                return Response({'success': 'Logged in' })
+                return Response({'success': 'Logged in'})
             return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
-        except:
+        except Exception as e:
+            logger.exception(f"Logging in error: {e}")
             return Response({'error': 'Something went wrong when logging in'})
+
 
 class LogoutView(APIView):
     def post(self, request):
         try:
             logout(request=request)
             return Response({"success": "Logged out successfully"})
-        except:
+        except Exception as e:
+            logger.exception(f"Logging out error: {e}")
             return Response({"error": "Something went wrong when logging out"})
+
 
 class DeleteAccountView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -106,7 +115,8 @@ class DeleteAccountView(APIView):
             user = request.user
             User.objects.filter(id=user.id).delete()
             return Response({'success': 'Account deleted'}, status=status.HTTP_204_NO_CONTENT)
-        except:
+        except Exception as e:
+            logger.exception(f"Deleting user error: {e}")
             return Response({'error': 'Something went wrong when trying to delete user'})
 
 

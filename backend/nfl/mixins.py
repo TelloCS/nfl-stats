@@ -1,5 +1,6 @@
 from django.core.cache import cache
 
+
 class KeyBasedCacheMixin:
     cache_timeout = 60 * 60
 

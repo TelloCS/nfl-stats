@@ -6,6 +6,7 @@ from .models import Team, Player, Game, PlayerGameStats, TeamOffensePassingStats
 
 POSITIONS = ['QB', 'RB', 'WR', 'TE']
 
+
 class TeamFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Team
@@ -20,6 +21,7 @@ class TeamFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def slug(self):
         return slugify(self.full_name)
+
 
 class PlayerFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -40,6 +42,7 @@ class PlayerFactory(factory.django.DjangoModelFactory):
     def slug(self):
         return slugify(self.full_name)
 
+
 class GameFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Game
@@ -56,13 +59,14 @@ class GameFactory(factory.django.DjangoModelFactory):
     status = "Final"
     event = factory.Sequence(lambda n: f"event_{n}")
 
+
 class PlayerGameStatsFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PlayerGameStats
 
     player = factory.SubFactory(PlayerFactory)
     game = factory.SubFactory(GameFactory)
-    
+
     games_played = 1
     is_starter = factory.Faker('boolean')
     pass_attempts = factory.Faker('random_int', min=20, max=50)
@@ -70,6 +74,7 @@ class PlayerGameStatsFactory(factory.django.DjangoModelFactory):
     pass_yards = factory.Faker('random_int', min=150, max=400)
     pass_touchdowns = factory.Faker('random_int', min=0, max=4)
     interceptions = factory.Faker('random_int', min=0, max=2)
+
 
 class TeamOffensePassingStatsFactory(factory.django.DjangoModelFactory):
     class Meta:
