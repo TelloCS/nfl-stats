@@ -4,7 +4,8 @@ export default function createTeamStatsRanksQueryOptions() {
     return queryOptions({
         queryKey: ['teamStatsRanks'],
         queryFn : getTeamStatsRanks,
-        retry: false
+        retry: false,
+        refetchOnWindowFocus: false
     })
 }
 

@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.utils.cache import patch_cache_control
 
 
 class KeyBasedCacheMixin:
@@ -14,3 +15,10 @@ class KeyBasedCacheMixin:
     def store_in_cache(self, request, data):
         key = self.get_cache_key(request)
         cache.set(key, data, self.cache_timeout)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(request, response, *args, **kwargs)
+
+        if request.method == 'GET' and response.status_code == 200:
+            patch_cache_control(response, public=True, max_age=self.cache_timeout)
+        return response
