@@ -116,7 +116,7 @@ class TeamStatsListView(KeyBasedCacheMixin, generics.ListAPIView):
 
 
 class TeamRanksListView(KeyBasedCacheMixin, generics.ListAPIView):
-    queryset = Team.objects.select_related('rank_snapshot').all()
+    queryset = Team.objects.select_related('rank_snapshot')
     serializer_class = TeamRanksSerializer
     pagination_class = None
     cache_timeout = 60 * 60 * 24

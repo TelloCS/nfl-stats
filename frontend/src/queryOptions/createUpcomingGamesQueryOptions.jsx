@@ -4,7 +4,8 @@ export default function createUpcomingGamesQueryOptions(){
     return queryOptions({
         queryKey: ['upcomingGames'],
         queryFn : () => getUpcomingGames(),
-        retry: false
+        retry: false,
+        refetchOnWindowFocus: false
     })
 }
 

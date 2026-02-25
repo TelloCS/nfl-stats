@@ -4,7 +4,8 @@ export default function createTeamsQueryOptions() {
     return queryOptions({
         queryKey: ['teams'],
         queryFn : getTeams,
-        retry: false
+        retry: false,
+        refetchOnWindowFocus: false
     })
 }
 

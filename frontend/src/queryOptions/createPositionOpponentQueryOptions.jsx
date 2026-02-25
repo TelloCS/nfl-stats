@@ -16,7 +16,8 @@ export default function createPositionOpponentQueryOptions(position, opponent, s
             }
             return undefined;
         },
-        retry: false
+        retry: false,
+        refetchOnWindowFocus: false
     })
 }
 
