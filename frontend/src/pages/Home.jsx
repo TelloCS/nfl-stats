@@ -4,8 +4,8 @@ import { ChartColumn, Shield, Users } from 'lucide-react';
 export default function Home() {
   return (
     <div className="relative min-h-[calc(100vh-80px)] bg-white flex flex-col justify-center overflow-hidden">
-      <div className="container mx-auto p-10 relative z-10 mb-12">
-        <div className="max-w-3xl">
+      <div className="container mx-auto p-10 relative z-10 mb-12 flex flex-col">
+        <div className="mx-auto justify-center flex flex-col">
           <h1 className="text-4xl md:text-4xl font-bold text-neutral-900 mb-6 tracking-tight leading-tight">
             Advanced NFL Analytics & Stats
           </h1>

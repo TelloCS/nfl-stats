@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../actions/authentication";
@@ -12,6 +12,16 @@ export default function Layout() {
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const handleChange = (e) => {
+      if (e.matches) setIsMenuOpen(false);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -48,51 +58,53 @@ export default function Layout() {
                     <Link to="/login" className="text-white bg-neutral-900 rounded-full text-sm py-3 px-5 hover:underline font-bold">Log in</Link>
                   </div>
                 )}
-                <button 
+                <button
                   className="lg:hidden"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
-                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                  {isMenuOpen
+                    ? <X size={24} className="bg-gray-50 rounded-sm hover:bg-neutral-200 cursor-pointer" />
+                    : <Menu size={24} className="cursor-pointer" />}
                 </button>
               </div>
             </div>
           </nav>
         </div>
-        
+
         {isMenuOpen && (
-          <div className="bg-neutral-900 border-b border-neutral-200 absolute w-full left-0 top-[80px] z-40 px-8 py-6 flex flex-col gap-4 h-[calc(100vh-80px)]">
-            <Link 
-              to="/position-vs-opponent" 
-              className="text-white font-semibold text-lg hover:text-emerald-400 transition-colors"
+          <div className="lg:hidden bg-white border-b border-neutral-200 absolute w-full left-0 top-[80px] z-40 px-8 py-6 flex flex-col gap-4">
+            <Link
+              to="/position-vs-opponent"
+              className="font-semibold text-lg hover:underline"
               onClick={() => setIsMenuOpen(false)}
             >
               Position vs Opponent
             </Link>
-            <Link 
-              to="/team/stats" 
-              className="text-white font-semibold text-lg hover:text-emerald-400 transition-colors"
+            <Link
+              to="/team/stats"
+              className="font-semibold text-lg hover:underline"
               onClick={() => setIsMenuOpen(false)}
             >
               Team Stats
             </Link>
-            
+
             {!user && (
-               <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-neutral-800">
-                  <Link 
-                    to="/login" 
-                    className="text-white font-bold hover:text-emerald-400 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Log in
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    className="bg-neutral-900 rounded-lg font-bold text-center py-3 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign up
-                  </Link>
-               </div>
+              <div className="flex flex-col gap-4">
+                <Link
+                  to="/login"
+                  className="font-semibold text-lg hover:underline"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="font-semibold text-lg hover:underline"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign up
+                </Link>
+              </div>
             )}
           </div>
         )}
