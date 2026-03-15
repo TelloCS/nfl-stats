@@ -39,6 +39,7 @@ jobs:
       run:
         working-directory: ./backend
     env:
+      DJANGO_SETTINGS_MODULE: backend.settings.local
       DB_HOST: localhost
       DB_NAME: nfl
       DB_USER: nfl
