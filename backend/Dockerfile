@@ -23,12 +23,12 @@ EXPOSE 8000
 #######################################################################
 FROM python AS dev
 
+ENV DJANGO_SETTINGS_MODULE=backend.settings.local
+
 COPY --chown=nfl:nfl . .
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
-
-RUN chown -R nfl:nfl /app
 
 USER nfl
 
@@ -37,12 +37,12 @@ CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 #######################################################################
 FROM python AS prod
 
+ENV DJANGO_SETTINGS_MODULE=backend.settings.production
+
 COPY --chown=nfl:nfl . .
 RUN chmod +x entrypoint.prod.sh
 
 ENTRYPOINT ["./entrypoint.prod.sh"]
-
-RUN chown -R nfl:nfl /app
 
 USER nfl
 

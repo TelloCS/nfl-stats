@@ -77,6 +77,7 @@ class Game(models.Model):
 class PlayerGameStats(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='stats', null=False)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='game', null=False)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players')
 
     games_played = models.IntegerField(default=0)
     is_starter = models.BooleanField(default=False)

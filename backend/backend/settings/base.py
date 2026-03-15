@@ -10,28 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from dotenv import load_dotenv
-from datetime import timedelta
-import os
-
-load_dotenv()
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'not-secret-key-for-testing')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', True)
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'http://127.0.0.1:8000').split(' ')
-
+env_path = BASE_DIR.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # Application definition
 
@@ -141,7 +129,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static", 
+    BASE_DIR / "static",
 ]
 
 MEDIA_URL = '/media/'
@@ -170,15 +158,19 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
-SESSION_COOKIE_DOMAIN = None  # Set to '.yourdomain.com' in production
+# Set to '.yourdomain.com' in production
+SESSION_COOKIE_DOMAIN = None
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False # False for Localhost
+
+# False for Localhost
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False  # False for Localhost
+
+# False for Localhost
+CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", 'http://localhost:5173').split(' ')
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
@@ -188,7 +180,6 @@ USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", 'http://localhost:5173').split(' ')
 
 # Celery Config
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
@@ -196,12 +187,14 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0
 CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Chicago')
 
 # Celery Beat Schedule
-from celery.schedules import crontab
-
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=0, hour=14, minute=15),
+        'schedule': crontab(day_of_week=6, hour=12, minute=14),
+    },
+    'refresh-nfl-schedule-every-minute': {
+        'task': 'nfl.tasks.update_nfl_cache_task',
+        'schedule': 60.0,
     },
 }
 

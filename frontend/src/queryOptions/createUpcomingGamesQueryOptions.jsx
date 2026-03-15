@@ -11,6 +11,6 @@ export default function createUpcomingGamesQueryOptions(){
 
 const getUpcomingGames = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    const response = await fetch('/nfl/events/');
+    const response = await fetch('/nfl/schedule/');
     return response.json()
 }

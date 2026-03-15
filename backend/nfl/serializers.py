@@ -275,10 +275,52 @@ class TeamRanksSerializer(serializers.ModelSerializer):
 #######################################################################################################################
 
 
+class PlayerOnlySerializer(serializers.ModelSerializer):
+    fullName = serializers.CharField(source='full_name')
+
+    class Meta:
+        model = Player
+        fields = ['id', 'slug', 'fullName', 'position']
+
+
 class PlayerGameStatsMatchupsSerializer(serializers.ModelSerializer):
-    player = PlayerSerializer(read_only=True)
+    player = PlayerOnlySerializer(read_only=True)
     game = GameSerializer(read_only=True)
+    team = TeamSerializer(read_only=True)
 
     class Meta:
         model = PlayerGameStats
         fields = ("__all__")
+
+#######################################################################################################################
+
+
+class TeamSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    abbreviation = serializers.CharField()
+    displayName = serializers.CharField()
+    color = serializers.CharField(required=False, allow_null=True)
+
+
+class CompetitorSerializer(serializers.Serializer):
+    homeAway = serializers.CharField()
+    score = serializers.CharField()
+    winner = serializers.BooleanField(required=False, allow_null=True)
+    team = TeamSerializer()
+
+
+class CompetitionSerializer(serializers.Serializer):
+    competitors = CompetitorSerializer(many=True)
+
+
+class EventSerializer(serializers.Serializer):
+    date = serializers.DateTimeField()
+    name = serializers.CharField()
+    status = serializers.DictField()
+    competitions = CompetitionSerializer(many=True)
+
+
+class NFLScheduleSerializer(serializers.Serializer):
+    season = serializers.DictField(required=False)
+    week = serializers.DictField(required=False)
+    events = EventSerializer(many=True)

@@ -1,5 +1,7 @@
+import requests
 from celery import shared_task
 from .services.services import main
+from .services.nfl_service import weekly_schedule
 from celery.utils.log import get_task_logger
 from django.db import transaction
 from django.db.models import F, Window
@@ -180,3 +182,22 @@ def update_team_rank_snapshots():
 
     except Exception as e:
         logger.error(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
+
+
+@shared_task(
+    name="nfl.tasks.update_nfl_cache_task",
+    autoretry_for=(requests.exceptions.RequestException, ValueError),
+    retry_kwargs={'max_retries': 3},
+    retry_backoff=True,
+    retry_backoff_max=30
+)
+def update_nfl_cache_task():
+    logger.info("Starting NFL Schedule cache refresh...")
+
+    data = weekly_schedule(force_refresh=True)
+
+    if not data:
+        raise ValueError("NFL API returned empty data; forcing a retry.")
+
+    logger.info("NFL background refresh successful.")
+    return True

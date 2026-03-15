@@ -50,7 +50,8 @@ export default function SearchBar() {
   return (
     <div className="relative w-full sm:w-64">
       <input
-        className="bg-white block w-full p-2.5 pl-4 text-sm rounded-full border-2 border-neutral-200 focus:outline-none focus:ring-1 focus:ring-neutral-200 transition duration-150"
+        className="bg-neutral-900 block w-full p-2.5 pl-4 text-sm rounded-lg border-1 border-neutral-800
+        focus:outline-none"
         type="text"
         placeholder="Search player name..."
         value={input}
@@ -64,7 +65,7 @@ export default function SearchBar() {
 
       {showResults && displayResults.length > 0 && (
         <div
-          className="absolute z-10 w-full mt-1 bg-white overflow-hidden border-2 border-neutral-200 rounded-lg shadow-lg"
+          className="absolute z-10 w-full mt-1 overflow-hidden border-1 border-neutral-800 rounded-lg"
           role="listbox"
         >
           {displayResults.map((r, index) => (
@@ -78,7 +79,7 @@ export default function SearchBar() {
               }}
               role="option"
               aria-selected={index === selectedIndex}
-              className={`block p-3 text-sm border-b last:border-0 border-neutral-100 transition-colors ${index === selectedIndex ? "bg-gray-100" : "bg-white hover:bg-gray-100"
+              className={`bg-neutral-800 block p-3 text-sm border-b last:border-0 border-neutral-800 transition-colors ${index === selectedIndex ? "bg-hover:bg-neutral-800" : "bg-neutral-900 hover:hover:bg-neutral-800"
                 }`}
             >
               {r.fullName}

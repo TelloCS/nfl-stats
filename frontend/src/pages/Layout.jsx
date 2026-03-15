@@ -3,7 +3,7 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../actions/authentication";
 import { useUser } from "../hooks/useUser";
-import { ChartColumn, Menu, X } from 'lucide-react';
+import { House , Menu, X } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
 
@@ -32,18 +32,20 @@ export default function Layout() {
     onError: () => alert("Failed to logout. Please try again.")
   });
 
-  if (isLoading) return <div className="h-[60px] bg-white border-b border-neutral-200" />;
+  if (isLoading) return <div className="h-[80px] bg-neutral-950 border-b border-neutral-800" />;
 
   return (
     <>
-      <div className="bg-gray-50 text-bg-neutral-900 sticky top-0 z-50 border-b border-neutral-200">
+      <div className="bg-[#000000] text-white sticky top-0 z-50 border-b border-neutral-800">
         <div className="container mx-auto max-w-full h-[80px]">
-          <nav className="flex h-full px-8 items-center justify-between">
+          <nav className="flex h-full px-4 md:px-8 items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link to="/"><ChartColumn size={32} /></Link>
+              <Link to="/" className="hover:text-emerald-400 transition-colors">
+                <House size={32} />
+              </Link>
               <ul className="hidden lg:flex items-center justify-center gap-6 font-semibold">
-                <li><Link to="/position-vs-opponent" className="hover:underline">Position vs Opponent</Link></li>
-                <li><Link to="/team/stats" className="hover:underline">Team Stats</Link></li>
+                <li><Link to="/position-vs-opponent" className="hover:text-emerald-400 hover:underline transition-colors">Position vs Opponent</Link></li>
+                <li><Link to="/team/stats" className="hover:text-emerald-400 hover:underline transition-colors">Team Stats</Link></li>
               </ul>
             </div>
 
@@ -54,52 +56,54 @@ export default function Layout() {
                   <UserDropdown user={user} onLogout={() => logoutMutation.mutate()} />
                 ) : (
                   <div className="hidden lg:flex items-center gap-4">
-                    <Link to="/signup" className="text-sm hover:underline font-bold">Sign up</Link>
-                    <Link to="/login" className="text-white bg-neutral-900 rounded-full text-sm py-3 px-5 hover:underline font-bold">Log in</Link>
+                    <Link to="/signup" className="text-sm text-white hover:text-neutral-200 hover:underline font-bold transition-colors">Sign up</Link>
+                    <Link to="/login" className="text-[#000000] bg-white rounded-full text-sm py-2.5 px-5 hover:bg-neutral-200 font-bold transition-colors">Log in</Link>
                   </div>
                 )}
                 <button
-                  className="lg:hidden"
+                  className="lg:hidden text-neutral-300 hover:text-white"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                   {isMenuOpen
-                    ? <X size={24} className="bg-gray-50 rounded-sm hover:bg-neutral-200 cursor-pointer" />
+                    ? <X size={24} className="bg-neutral-800 rounded-sm hover:bg-neutral-700 cursor-pointer p-0.5" />
                     : <Menu size={24} className="cursor-pointer" />}
                 </button>
               </div>
             </div>
           </nav>
         </div>
+        
 
+        {/* Mobile */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-neutral-200 absolute w-full left-0 top-[80px] z-40 px-8 py-6 flex flex-col gap-4">
+          <div className="lg:hidden bg-neutral-900 border-b border-neutral-800 absolute w-full left-0 top-[80px] z-40 px-8 py-6 flex flex-col gap-4">
             <Link
               to="/position-vs-opponent"
-              className="font-semibold text-lg hover:underline"
+              className="font-semibold text-lg text-neutral-200 hover:text-emerald-400 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Position vs Opponent
             </Link>
             <Link
               to="/team/stats"
-              className="font-semibold text-lg hover:underline"
+              className="font-semibold text-lg text-neutral-200 hover:text-emerald-400 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Team Stats
             </Link>
 
             {!user && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 pt-4 border-t border-neutral-800 mt-2">
                 <Link
                   to="/login"
-                  className="font-semibold text-lg hover:underline"
+                  className="font-semibold text-lg text-neutral-200 hover:text-emerald-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Log in
                 </Link>
                 <Link
                   to="/signup"
-                  className="font-semibold text-lg hover:underline"
+                  className="font-semibold text-lg text-neutral-200 hover:text-emerald-400 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign up

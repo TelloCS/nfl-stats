@@ -48,18 +48,18 @@ export default function Register() {
     navigate('/');
   };
 
-  const inputClasses = "block w-full p-2.5 pl-10 text-sm text-gray-900 border border-neutral-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent transition-all duration-200";
+  const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex flex-col items-center justify-center bg-[#000000] py-12 px-4 sm:px-6 lg:px-8'>
       <CSRFToken />
 
-      <div className='w-full max-w-[400px] bg-white border border-neutral-200 p-8 rounded-3xl shadow-sm'>
+      <div className='w-full max-w-[400px] bg-neutral-900 border border-neutral-800 p-8 rounded-3xl'>
         <div className='flex flex-col items-center text-center pb-8'>
-          <div className='bg-neutral-100 p-3 rounded-2xl mb-4'>
-            <UserPlus size={28} className="text-neutral-700" />
+          <div className='bg-neutral-900 p-3 rounded-2xl mb-4 border border-neutral-800'>
+            <UserPlus size={28} className="text-neutral-400" />
           </div>
-          <h1 className='text-2xl font-bold text-neutral-800'>Create Account</h1>
+          <h1 className='text-2xl font-bold text-white'>Create Account</h1>
         </div>
 
         <form onSubmit={onSubmit} className='space-y-4'>
@@ -127,7 +127,8 @@ export default function Register() {
           </div>
 
           <button
-            className='w-full py-2.5 px-4 text-sm font-medium text-white bg-neutral-900 rounded-lg hover:bg-neutral-800 focus:ring-4 focus:outline-none focus:ring-neutral-300 transition-colors disabled:opacity-70 disabled:cursor-not-allowed mt-2'
+            className='w-full py-2.5 px-4 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-lg
+            hover:bg-emerald-500 hover:border-emerald-500 transition-colors mt-2'
             type='submit'
             disabled={registerMutation.isPending}
           >
@@ -143,25 +144,26 @@ export default function Register() {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-neutral-200"></div>
+            <div className="w-full border-t border-neutral-800"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-neutral-500">or</span>
+            <span className="px-2 bg-neutral-900 text-neutral-400">or</span>
           </div>
         </div>
 
         <button
           onClick={handleGuestAccess}
-          className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 focus:ring-4 focus:outline-none focus:ring-neutral-100 transition-colors'
+          className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-400 bg-neutral-900 border border-neutral-800
+          rounded-lg hover:bg-neutral-800 hover:text-white transition-colors'
         >
           Continue as Guest
         </button>
 
-        <p className='text-center text-sm text-neutral-500 mt-6'>
+        <p className='text-center text-sm text-white mt-6'>
           Already have an account?{' '}
           <span
             onClick={() => navigate('/login')}
-            className='font-semibold text-neutral-900 hover:underline cursor-pointer'
+            className='font-semibold text-neutral-400 hover:underline cursor-pointer'
           >
             Log in
           </span>

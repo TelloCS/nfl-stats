@@ -16,7 +16,6 @@ from django.core.cache import cache
 
 load_dotenv()
 logger = logging.getLogger(__name__)
-print(f"DEBUG: My logger name is: {logger.name}")
 
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -235,7 +234,8 @@ class PlayerStats(EndpointGenerator):
     def transform(self, util: list) -> None:
         games_map = {game.event: game for game in models.Game.objects.all()}
         players_map = {player.espn_id: player for player in models.Player.objects.all()}
-        
+        teams_map = {team.abbreviation: team for team in models.Team.objects.all()}
+
         if len(self.raw) != len(util):
             logger.error(f"CRITICAL MISMATCH: Stats Raw ({len(self.raw)}) vs Util ({len(util)}).")
             raise ValueError("Zip alignment failed! Aborting stats transformation.")
@@ -261,8 +261,15 @@ class PlayerStats(EndpointGenerator):
                             continue
                         
                         stats = {name: stat for name, stat in zip(player_data["names"], event["stats"])}
+
+                        team_abbr = player_data['events'].get(event_id, {}).get('team', {}).get('abbreviation')
+                        team_instance = teams_map.get(team_abbr)
+                        if not team_instance:
+                            logger.warning(f"Team {team_abbr} not found in teams_map. Skipping stats for this event.")
+                            continue
                         
                         defaults = {
+                            'team': team_instance,
                             'is_starter': stats.get('isStarter', True),
                             'pass_attempts': self.check(value=stats.get('passingAttempts', 0)),
                             'completions': self.check(value=stats.get('completions', 0)),
@@ -296,7 +303,6 @@ class PlayerStats(EndpointGenerator):
                             'fumbles_lost': self.check(value=stats.get('fumblesLost', 0)),
                             'games_played': games_played,
                         }
-                        self.res.append(defaults)
 
                         _, created = models.PlayerGameStats.objects.update_or_create(
                             player=player_instance,
@@ -308,6 +314,8 @@ class PlayerStats(EndpointGenerator):
                             logger.info(f"CREATED: PLAYER_STATS {str(u['full_name']).upper()}")
                         else:
                             logger.debug(f"UPDATED: PLAYER_STATS {str(u['full_name']).upper()}")
+        
+        self.raw.clear()
 
     def to_df(self) -> None:
         print(pd.DataFrame(self.res))
@@ -1044,7 +1052,7 @@ def main():
         "year": 2025,
         "season_type": 2,
         "start_week": 1,
-        "end_week": 6
+        "end_week": 3
     }
 
     # manual_config = None

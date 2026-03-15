@@ -1,13 +1,24 @@
 import { useEffect } from 'react';
-import axios from 'axios';
+import api from '../actions/authentication/';
+
+let hasRequestedToken = false;
 
 const CSRFToken = () => {
   useEffect(() => {
     const ensureCSRFToken = async () => {
-      try {
-        await axios.get('/auth/csrf-cookie');
-      } catch (err) {
-        console.error('CSRF Token fetch failed', err);
+      const cookieName = api.defaults.xsrfCookieName;
+      const cookieExists = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(`${cookieName}=`));
+
+      if (!hasRequestedToken && !cookieExists) {
+        try {
+          hasRequestedToken = true;
+          await api.get('/auth/csrf-cookie');
+          
+        } catch {
+          hasRequestedToken = false;
+        }
       }
     };
 

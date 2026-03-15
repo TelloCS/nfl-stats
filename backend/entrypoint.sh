@@ -11,14 +11,11 @@ then
 
     echo "PostgreSQL started"
 
-    echo "Making initial migrations"
-    python manage.py makemigrations
+    # echo "Making initial migrations"
+    # python manage.py makemigrations
 
     echo "Running migrations..."
     python manage.py migrate
-
-    # echo "Running Django tests..."
-    # python manage.py test
 fi
 
 exec "$@"

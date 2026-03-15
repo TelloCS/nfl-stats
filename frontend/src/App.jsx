@@ -11,7 +11,14 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ErrorPage from './pages/ErrorPage';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+    },
+  },
+});
 
 const router = createBrowserRouter([
   {

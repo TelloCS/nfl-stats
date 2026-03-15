@@ -14,38 +14,32 @@ class PlayerFilter(FilterSet):
         fields = ['fullName']
 
 
-class PlayerStatFilter(FilterSet):
+class PlayerGameLogFilter(FilterSet):
     season_year = NumberFilter(field_name='stats__game__season_year')
     season_type = NumberFilter(field_name='stats__game__season_type')
-    location = ChoiceFilter(choices=[('home', 'Home'), ('away', 'Away')])
 
     class Meta:
         model = Player
-        fields = ('season_year', 'season_type', 'location')
+        fields = ('season_year', 'season_type',)
 
     def filter_queryset(self, queryset):
-        year = self.request.query_params.get('season_year')
-        stype = self.request.query_params.get('season_type')
-        loc = self.request.query_params.get('location')
+        year = self.form.cleaned_data.get('season_year')
+        s_type = self.form.cleaned_data.get('season_type')
 
-        stats_filter = PlayerGameStats.objects.select_related('game')
+        stats_qs = PlayerGameStats.objects.select_related(
+            'game',
+            'game__homeTeam',
+            'game__awayTeam'
+        )
 
-        if any([year, stype, loc]):
-            if year:
-                stats_filter = stats_filter.filter(game__season_year=year)
+        if year is not None:
+            stats_qs = stats_qs.filter(game__season_year=year)
+        if s_type is not None:
+            stats_qs = stats_qs.filter(game__season_type=s_type)
 
-            if stype:
-                stats_filter = stats_filter.filter(game__season_type=stype)
-
-            if loc == 'home':
-                stats_filter = stats_filter.filter(player__team=F('game__homeTeam'))
-            elif loc == 'away':
-                stats_filter = stats_filter.filter(player__team=F('game__awayTeam'))
-
-            return queryset.prefetch_related(
-                Prefetch('stats', queryset=stats_filter)
-            ).distinct()
-        return queryset
+        return queryset.prefetch_related(
+            Prefetch('stats', queryset=stats_qs)
+        )
 
 
 class PlayerMatchupsFilter(FilterSet):
@@ -70,11 +64,11 @@ class PlayerMatchupsFilter(FilterSet):
         return queryset.filter(
             Q(game__homeTeam__abbreviation=opponent) |
             Q(game__awayTeam__abbreviation=opponent)
-        ).exclude(player__team__abbreviation=opponent)
+        ).exclude(team__abbreviation=opponent)
 
     def filter_by_location(self, queryset, name, value):
         if value == 'home':
-            return queryset.filter(player__team=F('game__homeTeam'))
+            return queryset.filter(team_id=F('game__homeTeam'))
         elif value == 'away':
-            return queryset.filter(player__team=F('game__awayTeam'))
+            return queryset.filter(team_id=F('game__awayTeam'))
         return queryset

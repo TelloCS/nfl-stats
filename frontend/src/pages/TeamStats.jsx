@@ -1,21 +1,23 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { ChevronUp, ChevronDown } from 'lucide-react';
+
 import { TeamStatMap } from '../components/Config';
 import UpcomingGames from '../components/UpcomingGames';
 import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOptions';
-import useUrlTableSort from '../hooks/useUrlTableSort'
+import useUrlTableSort from '../hooks/useUrlTableSort';
 
 export default function TeamStats() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: teamData } = useQuery(createTeamStatsQueryOptions());
+  const { data: teamData, isLoading } = useQuery(createTeamStatsQueryOptions());
 
   const activeTabKey = searchParams.get("tab") || TeamStatMap[0].key;
 
   const activeTabConfig = useMemo(() =>
     TeamStatMap.find(t => t.key === activeTabKey) || TeamStatMap[0],
-    [activeTabKey]);
+    [activeTabKey]
+  );
 
   const { key: tableKey, stats: columnsToShow } = activeTabConfig;
 
@@ -37,72 +39,107 @@ export default function TeamStats() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-[#000000] text-neutral-200">
       <UpcomingGames />
-      <div className="bg-gray-50 border-b border-neutral-200">
-        <div className="container mx-auto flex px-8 py-4">
-          <div className="flex flex-wrap gap-4 pt-[6px] text-[13px] font-normal">
-            {TeamStatMap.map((tab) => (
-              <button key={tab.key} onClick={() => handleTabChange(tab.key)}
-                className={`cursor-pointer whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors
-                  ${activeTabConfig.key === tab.key
-                    ? 'bg-neutral-800 text-white'
-                    : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-                  }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="container mx-auto flex p-8">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full border-collapse border-spacing-0">
-            <thead className="bg-gray-100 text-neutral-600">
-              <tr>
-                <th className="px-2 border-b border-neutral-200 font-semibold uppercase text-left text-xs h-[40px]">Team</th>
-                {columnsToShow.map((stat) => (
-                  <SortableTh
-                    key={stat.key}
-                    label={stat.label}
-                    sortKey={stat.key}
-                    activeSort={sortConfig}
-                    onClick={() => handleHeaderClick(stat.key)}
-                  />
-                ))}
-              </tr>
-            </thead>
-            <tbody className="">
-              {sortedItems?.map((team, index) => (
-                <tr key={team.id || index} className="hover:bg-gray-50">
-                  <td className="px-2 h-[48px] text-nowrap border-b border-neutral-200 bg-white text-left text-sm">
-                    {team.full_name}
-                  </td>
+      
+      <FilterSection 
+        activeTabKey={activeTabConfig.key} 
+        onTabChange={handleTabChange} 
+      />
 
-                  {columnsToShow.map((stat) => (
-                    <td key={stat.key} className="px-2 h-[48px] text-nowrap border-b border-neutral-200 bg-white text-center text-sm">
-                      {team[tableKey]?.[stat.key] ?? '-'}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="container mx-auto flex flex-col p-4 md:p-8">
+        <ResultsTable 
+          isLoading={isLoading}
+          data={sortedItems}
+          columnsToShow={columnsToShow}
+          tableKey={tableKey}
+          sortConfig={sortConfig}
+          onHeaderClick={handleHeaderClick}
+        />
       </div>
-    </>
-  )
+    </div>
+  );
 }
 
+const FilterSection = memo(({ activeTabKey, onTabChange }) => (
+  <div className="bg-[#000000] border-b border-neutral-800">
+    <div className="container mx-auto flex px-4 md:px-8 py-4 overflow-x-auto hide-scrollbar">
+      <div className="flex flex-nowrap gap-2 pt-1">
+        {TeamStatMap.map((tab) => (
+          <button 
+            key={tab.key} 
+            onClick={() => onTabChange(tab.key)}
+            className={`cursor-pointer whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors
+              ${activeTabKey === tab.key
+                ? 'bg-neutral-800 text-white'
+                : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800 hover:text-neutral-200'
+              }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+));
+
+const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfig, onHeaderClick }) => (
+  <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
+    <table className="w-full border-collapse border-spacing-0 text-left">
+      <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
+        <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3">
+          <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">
+            Team
+          </th>
+          {columnsToShow.map((stat) => (
+            <SortableTh
+              key={stat.key}
+              label={stat.label}
+              sortKey={stat.key}
+              activeSort={sortConfig}
+              onClick={() => onHeaderClick(stat.key)}
+            />
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-neutral-800/50">
+        {isLoading ? (
+          <tr>
+            <td colSpan="100%" className="p-12 text-center text-neutral-500">Loading team data...</td>
+          </tr>
+        ) : data?.length > 0 ? (
+          data.map((team, index) => (
+            <tr key={team.id || index} className="group hover:bg-neutral-800/50 transition duration-150 h-[48px] text-xs text-neutral-300">
+              <td className="px-2 text-nowrap font-medium text-white sticky left-0 bg-neutral-900 group-hover:bg-neutral-800 transition-colors">
+                {team.full_name}
+              </td>
+
+              {columnsToShow.map((stat) => (
+                <td key={stat.key} className="px-2 text-nowrap text-left font-mono text-neutral-200">
+                  {team[tableKey]?.[stat.key] ?? '-'}
+                </td>
+              ))}
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="100%" className="p-12 text-center text-neutral-500">No results found.</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+));
+
 const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
-  <th onClick={onClick} className="px-2 border-b border-neutral-200 font-semibold uppercase text-xs h-[40px] cursor-pointer hover:bg-gray-200 min-w-[90px]">
-    <div className="flex items-center justify-center">
-      <div className="w-4" aria-hidden="true"></div>
-      <span className="flex-1 text-center">{label}</span>
-      <div className="w-4 flex items-center justify-center">
-        {activeSort?.key === sortKey && (
-          activeSort.direction === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+  <th onClick={onClick} className="cursor-pointer hover:text-white transition-colors group">
+    <div className="flex gap-1">
+      <span>{label}</span>
+      <div className="w-3 flex items-center justify-center text-neutral-600 group-hover:text-emerald-500 transition-colors">
+        {activeSort?.key === sortKey ? (
+          activeSort.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+        ) : (
+          <ChevronUp size={14} className="opacity-0 group-hover:opacity-50" />
         )}
       </div>
     </div>
