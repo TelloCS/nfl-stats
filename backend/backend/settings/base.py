@@ -158,28 +158,19 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
-# Set to '.yourdomain.com' in production
-SESSION_COOKIE_DOMAIN = None
-SESSION_COOKIE_SAMESITE = 'Lax'
-
-# False for Localhost
-SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_DOMAIN = None
 
+# default django is false (being explicit)
+CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 
-# False for Localhost
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
+CORS_ALLOW_CREDENTIALS = True
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login'
-
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-CORS_ALLOW_CREDENTIALS = True
 
 # Celery Config
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')

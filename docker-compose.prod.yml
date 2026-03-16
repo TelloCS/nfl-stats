@@ -4,6 +4,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: prod
+    env_file:
+      - .env
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings.production
     volumes:
