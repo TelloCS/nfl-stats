@@ -2,7 +2,7 @@ import random
 import factory
 from django.utils import timezone
 from django.utils.text import slugify
-from .models import Team, Player, Game, PlayerGameStats, TeamOffensePassingStats
+from nfl.models import Team, Player, Game, PlayerGameStats, TeamOffensePassingStats
 
 POSITIONS = ['QB', 'RB', 'WR', 'TE']
 
@@ -66,6 +66,7 @@ class PlayerGameStatsFactory(factory.django.DjangoModelFactory):
 
     player = factory.SubFactory(PlayerFactory)
     game = factory.SubFactory(GameFactory)
+    team = factory.SubFactory(TeamFactory)
 
     games_played = 1
     is_starter = factory.Faker('boolean')
