@@ -30,13 +30,15 @@ class DataIntegrityTest(TestCase):
     def test_unique_stats_per_game(self):
         game = GameFactory()
         player = PlayerFactory(team=game.homeTeam)
+        team = TeamFactory()
 
-        PlayerGameStatsFactory(player=player, game=game, pass_yards=100)
+        PlayerGameStatsFactory(player=player, game=game, team=team, pass_yards=100)
 
         with self.assertRaises(IntegrityError):
             PlayerGameStats.objects.create(
                 player=player,
                 game=game,
+                team=team,
                 pass_yards=50
             )
 
@@ -48,6 +50,7 @@ class StatsLogicTest(TestCase):
         self.assertIsNotNone(stat.player)
         self.assertIsNotNone(stat.game)
         self.assertIsNotNone(stat.game.homeTeam)
+        self.assertIsNotNone(stat.team)
 
         self.assertTrue(stat.completions <= stat.pass_attempts)
 
