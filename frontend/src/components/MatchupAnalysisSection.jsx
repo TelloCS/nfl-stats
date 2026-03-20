@@ -30,7 +30,10 @@ export default function MatchupAnalysisSection({ games, rankingData }) {
   return (
     <div className="bg-neutral-900 p-6 rounded-md border border-neutral-800 h-[550px] flex flex-col">
       <div className="flex justify-between items-center mb-4 min-h-[39px]">
-        <span className="font-semibold text-white text-lg">Matchups</span>
+        <div>
+          <span className="font-semibold text-white text-lg">Matchups</span>
+          <p class="text-xs text-[#a1a1a1] italic">Only Current Season</p>
+        </div>
         
         <SelectDropdown 
           value={selectedGameIndex} 

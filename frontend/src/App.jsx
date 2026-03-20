@@ -14,6 +14,7 @@ import ErrorPage from './pages/ErrorPage';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      retry: false,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5,
     },
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: '/player/stats/id/:player_id/:player_slug/',
+        path: '/player/stats/id/:player_id/:player_slug',
         element: <PlayerDashboard />
       },
       {

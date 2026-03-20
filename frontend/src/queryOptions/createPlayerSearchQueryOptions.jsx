@@ -1,22 +1,17 @@
 import { queryOptions } from "@tanstack/react-query";
+import { apiFetch } from "../utils/apiFetch";
 
 export default function createPlayerSearchQueryOptions(input) {
     return queryOptions({
         queryKey: ["playerSearch", input],
         queryFn : () => getPlayerSearchResults(input),
-        enabled : !!input && input.length >= 2,
+        enabled : !!input && input.length >= 3,
         staleTime: 1000 * 60 * 10,
-        refetchOnWindowFocus: false
+        retry: true,
     })
 }
 
 const getPlayerSearchResults = async (input) => {
-    const response = await fetch("/nfl/players/?fullName=" + input);
-    
-    if (!response.ok) {
-        throw new Error("Failed to fetch players");
-    }
-
-    const json = await response.json();
+    const json = await apiFetch(`/nfl/players/?fullName=${input}`);
     return json?.players || json?.results || json || [];
 }
