@@ -43,10 +43,6 @@ class Endpoint(ABC):
     def transform(self) -> Any:
         pass
 
-    @abstractmethod
-    def to_df(self) -> Any:
-        pass
-
 class EndpointGenerator(Endpoint):
     @abstractmethod
     async def spawn_tasks(self, *args, **kwargs) -> Any:
@@ -217,18 +213,24 @@ class PlayerStats(EndpointGenerator):
         self.raw = []
         self.res = []
 
-    async def spawn_tasks(self, session, player_ids):
+    async def spawn_tasks(self, session, player_ids, season):
         async with TaskGroup() as taskgroup:
             tasks = [
                 taskgroup.create_task(
-                    self.send_api_request(session, player_id)
+                    self.send_api_request(session, player_id, season)
             ) for player_id in player_ids
         ]
         self.raw = [t.result() for t in tasks]
 
-    async def send_api_request(self, session: ClientSession, player_id: str):
-        override_accept = {"Accept": "application/json"}
-        async with session.get(PlayerStats.base_url.format(player_id=player_id), headers=override_accept) as response:
+    async def send_api_request(self, session: ClientSession, player_id: str, season):
+        url = PlayerStats.base_url.format(player_id=player_id)
+        headers = {"Accept": "application/json"}
+
+        params = {}
+        if season:
+            params['season'] = season
+
+        async with session.get(url, headers=headers, params=params) as response:
             return await response.json()
     
     def transform(self, util: list) -> None:
@@ -994,7 +996,7 @@ class NFLPipeline(object):
                     elif isinstance(generator, Players):
                         player_ids = await generator.spawn_tasks(session, team_ids)
                     elif isinstance(generator, PlayerStats):
-                        await generator.spawn_tasks(session, player_ids)
+                        await generator.spawn_tasks(session, player_ids, season=self.year)
 
 def should_pipeline_run() -> dict:
     base_url = os.getenv("EVENTS_URL")
@@ -1049,7 +1051,7 @@ def should_pipeline_run() -> dict:
 
 def main():
     manual_config = {
-        "year": 2025,
+        "year": 2024,
         "season_type": 2,
         "start_week": 1,
         "end_week": 3

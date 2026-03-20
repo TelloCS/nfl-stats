@@ -1,5 +1,5 @@
 from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter
-from django.db.models import Q, F, Prefetch
+from django.db.models import Q, F
 from .models import Player, PlayerGameStats
 
 
@@ -21,25 +21,6 @@ class PlayerGameLogFilter(FilterSet):
     class Meta:
         model = Player
         fields = ('season_year', 'season_type',)
-
-    def filter_queryset(self, queryset):
-        year = self.form.cleaned_data.get('season_year')
-        s_type = self.form.cleaned_data.get('season_type')
-
-        stats_qs = PlayerGameStats.objects.select_related(
-            'game',
-            'game__homeTeam',
-            'game__awayTeam'
-        )
-
-        if year is not None:
-            stats_qs = stats_qs.filter(game__season_year=year)
-        if s_type is not None:
-            stats_qs = stats_qs.filter(game__season_type=s_type)
-
-        return queryset.prefetch_related(
-            Prefetch('stats', queryset=stats_qs)
-        )
 
 
 class PlayerMatchupsFilter(FilterSet):

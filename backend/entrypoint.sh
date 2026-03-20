@@ -11,8 +11,8 @@ then
 
     echo "PostgreSQL started"
 
-    # echo "Making initial migrations"
-    # python manage.py makemigrations
+    echo "Collecting static files..."
+    python manage.py collectstatic --noinput
 
     echo "Running migrations..."
     python manage.py migrate

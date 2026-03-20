@@ -23,7 +23,7 @@ load_dotenv(dotenv_path=env_path)
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -34,10 +34,10 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'accounts',
-    'nfl'
-]
+    'nfl',
+)
 
-MIDDLEWARE = [
+MIDDLEWARE = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -46,7 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+)
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -181,7 +181,7 @@ CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Chicago')
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=6, hour=12, minute=14),
+        'schedule': crontab(day_of_week=2, hour=15, minute=6),
     },
     'refresh-nfl-schedule-every-minute': {
         'task': 'nfl.tasks.update_nfl_cache_task',
