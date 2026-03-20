@@ -99,19 +99,32 @@ class PlayerGameStatsSerializer(serializers.ModelSerializer):
 
 
 class PlayerStatsSerializer(serializers.ModelSerializer):
-    """
-    Creates a player instance that contains stats instance
-    with many games played during the season.
-
-    """
-
-    team = PlayerTeamSerializer(read_only=True)
     fullName = serializers.CharField(source='full_name')
+    team = PlayerTeamSerializer(read_only=True)
     stats = PlayerGameStatsSerializer(many=True, read_only=True)
+    available_seasons = serializers.SerializerMethodField()
+    active_season = serializers.SerializerMethodField()
 
     class Meta:
         model = Player
-        fields = ['id', 'slug', 'fullName', 'position', 'jersey', 'experience', 'team', 'stats']
+        fields = [
+            'id', 'slug', 'fullName', 'position', 'jersey', 'experience',
+            'team', 'available_seasons', 'active_season', 'stats',
+        ]
+
+    def get_available_seasons(self, obj):
+        return (
+            PlayerGameStats.objects.filter(player=obj)
+            .values_list('game__season_year', flat=True)
+            .distinct()
+            .order_by('-game__season_year')
+        )
+
+    def get_active_season(self, obj):
+        prefetched_stats = list(obj.stats.all())
+        if prefetched_stats:
+            return prefetched_stats[0].game.season_year
+        return None
 
 #######################################################################################################################
 
@@ -275,6 +288,16 @@ class TeamRanksSerializer(serializers.ModelSerializer):
 #######################################################################################################################
 
 
+class TeamSlimSerializer(serializers.ModelSerializer):
+    """
+    A version of the Team serializer that does NOT include
+    related odds, preventing N+1 leaks.
+    """
+    class Meta:
+        model = Team
+        fields = ['id', 'slug', 'full_name', 'nickname', 'abbreviation']
+
+
 class PlayerOnlySerializer(serializers.ModelSerializer):
     fullName = serializers.CharField(source='full_name')
 
@@ -283,10 +306,22 @@ class PlayerOnlySerializer(serializers.ModelSerializer):
         fields = ['id', 'slug', 'fullName', 'position']
 
 
+class GameSlimSerializer(serializers.ModelSerializer):
+    homeTeam = TeamSlimSerializer(read_only=True)
+    awayTeam = TeamSlimSerializer(read_only=True)
+
+    class Meta:
+        model = Game
+        fields = [
+            'id', 'date', 'name', 'short_name', 'season_year', 'season_type', 'week', 'status',
+            'homeTeam', 'awayTeam', 'home_score', 'away_score'
+        ]
+
+
 class PlayerGameStatsMatchupsSerializer(serializers.ModelSerializer):
     player = PlayerOnlySerializer(read_only=True)
-    game = GameSerializer(read_only=True)
-    team = TeamSerializer(read_only=True)
+    game = GameSlimSerializer(read_only=True)
+    team = TeamSlimSerializer(read_only=True)
 
     class Meta:
         model = PlayerGameStats

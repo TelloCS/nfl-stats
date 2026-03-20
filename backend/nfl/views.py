@@ -6,6 +6,7 @@ from django.views.decorators.cache import cache_page
 from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
+from django.db.models import Prefetch, Max
 from .models import (
     Team,
     Player,
@@ -74,17 +75,47 @@ class PlayerListAPIView(generics.ListAPIView):
 
 
 class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIView):
-    queryset = Player.objects.select_related('team').all()
     serializer_class = PlayerStatsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerGameLogFilter
     lookup_field = 'slug'
 
+    def get_queryset(self):
+        queryset = Player.objects.select_related(
+            'team',
+        ).distinct().all()
+
+        season_year = self.request.query_params.get('season_year')
+        season_type = self.request.query_params.get('season_type')
+        player_slug = self.kwargs.get(self.lookup_field)
+
+        stats_query = PlayerGameStats.objects.select_related(
+            'player',
+            'game',
+            'game__homeTeam',
+            'game__awayTeam',
+        ).order_by('game__date')
+
+        if not season_year:
+            default_query = PlayerGameStats.objects.filter(
+                player__slug=player_slug
+            ).aggregate(max_year=Max('game__season_year'))
+
+            season_year = default_query.get('max_year')
+
+        if season_year:
+            stats_query = stats_query.filter(game__season_year=season_year)
+        if season_type:
+            stats_query = stats_query.filter(game__season_type=season_type)
+
+        prefetch = Prefetch('stats', queryset=stats_query)
+        return queryset.prefetch_related(prefetch)
+
     def get_cache_key(self, request):
-        slug = self.kwargs.get('slug')
-        season = request.query_params.get('season_year', 'all')
-        stype = request.query_params.get('season_type', 'all')
-        return f"player_stats:{slug}:{season}:{stype}"
+        player_slug = self.kwargs.get(self.lookup_field)
+        season_year = self.request.query_params.get('season_year')
+        season_type = self.request.query_params.get('season_type')
+        return f"player_stats:{player_slug}:{season_year}:{season_type}"
 
     @method_decorator(ratelimit(key='ip', rate='10/m', method='GET', block=True))
     def get(self, request, *args, **kwargs):
@@ -98,7 +129,19 @@ class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIVie
 
 
 class TeamStatsListView(KeyBasedCacheMixin, generics.ListAPIView):
-    queryset = Team.objects.all()
+    queryset = Team.objects.select_related(
+        'team_offense_passing',
+        'team_offense_rushing',
+        'team_offense_receiving',
+        'team_defense_passing',
+        'team_defense_rushing',
+        'team_defense_receiving',
+        'team_advance_offense',
+        'team_advance_defense',
+        'team_coverage_rates',
+        'team_play_calling',
+        'team_coverage_stats_by_position'
+    ).all()
     serializer_class = TeamStatsSerializer
     pagination_class = None
     cache_timeout = 60 * 60 * 24
@@ -146,15 +189,15 @@ class PlayerGameStatsMatchupsListView(generics.ListAPIView):
         'team',
         'player__team',
         'game__homeTeam',
-        'game__awayTeam'
+        'game__awayTeam',
     ).all()
     serializer_class = PlayerGameStatsMatchupsSerializer
     pagination_class = PlayerGameStatsMatchupsPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerMatchupsFilter
 
-    @method_decorator(cache_page(60 * 60 * 24))
-    @method_decorator(ratelimit(key='ip', rate='60/m', method='GET', block=True))
+    # @method_decorator(cache_page(60 * 60 * 24))
+    # @method_decorator(ratelimit(key='ip', rate='60/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
