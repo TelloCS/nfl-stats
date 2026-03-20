@@ -1,16 +1,14 @@
 import { queryOptions } from '@tanstack/react-query'
+import { apiFetch } from "../utils/apiFetch";
 
 export default function createTeamStatsRanksQueryOptions() {
     return queryOptions({
         queryKey: ['teamStatsRanks'],
         queryFn : getTeamStatsRanks,
-        retry: false,
-        refetchOnWindowFocus: false
     })
 }
 
 const getTeamStatsRanks = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const response = await fetch('/nfl/team/stats/ranks/');
-    return response.json();
+    const json = apiFetch('/nfl/team/stats/ranks/');
+    return json;
 }

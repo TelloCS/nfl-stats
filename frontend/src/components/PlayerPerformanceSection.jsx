@@ -3,10 +3,20 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Dot } from 'lucide-react';
 import { PositionStatMap } from "./Config";
 import StatToggle from "./ui/StatToggle";
+import SelectDropdown from "./ui/SelectDropdown";
 import CustomizedAxisTick from "./charts/CustomizedAxisTick";
 
-export default function PlayerPerformanceSection({ data }) {
+export default function PlayerPerformanceSection({ data, onFilterChange }) {
   const [activeStat, setActiveStat] = useState("");
+
+  const currentSeason = data?.active_season;
+  const seasonOptions = useMemo(() => 
+    data?.available_seasons?.map(year => ({
+      label: String(year),
+      value: String(year)
+    })) || [], 
+    [data?.available_seasons]
+  );
 
   const availableStats = useMemo(() =>
     data?.position ? (PositionStatMap[data.position] || []) : [],
@@ -32,8 +42,6 @@ export default function PlayerPerformanceSection({ data }) {
     return paddedStats;
   }, [data?.stats]);
 
-  if (!data) return null;
-
   return (
     <div className="bg-neutral-900 p-4 sm:p-6 rounded-md border border-neutral-800 h-[550px] flex flex-col">
       <div className="font-semibold mb-4 text-neutral-400 flex justify-between items-center h-[39px]">
@@ -44,6 +52,14 @@ export default function PlayerPerformanceSection({ data }) {
           <div className="text-sm font-normal flex items-center gap-1">
             {data.team?.full_name} <Dot /> #{data.jersey} <Dot /> {data.position}
           </div>
+        </div>
+        <div>
+          <SelectDropdown
+            value={currentSeason}
+            onChange={(v) => onFilterChange('season_year', v)}
+            options={seasonOptions}
+            minWidth="120px"
+          />
         </div>
       </div>
 

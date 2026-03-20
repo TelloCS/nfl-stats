@@ -39,7 +39,7 @@ export default function SearchBar() {
         const selected = displayResults[selectedIndex];
         setInput(selected.fullName);
         setShowResults(false);
-        navigate(`/player/stats/id/${selected.id}/${selected.slug}/`);
+        navigate(`/player/stats/id/${selected.id}/${selected.slug}`);
       }
     } else if (e.key === "Escape") {
       setShowResults(false);
@@ -71,7 +71,7 @@ export default function SearchBar() {
           {displayResults.map((r, index) => (
             <Link
               key={r.id}
-              to={`/player/stats/id/${r.id}/${r.slug}/`}
+              to={`/player/stats/id/${r.id}/${r.slug}`}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 setShowResults(false);

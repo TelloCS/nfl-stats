@@ -1,4 +1,5 @@
 import { infiniteQueryOptions } from '@tanstack/react-query'
+import { apiFetch } from "../utils/apiFetch";
 
 export default function createPositionOpponentQueryOptions(position, opponent, seasonYear, seasonType, location) {
     return infiniteQueryOptions({
@@ -16,8 +17,6 @@ export default function createPositionOpponentQueryOptions(position, opponent, s
             }
             return undefined;
         },
-        retry: false,
-        refetchOnWindowFocus: false
     })
 }
 
@@ -31,6 +30,6 @@ const getPositionOpponent = async (position, opponent, seasonYear, seasonType, l
         page: pageParam.toString()
     });
 
-    const response = await fetch(`/nfl/player/stats/gamelogs?${params.toString()}`);
-    return response.json();
+    const json = apiFetch(`/nfl/player/stats/gamelogs?${params.toString()}`);
+    return json;
 }
