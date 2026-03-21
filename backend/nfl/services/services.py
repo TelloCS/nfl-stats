@@ -1,66 +1,32 @@
-from abc import ABC, abstractmethod
+import os
+import time
+import logging
+import requests
+from dotenv import load_dotenv
+from typing import Any
 from aiohttp import ClientSession
 from asyncio import TaskGroup, run
-from typing import Any
-import pandas as pd
-import string
-from .table import Table
-from dotenv import load_dotenv
-import logging
-import os
-from nfl import models
-from datetime import datetime, timezone
-import requests
 from dateutil import parser
+from datetime import datetime, timezone
+from nfl import models
 from django.core.cache import cache
+from nfl.services.utils import (
+    DEFAULT_HEADERS,
+    Endpoint,
+    EndpointGenerator,
+    WebScraping,
+    Table,
+    generate_slug
+)
 
 load_dotenv()
 logger = logging.getLogger(__name__)
-
-DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US, en;q=0.5",
-    "Accept-Encoding": "gzip, deflate",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "DNT": "1",
-    "Referer": "https://www.google.com/"
-}
-
-class Endpoint(ABC):
-    base_url = None
-    
-    @abstractmethod
-    async def send_api_request(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def transform(self) -> Any:
-        pass
-
-class EndpointGenerator(Endpoint):
-    @abstractmethod
-    async def spawn_tasks(self, *args, **kwargs) -> Any:
-        pass
-
-class WebScraping(Endpoint):
-    source = None
-
-    @abstractmethod
-    async def send_api_request(self, *args, **kwargs) -> Any:
-        pass
 
 class Teams(Endpoint):
     base_url = os.getenv('TEAMS_URL')
 
     def __init__(self):
         self.team_ids: list = []
-        self.res: list = []
         self.raw = None
 
     async def send_api_request(self, session: ClientSession):
@@ -84,15 +50,16 @@ class Teams(Endpoint):
                         "division": division['abbreviation'],
                     }
 
-                    self.res.append(defaults)
-
                     obj, created = models.Team.objects.update_or_create(
                         abbreviation=defaults['abbreviation'],
                         defaults=defaults
                     )
 
-                    if created: logger.info(f"CREATED: TEAM {obj.full_name.upper()}")
-                    else: logger.debug(f"UPDATED: TEAM {obj.full_name.upper()}")
+                    if created:
+                        logger.info(f"CREATED: TEAM {obj.full_name.upper()}")
+                    else:
+                        logger.debug(f"UPDATED: TEAM {obj.full_name.upper()}")
+        self.raw = None
     
     def helper(self) -> None:
         for conference in self.raw["content"]["standings"]["groups"]:
@@ -100,9 +67,6 @@ class Teams(Endpoint):
                 for team in division["standings"]["entries"]:
                     self.team_ids.append(team["team"]["id"])
         return self.team_ids
-
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
 
 class Odds(Endpoint):
     base_url = os.getenv('ODDS_URL')
@@ -112,16 +76,15 @@ class Odds(Endpoint):
             data = await response.json()
             
             for week in data["lines"][:1]:
-                print(week["displayValue"])
+                logger.info(week["displayValue"])
                 for event in week['events']:
                     for comp in event['competitions']:
-                        print(comp)
+                        logger.info(comp)
 
 class Players(EndpointGenerator):
     base_url = os.getenv('PLAYERS_URL')
 
     def __init__(self):
-        self.res = []
         self.raw = []
         self.util = []
         self.player_ids = []
@@ -179,8 +142,6 @@ class Players(EndpointGenerator):
                                 'team': team_instance
                             }
 
-                            self.res.append(defaults)
-
                             obj, created = models.Player.objects.update_or_create(
                                 espn_id=defaults['espn_id'],  
                                 defaults=defaults
@@ -190,6 +151,7 @@ class Players(EndpointGenerator):
                                 logger.info(f"CREATED: PLAYER {obj.full_name.upper()}")
                             else:
                                 logger.debug(f"UPDATED: PLAYER {obj.full_name.upper()}")
+        self.raw.clear()
 
     def helper(self):
         positions = {'QB', 'WR', 'RB', 'TE'}
@@ -202,16 +164,12 @@ class Players(EndpointGenerator):
                         if athlete["position"]["abbreviation"] in positions:
                             self.player_ids.append(athlete['id'])
         return self.player_ids
-    
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
 
 class PlayerStats(EndpointGenerator):
     base_url = os.getenv('STATS_URL')
 
     def __init__(self):
         self.raw = []
-        self.res = []
 
     async def spawn_tasks(self, session, player_ids, season):
         async with TaskGroup() as taskgroup:
@@ -316,11 +274,7 @@ class PlayerStats(EndpointGenerator):
                             logger.info(f"CREATED: PLAYER_STATS {str(u['full_name']).upper()}")
                         else:
                             logger.debug(f"UPDATED: PLAYER_STATS {str(u['full_name']).upper()}")
-        
         self.raw.clear()
-
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
 
     def check(self, value: Any):
         if value == '-' or value is None:
@@ -334,7 +288,6 @@ class Events(EndpointGenerator):
     base_url = os.getenv('EVENTS_URL')
 
     def __init__(self):
-        self.res = []
         self.raw = []
 
     async def spawn_tasks(self, session: ClientSession, year: int = None, season_type: int = None, start_week: int = None, end_week: int = None) -> None:
@@ -362,11 +315,11 @@ class Events(EndpointGenerator):
                 "week": week
             }
 
-            print(f"Fetching: Year {year} | Type {season_type} | Week {week}")
+            logger.info(f"Fetching: Year {year} | Type {season_type} | Week {week}")
             async with session.get(Events.base_url, params=params, headers=override_accept) as response:
                 return await response.json()
         else:
-            print("Fetching LIVE data")
+            logger.info("Fetching LIVE data")
             async with session.get(Events.base_url) as response:
                 return await response.json()
         
@@ -409,26 +362,24 @@ class Events(EndpointGenerator):
                     'status': event['status']['type']['detail'], 
                     'event': event['id'] 
                 }
-                self.res.append(defaults)
 
                 obj, created = models.Game.objects.update_or_create(
                     event=defaults['event'],
                     defaults=defaults
                 )
 
-                if created: logger.info(f"CREATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
-                else: logger.debug(f"UPDATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
-
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+                if created:
+                    logger.info(f"CREATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
+                else:
+                    logger.debug(f"UPDATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
+        self.raw.clear()
 
 class OffensePassing(WebScraping):
     base_url = os.getenv('OFFENSE_PASSING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=OffensePassing.base_url) as response:
@@ -459,7 +410,6 @@ class OffensePassing(WebScraping):
                 'sack_yards': int(item['SckY']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamOffensePassingStats.objects.update_or_create(
                 team=team_instance,
@@ -470,17 +420,14 @@ class OffensePassing(WebScraping):
                 logger.info(f"CREATED: TEAM OFFENSE_PASSING {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM OFFENSE_PASSING {str(item['Team']).upper()}")
-    
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class OffenseRushing(WebScraping):
     base_url = os.getenv('OFFENSE_RUSHING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=OffenseRushing.base_url) as response:
@@ -506,7 +453,6 @@ class OffenseRushing(WebScraping):
                 'rush_fumbles': int(item['Rush FUM']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamOffenseRushingStats.objects.update_or_create(
                 team=team_instance,
@@ -517,17 +463,14 @@ class OffenseRushing(WebScraping):
                 logger.info(f"CREATED: TEAM OFFENSE_RUSHING {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM OFFENSE_RUSHING {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class OffenseReceiving(WebScraping):
     base_url = os.getenv('OFFENSE_RECEIVING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=OffenseReceiving.base_url) as response:
@@ -553,7 +496,6 @@ class OffenseReceiving(WebScraping):
                 'rec_fumbles': int(item['Rec FUM']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamOffenseReceivingStats.objects.update_or_create(
                 team=team_instance,
@@ -564,17 +506,14 @@ class OffenseReceiving(WebScraping):
                 logger.info(f"CREATED: TEAM OFFENSE_RECEIVING {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM OFFENSE_RECEIVING {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class DefensePassing(WebScraping):
     base_url = os.getenv('DEFENSE_PASSING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=DefensePassing.base_url) as response:
@@ -604,7 +543,6 @@ class DefensePassing(WebScraping):
                 'sacks': int(item['Sck']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamDefensePassingStats.objects.update_or_create(
                 team=team_instance,
@@ -615,17 +553,14 @@ class DefensePassing(WebScraping):
                 logger.info(f"CREATED: TEAM DEFENSE_PASSING {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM DEFENSE_PASSING {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class DefenseRushing(WebScraping):
     base_url = os.getenv('DEFENSE_RUSHING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=DefenseRushing.base_url) as response:
@@ -652,7 +587,6 @@ class DefenseRushing(WebScraping):
                 'rush_fumbles': int(item['Rush FUM']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamDefenseRushingStats.objects.update_or_create(
                 team=team_instance,
@@ -663,17 +597,14 @@ class DefenseRushing(WebScraping):
                 logger.info(f"CREATED: TEAM DEFENSE_RUSHING {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM DEFENSE_RUSHING {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class DefenseReceiving(WebScraping):
     base_url = os.getenv('DEFENSE_RECEIVING_URL')
     source = "nfl"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=DefenseReceiving.base_url) as response:
@@ -700,7 +631,6 @@ class DefenseReceiving(WebScraping):
                 'pass_defended': int(item['PDef']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamDefenseReceivingStats.objects.update_or_create(
                 team=team_instance,
@@ -710,18 +640,15 @@ class DefenseReceiving(WebScraping):
             if created:
                 logger.info(f"CREATED: TEAM DEFENSE_RECEIVING {str(item['Team']).upper()}")
             else:
-                logger.debug(f"UPDATED: TEAM DEFENSE_RECEIVING {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+                logger.debug(f"UPDATED: TEAM DEFENSE_RECEIVING {str(item['Team']).upper()}") 
+        self.raw = None
 
 class AdvanceOffense(WebScraping):
     base_url = os.getenv('ADVANCE_OFFENSE_URL')
     source = "sumer"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=AdvanceOffense.base_url) as response:
@@ -751,7 +678,6 @@ class AdvanceOffense(WebScraping):
                 'interception_pct': float(item['Int %'].split('%')[0]),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamAdvanceOffenseStats.objects.update_or_create(
                 team=team_instance,
@@ -762,17 +688,14 @@ class AdvanceOffense(WebScraping):
                 logger.info(f"CREATED: TEAM OFF_ADVANCE_STATS {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM OFF_ADVANCE_STATS {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class AdvanceDefense(WebScraping):
     base_url = os.getenv('ADVANCE_DEFENSE_URL')
     source = "sumer"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=AdvanceDefense.base_url) as response:
@@ -802,7 +725,6 @@ class AdvanceDefense(WebScraping):
                 'interception_pct': float(item['Int %'].split('%')[0]),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamAdvanceDefenseStats.objects.update_or_create(
                 team=team_instance,
@@ -813,17 +735,14 @@ class AdvanceDefense(WebScraping):
                 logger.info(f"CREATED: TEAM DEF_ADVANCE_STATS {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM DEF_ADVANCE_STATS {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
         
 class CoverageSchemes(WebScraping):
     base_url = os.getenv('COVERAGE_SCHEMES_URL')
     source = "sharp"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=CoverageSchemes.base_url) as response:
@@ -848,7 +767,6 @@ class CoverageSchemes(WebScraping):
                 'middle_open_rate': float(item['Middle Open Rate'].split('%')[0]),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamCoverageSchemeStats.objects.update_or_create(
                 team=team_instance,
@@ -859,17 +777,14 @@ class CoverageSchemes(WebScraping):
                 logger.info(f"CREATED: TEAM COVERAGE_SCHEME_STATS {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM COVERAGE_SCHEME_STATS {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class OffenseTendencies(WebScraping):
     base_url = os.getenv('OFFENSE_TENDENCIES_URL')
     source = "sharp"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=OffenseTendencies.base_url) as response:
@@ -895,7 +810,6 @@ class OffenseTendencies(WebScraping):
                 'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0]),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamOffensePlayCallingStats.objects.update_or_create(
                 team=team_instance,
@@ -906,17 +820,14 @@ class OffenseTendencies(WebScraping):
                 logger.info(f"CREATED: TEAM TENDENCIES_STATS {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM TENDENCIES_STATS {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
+        self.raw = None
 
 class CoverageStatsByPosition(WebScraping):
     base_url = os.getenv('COVERAGE_STATS_BY_POSITION_URL')
     source = "sharp"
 
     def __init__(self):
-        self.raw = []
-        self.res = []
+        self.raw = None
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=CoverageStatsByPosition.base_url) as response:
@@ -942,7 +853,6 @@ class CoverageStatsByPosition(WebScraping):
                 'yards_allowed_slot': float(item['YPT Allowed Slot']),
                 'team': team_instance
             }
-            self.res.append(defaults)
 
             _, created = models.TeamCoverageStatsByPosition.objects.update_or_create(
                 team=team_instance,
@@ -953,19 +863,12 @@ class CoverageStatsByPosition(WebScraping):
                 logger.info(f"CREATED: TEAM COVERAGE_STATS_BY_POSITION {str(item['Team']).upper()}")
             else:
                 logger.debug(f"UPDATED: TEAM COVERAGE_STATS_BY_POSITION {str(item['Team']).upper()}")
-        
-    def to_df(self) -> None:
-        print(pd.DataFrame(self.res))
-
-def generate_slug(name: str) -> str:
-    name = ''.join([c for c in name if c not in string.punctuation])
-    name = name.lower().replace(' ', '-')
-    return name
+        self.raw = None
 
 class NFLPipeline(object):
     def __init__(self, year: int = None, season_type: int = None, start_week: int = None, end_week: int = None):
-        self.endpoints: list = []
-        self.generators: list = []
+        self.endpoints: list[Endpoint] = []
+        self.generators: list[EndpointGenerator] = []
         self.year = year
         self.season_type = season_type
         self.start_week = start_week
@@ -980,7 +883,7 @@ class NFLPipeline(object):
     async def extract_data(self):
        async with ClientSession(headers=DEFAULT_HEADERS) as session:
             if not self.endpoints:
-                print('No endpoints to process.')
+                logger.info('No endpoints to process.')
             else:
                 for endpoint in self.endpoints:
                     if isinstance(endpoint, Teams):
@@ -988,7 +891,7 @@ class NFLPipeline(object):
                     else:
                         await endpoint.send_api_request(session)
             if not self.generators:
-                print("No generators to process.")
+                logger.info("No generators to process.")
             else:
                 for generator in self.generators:
                     if isinstance(generator, Events):
@@ -1015,7 +918,7 @@ def should_pipeline_run() -> dict:
         events = data.get('events', [])
 
         if not events:
-            print("No events found. Pipeline Skip.")
+            logger.info("No events found. Pipeline Skip.")
             return None
 
         last_event = events[-1]
@@ -1028,15 +931,15 @@ def should_pipeline_run() -> dict:
         is_complete = status.get('completed', False)
         days_since_game = (current_date - game_date).days
 
-        print(f"Latest Event: {last_event.get('shortName', 'Unknown')}")
-        print(f"Status: {'Final' if is_complete else 'Active'}")
-        print(f"Time since kickoff: {days_since_game} days")
+        logger.info(f"Latest Event: {last_event.get('shortName', 'Unknown')}")
+        logger.info(f"Status: {'Final' if is_complete else 'Active'}")
+        logger.info(f"Time since kickoff: {days_since_game} days")
 
         if is_complete and days_since_game > 3:
-            print("Event is stale (> 3 days post-game). Pipeline SKIP.")
+            logger.info("Event is stale (> 3 days post-game). Pipeline SKIP.")
             return None
 
-        print(f"Pipeline GO: Year {current_year} | Type {current_type} | Week {current_week}")
+        logger.info(f"Pipeline GO: Year {current_year} | Type {current_type} | Week {current_week}")
         
         return {
             "year": current_year,
@@ -1046,28 +949,28 @@ def should_pipeline_run() -> dict:
         }
 
     except Exception as e:
-        print(f"Error checking season status: {e}")
+        logger.error(f"Error checking season status: {e}")
         return None
 
 def main():
     manual_config = {
-        "year": 2024,
+        "year": 2025,
         "season_type": 2,
-        "start_week": 1,
-        "end_week": 3
+        "start_week": 7,
+        "end_week": 8
     }
 
     # manual_config = None
     
     if manual_config:
-        print(f"MANUAL MODE: Forcing run for {manual_config}")
+        logger.info(f"MANUAL MODE: Forcing run for {manual_config}")
         context = manual_config
     else:
-        print("AUTO MODE: Checking if NFL is in season...")
+        logger.info("AUTO MODE: Checking if NFL is in season...")
         context = should_pipeline_run()
         
         if not context:
-            print("NFL is out of season. Exiting.")
+            logger.info("NFL is out of season. Exiting.")
             return
 
     pl = NFLPipeline(
@@ -1129,4 +1032,8 @@ def main():
     coverage_schemes.transform()
     offense_tendencies.transform()
     coverage_position.transform()
-    cache.clear()
+
+    teams.team_ids.clear()
+    players.player_ids.clear()
+    players.util.clear()
+    

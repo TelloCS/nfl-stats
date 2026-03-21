@@ -43,7 +43,7 @@ class TotalSerializer(serializers.ModelSerializer):
         fields = ['display_name', 'open_line', 'open_odds', 'close_line', 'close_odds']
 
 
-class TeamSerializer(serializers.ModelSerializer):
+class TeamSerializerV1(serializers.ModelSerializer):
     point_spread = PointSpreadSerializer(many=True, read_only=True)
     moneyline = MoneylineSerializer(many=True, read_only=True)
     total = TotalSerializer(many=True, read_only=True)
@@ -58,8 +58,8 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class GameSerializer(serializers.ModelSerializer):
-    homeTeam = TeamSerializer(read_only=True)
-    awayTeam = TeamSerializer(read_only=True)
+    homeTeam = TeamSerializerV1(read_only=True)
+    awayTeam = TeamSerializerV1(read_only=True)
 
     class Meta:
         model = Game
@@ -134,7 +134,7 @@ class PlayerSerializer(serializers.ModelSerializer):
     For the autocomplete search bar.
 
     """
-    team = TeamSerializer(read_only=True)
+    team = TeamSerializerV1(read_only=True)
     fullName = serializers.CharField(source='full_name')
 
     class Meta:

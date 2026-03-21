@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerSearchQueryOptions from "../queryOptions/createPlayerSearchQueryOptions";
 
 export default function SearchBar() {
@@ -10,7 +10,10 @@ export default function SearchBar() {
   const [showResults, setShowResults] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  const { data: searchResults } = useQuery(createPlayerSearchQueryOptions(debouncedInput));
+  const { data: searchResults } = useVersionedQuery(
+    createPlayerSearchQueryOptions,
+    debouncedInput
+  );
   const displayResults = searchResults ? searchResults.slice(0, 5) : [];
 
   useEffect(() => {

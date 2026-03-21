@@ -1,5 +1,50 @@
+from abc import ABC, abstractmethod
+from typing import Any
+import string
 from bs4 import BeautifulSoup
-from pprint import pprint
+
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US, en;q=0.5",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "DNT": "1",
+    "Referer": "https://www.google.com/"
+}
+
+class Endpoint(ABC):
+    base_url = None
+    
+    @abstractmethod
+    async def send_api_request(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def transform(self) -> Any:
+        pass
+
+class EndpointGenerator(Endpoint):
+    @abstractmethod
+    async def spawn_tasks(self, *args, **kwargs) -> Any:
+        pass
+
+class WebScraping(Endpoint):
+    source = None
+
+    @abstractmethod
+    async def send_api_request(self, *args, **kwargs) -> Any:
+        pass
+
+def generate_slug(name: str) -> str:
+    name = ''.join([c for c in name if c not in string.punctuation])
+    name = name.lower().replace(' ', '-')
+    return name
 
 class Table(object):
     def __init__(self, html: str, source: str):

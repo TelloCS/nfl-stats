@@ -1,16 +1,15 @@
 import { useMemo } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useVersionedInfiniteQuery } from './useVersionedInfiniteQuery';
 import createPositionOpponentQueryOptions from "../queryOptions/createPositionOpponentQueryOptions";
 
 export default function usePositionOpponentData(filters) {
-  const query = useInfiniteQuery(
-    createPositionOpponentQueryOptions(
-      filters.position,
-      filters.opponent,
-      filters.season_year,
-      filters.season_type,
-      filters.location
-    )
+  const query = useVersionedInfiniteQuery(
+    createPositionOpponentQueryOptions,
+    filters.position,
+    filters.opponent,
+    filters.season_year,
+    filters.season_type,
+    filters.location
   );
 
   const { data } = query;
@@ -24,11 +23,11 @@ export default function usePositionOpponentData(filters) {
 
     const firstPage = data.pages[0];
     const totalCount = firstPage.count || 0;
-    
+
     const pageSize = firstPage.results?.length > 0 ? firstPage.results.length : 50;
-    
-    return { 
-      totalCount, 
+
+    return {
+      totalCount,
       totalPages: totalCount > 0 ? Math.ceil(totalCount / pageSize) : 0,
       loadedCount: flatData.length
     };

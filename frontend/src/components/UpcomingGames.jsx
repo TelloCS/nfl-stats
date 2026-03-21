@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import createUpcomingGamesQueryOptions from "../queryOptions/createUpcomingGamesQueryOptions";
 import { useScrollOverflow } from "../hooks/useScrollOverflow";
 import { GameCard } from "./GameCard";
+import { useVersionedQuery } from "../hooks/useVersionedQuery";
+import createUpcomingGamesQueryOptions from "../queryOptions/createUpcomingGamesQueryOptions";
 
 export default function UpcomingGames() {
-  const { data, isPending } = useQuery(createUpcomingGamesQueryOptions());
+  const { data, isPending } = useVersionedQuery(createUpcomingGamesQueryOptions);
   const { scrollRef, canScroll, scroll } = useScrollOverflow(data);
 
   if (isPending || !data?.events?.length) return null;

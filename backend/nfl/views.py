@@ -2,9 +2,11 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Prefetch, Max
 from .models import (
@@ -14,7 +16,7 @@ from .models import (
 )
 from .pagination import PlayerGameStatsMatchupsPagination
 from .serializers import (
-    TeamSerializer,
+    TeamSerializerV1,
     PlayerSerializer,
     PlayerStatsSerializer,
     TeamStatsSerializer,
@@ -33,7 +35,7 @@ from .services.nfl_service import weekly_schedule
 
 class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
     queryset = Team.objects.all()
-    serializer_class = TeamSerializer
+    serializer_class = TeamSerializerV1
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nickname',]
     cache_timeout = 60 * 60 * 24
@@ -196,8 +198,8 @@ class PlayerGameStatsMatchupsListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerMatchupsFilter
 
-    # @method_decorator(cache_page(60 * 60 * 24))
-    # @method_decorator(ratelimit(key='ip', rate='60/m', method='GET', block=True))
+    @method_decorator(cache_page(60 * 60 * 24))
+    @method_decorator(ratelimit(key='ip', rate='60/m', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -213,3 +215,17 @@ class NFLScheduleView(APIView):
 
         serializer = NFLScheduleSerializer(data)
         return Response(serializer.data)
+
+
+class ETLVersionView(KeyBasedCacheMixin, APIView):
+    """
+    Direct access to the 'Version Billboard' in Redis.
+    No internal caching allowed—this must always be fresh.
+    """
+    def get(self, request, *args, **kwargs):
+        version = cache.get("etl_version_ts", 0)
+
+        return Response({
+            'version': version,
+            'time': timezone.now().timestamp()
+        })

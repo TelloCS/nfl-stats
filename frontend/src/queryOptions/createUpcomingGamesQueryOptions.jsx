@@ -1,9 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import { apiFetch } from "../utils/apiFetch";
 
-export default function createUpcomingGamesQueryOptions(){
+export default function createUpcomingGamesQueryOptions(version){
     return queryOptions({
-        queryKey: ['upcomingGames'],
+        queryKey: ['upcomingGames', { v: version }],
         queryFn : () => getUpcomingGames(),
     })
 }
