@@ -1,4 +1,7 @@
 from backend.settings.base import *
+import sys
+
+IS_TESTING = 'test' in sys.argv
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'not-secret-key-for-testing'
@@ -8,7 +11,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend']
 
-if DEBUG:
+if DEBUG and not IS_TESTING:
     INSTALLED_APPS += (
         "debug_toolbar",
     )
