@@ -1,9 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import { apiFetch } from "../utils/apiFetch";
 
-export default function createPlayerSearchQueryOptions(input) {
+export default function createPlayerSearchQueryOptions(input, version) {
     return queryOptions({
-        queryKey: ["playerSearch", input],
+        queryKey: ["playerSearch", input, { v: version }],
         queryFn : () => getPlayerSearchResults(input),
         enabled : !!input && input.length >= 3,
         staleTime: 1000 * 60 * 10,

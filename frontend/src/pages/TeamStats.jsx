@@ -1,16 +1,17 @@
 import { useMemo, memo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 import { TeamStatMap } from '../components/Config';
 import UpcomingGames from '../components/UpcomingGames';
-import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOptions';
 import useUrlTableSort from '../hooks/useUrlTableSort';
+
+import { useVersionedQuery } from "../hooks/useVersionedQuery";
+import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOptions';
 
 export default function TeamStats() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: teamData, isLoading } = useQuery(createTeamStatsQueryOptions());
+  const { data: teamData, isLoading } = useVersionedQuery(createTeamStatsQueryOptions);
 
   const activeTabKey = searchParams.get("tab") || TeamStatMap[0].key;
 

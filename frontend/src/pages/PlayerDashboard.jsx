@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query';
 
 import CustomLoader from "../components/CustomLoader";
 import UpcomingGames from "../components/UpcomingGames";
@@ -7,6 +6,7 @@ import PlayerPerformanceSection from "../components/PlayerPerformanceSection";
 import MatchupAnalysisSection from "../components/MatchupAnalysisSection";
 import useUrlFilters from "../hooks/useUrlFilters"
 
+import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerStatsQueryOptions from '../queryOptions/createPlayerStatsQueryOptions';
 import createTeamStatsRanksQueryOptions from "../queryOptions/createTeamStatsRanksQueryOptions";
 
@@ -14,8 +14,13 @@ export default function PlayerDashboard() {
   const { player_id, player_slug } = useParams();
   const { filters, setFilter } = useUrlFilters({ season_year: "" });
 
-  const { data: playerData, isPending: isPlayerPending } = useQuery(createPlayerStatsQueryOptions(player_id, player_slug, filters));
-  const { data: rankingData, isPending: isRankingPending } = useQuery(createTeamStatsRanksQueryOptions());
+  const { data: playerData, isPending: isPlayerPending } = useVersionedQuery(
+    createPlayerStatsQueryOptions,
+    player_id,
+    player_slug,
+    filters
+  );
+  const { data: rankingData, isPending: isRankingPending } = useVersionedQuery(createTeamStatsRanksQueryOptions);
 
   const isPending = isPlayerPending || isRankingPending;
 

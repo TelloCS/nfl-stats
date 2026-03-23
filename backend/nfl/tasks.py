@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import F, Window
 from django.db.models.functions import DenseRank
 from django.core.cache import cache
+from nfl.utils import refresh_application_cache
 from .models import (
     TeamRankSnapshot,
     TeamOffensePassingStats, TeamOffenseRushingStats, TeamOffenseReceivingStats,
@@ -27,9 +28,8 @@ def weekly_nfl_sync():
             main()
             logger.info("Main pipeline finished successfully")
 
-        update_team_rank_snapshots.delay()
-        logger.info("Triggered follow-up rank update task")
-
+            logger.info("Triggered follow-up rank update task")
+            transaction.on_commit(lambda: update_team_rank_snapshots.delay())
     except Exception as e:
         logger.error(f"Scheduled task failed: {e}")
 
@@ -162,26 +162,31 @@ def update_team_rank_snapshots():
 
     try:
         with transaction.atomic():
-            count = 0
             for tid, stats in master_data.items():
                 TeamRankSnapshot.objects.update_or_create(
                     team_id=tid,
                     defaults=stats
                 )
-                count += 1
+
             logger.info("Updated TeamRankSnapshot Model")
-
-        cache_keys_to_delete = [
-            "team_list",
-            "team_stats",
-            "team_ranks"
-        ]
-
-        cache.delete_many(cache_keys_to_delete)
-        logger.info("Team and Rank caches invalidated successfully.")
-
+            transaction.on_commit(finalize_rank_updates)
     except Exception as e:
         logger.error(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
+
+
+def finalize_rank_updates():
+    """
+    Runs only after the ranks are safely committed to the database.
+    """
+    # 1. Clear specific keys
+    cache_keys_to_delete = ["team_list", "team_stats", "team_ranks"]
+    cache.delete_many(cache_keys_to_delete)
+
+    # 2. Bump the global version
+    # This is what tells TanStack Query 'The ranks are ready!'
+    refresh_application_cache()
+
+    logger.info("Team caches invalidated and Global Version bumped.")
 
 
 @shared_task(

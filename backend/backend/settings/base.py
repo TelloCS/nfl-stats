@@ -181,7 +181,7 @@ CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Chicago')
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=2, hour=15, minute=6),
+        'schedule': crontab(day_of_week=5, hour=16, minute=30),
     },
     'refresh-nfl-schedule-every-minute': {
         'task': 'nfl.tasks.update_nfl_cache_task',

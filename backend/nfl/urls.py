@@ -6,7 +6,8 @@ from .views import (
     PlayerListAPIView,
     PlayerGameStatsRetrieveAPIView,
     PlayerGameStatsMatchupsListView,
-    NFLScheduleView
+    NFLScheduleView,
+    ETLVersionView,
 )
 
 app_name = 'nfl'
@@ -24,5 +25,6 @@ urlpatterns = [
         name='player-game-stats-view'
     ),
     path('player/stats/gamelogs', PlayerGameStatsMatchupsListView.as_view(), name='player-stats-gamelogs-view'),
-    path('schedule/', NFLScheduleView.as_view(), name='schedule')
+    path('schedule/', NFLScheduleView.as_view(), name='schedule'),
+    path('etl-version/', ETLVersionView.as_view(), name='etl-version'),
 ]
