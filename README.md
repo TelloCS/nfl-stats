@@ -12,7 +12,7 @@ git clone https://github.com/TelloCS/nfl-stats.git
 .
 ├── backend/
 |  ├── backend/
-|      ├── settings.py
+|      ├── settings/base.py
 |
 ```
 2. Modify this code snippet
@@ -26,9 +26,9 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 ```
-3. In the root directory initial docker compose command
+3. In the root directory
 ```shell
-docker compose -f docker-compose.yml up --build
+./manage.sh local
 ```
 ## More things to know
 Don't need to sign up locally though it provides more API requests to the backend due to rate limiting being implemented. If experiencing rate limiting here is a easy work around.
