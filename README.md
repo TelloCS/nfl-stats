@@ -63,7 +63,7 @@ REST_FRAMEWORK = {
 }
 ```
 ## Position vs. Opponent Preview
-<img width="1643" height="872" alt="image" src="https://github.com/user-attachments/assets/ae0f8c9f-c715-4d15-adcb-926d131c83b3" />
+<img width="1643" height="545" alt="image" src="https://github.com/user-attachments/assets/10f2d441-be05-4b7f-82c5-272ba5bbd584" />
 
 ## Credits and references
 - https://gist.github.com/nntrn/ee26cb2a0716de0947a0a4e9a157bc1c [Source of ESPN API endpoints]
