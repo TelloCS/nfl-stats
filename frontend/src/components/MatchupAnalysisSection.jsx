@@ -29,10 +29,10 @@ export default function MatchupAnalysisSection({ games, rankingData }) {
 
   return (
     <div className="bg-neutral-900 p-6 rounded-md border border-neutral-800 h-[550px] flex flex-col">
-      <div className="flex justify-between items-center mb-4 min-h-[39px]">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center text-neutral-400 justify-between mb-4 gap-4">
+        <div className="min-w-0">
           <span className="font-semibold text-white text-lg">Matchups</span>
-          <p class="text-xs text-[#a1a1a1] italic">Only Current Season</p>
+          <p className="text-xs text-[#a1a1a1] italic">Only Current Season</p>
         </div>
         
         <SelectDropdown 
@@ -55,7 +55,7 @@ export default function MatchupAnalysisSection({ games, rankingData }) {
             <PolarGrid stroke="#a1a1a1" opacity={0.3} />
             <PolarAngleAxis 
               dataKey="subject" 
-              tick={{ fontSize: 11, fontWeight: 500, fill: '#a1a1a1' }} 
+              tick={{ fontSize: 12, fontWeight: 500, fill: '#a1a1a1' }} 
             />
             <PolarRadiusAxis angle={30} domain={[32, 1]} tick={false} axisLine={false} />
             <Radar 

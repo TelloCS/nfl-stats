@@ -19,7 +19,7 @@ export default function Register() {
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      navigate('/login', { state: { message: "Account created! Please log in." } });
+      navigate('/', { state: { message: "Account created. Redirecting..." } });
     },
     onError: () => {
       setValidationError(null);
@@ -65,14 +65,15 @@ export default function Register() {
         <form onSubmit={onSubmit} className='space-y-4'>
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Mail size={18} className="text-neutral-400" />
+              <User size={18} className="text-neutral-400" />
             </div>
             <input
               className={inputClasses}
-              type='email'
-              placeholder='Email address'
-              name='email'
-              value={email}
+              type='text'
+              id='username'
+              placeholder='Username'
+              name='username'
+              value={username}
               onChange={onChange}
               required
             />
@@ -80,14 +81,15 @@ export default function Register() {
 
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <User size={18} className="text-neutral-400" />
+              <Mail size={18} className="text-neutral-400" />
             </div>
             <input
               className={inputClasses}
-              type='text'
-              placeholder='Username'
-              name='username'
-              value={username}
+              id='email'
+              type='email'
+              placeholder='Email address'
+              name='email'
+              value={email}
               onChange={onChange}
               required
             />

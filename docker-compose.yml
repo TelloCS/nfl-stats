@@ -53,6 +53,8 @@ services:
     command: celery -A nfl worker --loglevel=info
     volumes:
       - ./backend:/app/backend
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     env_file:
       - .env
     depends_on:
@@ -68,6 +70,8 @@ services:
     command: celery -A nfl beat --loglevel=info
     volumes:
       - ./backend:/app/backend
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     env_file:
       - .env
     depends_on:
@@ -93,6 +97,7 @@ services:
         - /app/backend/staticfiles/
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings.local
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     ports:
       - 127.0.0.1:8000:8000
     stdin_open: true
