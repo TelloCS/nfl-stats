@@ -44,13 +44,13 @@ export default function PlayerPerformanceSection({ data, onFilterChange }) {
 
   return (
     <div className="bg-neutral-900 p-4 sm:p-6 rounded-md border border-neutral-800 h-[550px] flex flex-col">
-      <div className="font-semibold mb-4 text-neutral-400 flex justify-between items-center h-[39px]">
-        <div>
-          <div className="text-lg flex text-white items-center gap-1">
-            {data.fullName} <Dot className="text-white" /> {activeStatLabel}
+      <div className="flex flex-col sm:flex-row sm:items-center text-neutral-400 justify-between mb-4 gap-4">
+        <div className="min-w-0">
+          <div className="font-semibold text-lg sm:text-xl flex text-white items-center">
+            {data?.fullName} <Dot className="text-white" /> {activeStatLabel}
           </div>
-          <div className="text-sm font-normal flex items-center gap-1">
-            {data.team?.full_name} <Dot /> #{data.jersey} <Dot /> {data.position}
+          <div className="text-sm font-normal flex items-center">
+            {data?.team?.full_name} <Dot /> #{data?.jersey} <Dot /> {data?.position}
           </div>
         </div>
         <div>
@@ -69,9 +69,9 @@ export default function PlayerPerformanceSection({ data, onFilterChange }) {
         onSelect={setActiveStat}
       />
 
-      <div className="flex-1 mt-2">
+      <div className="flex-1 min-h-0 mt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 36, right: 0, left: 0, bottom: 45 }}>
+          <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 30 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#262626" />
             <XAxis
               dataKey="game.date"

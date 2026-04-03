@@ -40,6 +40,7 @@ jobs:
         working-directory: ./backend
     env:
       DJANGO_SETTINGS_MODULE: backend.settings.local
+      DATABASE_URL: postgres://nfl:nfl@localhost:5432/nfl
       DB_HOST: localhost
       DB_NAME: nfl
       DB_USER: nfl

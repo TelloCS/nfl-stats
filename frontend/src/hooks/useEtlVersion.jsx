@@ -4,7 +4,7 @@ import { apiFetch } from "../utils/apiFetch";
 export function useEtlVersion() {
   return useQuery({
     queryKey: ["version"],
-    queryFn: () => apiFetch("/api/etl-version/"),
+    queryFn: () => apiFetch("/nfl/etl-version/"),
     refetchInterval: 60000, 
     staleTime: 0, 
   });

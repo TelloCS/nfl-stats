@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 from celery.schedules import crontab
 
@@ -73,15 +74,18 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+_db_config = {
+    "default": "postgres://nfl:nfl@db:5432/nfl",
+}
+
+if _db_conn_max_age := os.getenv("CONN_MAX_AGE"):
+    _db_config.update({
+        "conn_max_age": int(_db_conn_max_age),
+        "conn_health_checks": True,
+    })
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'nfl'),
-        'USER': os.getenv('DB_USER', 'nfl'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'nfl'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '5432')
-    }
+    "default": dj_database_url.config(**_db_config)
 }
 
 
@@ -139,6 +143,9 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'

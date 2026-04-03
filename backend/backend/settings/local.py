@@ -45,6 +45,10 @@ if DEBUG and not IS_TESTING:
 
     INTERNAL_IPS = ['localhost', '127.0.0.1', 'backend']
 
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    )
+
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 
