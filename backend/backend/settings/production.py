@@ -49,7 +49,7 @@ else:
 
 # Nginx handles these configs
 SECURE_CONTENT_TYPE_NOSNIFF = False
-X_FRAME_OPTIONS = None
+X_FRAME_OPTIONS = 'DENY'
 
 USE_X_FORWARDED_HOST = True
 
