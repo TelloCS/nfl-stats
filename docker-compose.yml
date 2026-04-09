@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:17
     user: postgres
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -21,7 +22,7 @@ services:
   redis:
     image: redis:7-alpine
     user: redis
-    restart: no
+    restart: always
     volumes:
       - redis_data:/data
     healthcheck:
@@ -43,10 +44,10 @@ services:
   worker:
     build:
       context: ./backend
-      target: dev
+      target: ${BUILD_TARGET:-prod}
+      args:
+        - BUILD_ENV=${APP_ENV:-prod}
     command: celery -A nfl worker --loglevel=info --concurrency=2
-    volumes:
-      - ./backend:/app/backend
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_WORKER_MAX_TASKS_PER_CHILD=100
@@ -65,10 +66,10 @@ services:
   beat:
     build:
       context: ./backend
-      target: dev
+      target: ${BUILD_TARGET:-prod}
+      args:
+        - BUILD_ENV=${APP_ENV:-prod}
     command: celery -A nfl beat --loglevel=info
-    volumes:
-      - ./backend:/app/backend
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
@@ -81,41 +82,79 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: dev
+      target: ${BUILD_TARGET:-prod}
+      args:
+        - BUILD_ENV=${APP_ENV:-prod}
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-        - ./backend:/app/backend/
-        - /app/backend/staticfiles/
+      - static_volume:/app/backend/staticfiles
     environment:
-      - DJANGO_SETTINGS_MODULE=backend.settings.local
+      - DJANGO_SETTINGS_MODULE=backend.settings.${APP_ENV:-production}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     ports:
       - 127.0.0.1:8000:8000
-    stdin_open: true
-    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: dev
+      target: ${BUILD_TARGET:-prod}
+      args:
+        - BUILD_ENV=${APP_ENV:-prod}
     volumes:
-      - ./frontend:/app/frontend
-      - frontend_node_modules:/app/frontend/node_modules
+      - frontend_static:/usr/share/nginx/html
     environment:
-      - NODE_OPTIONS=--max-old-space-size=1024
+      - NODE_OPTIONS=--max-old-space-size=2048
     ports:
       - 127.0.0.1:5173:5173
     depends_on:
       - backend
-    stdin_open: true
-    tty: true
-  
+
+  nginx:
+    image: nginx:1.25-alpine
+    restart: always
+    volumes:
+      - ./nginx:/etc/nginx:ro
+      - frontend_static:/usr/share/nginx/html:ro
+      - static_volume:/app/backend/staticfiles:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - default
+      - dokploy-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+
 volumes:
   postgres_data:
   redis_data:
-  frontend_node_modules:
+  frontend_static:
+  static_volume:
+
+networks:
+  default:
+  dokploy-network:
+    external: true
