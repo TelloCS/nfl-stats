@@ -102,7 +102,7 @@ services:
       - DJANGO_SETTINGS_MODULE=backend.settings.${APP_ENV:-production}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     ports:
-      - 127.0.0.1:8000:8000
+      - 8000:8000
     logging:
       driver: "json-file"
       options:
