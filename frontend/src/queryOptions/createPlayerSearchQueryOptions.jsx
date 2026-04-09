@@ -6,12 +6,12 @@ export default function createPlayerSearchQueryOptions(input, version) {
         queryKey: ["playerSearch", input, { v: version }],
         queryFn : () => getPlayerSearchResults(input),
         enabled : !!input && input.length >= 3,
-        staleTime: 1000 * 60 * 10,
-        retry: true,
+        staleTime: Infinity,
+        retry: false,
     })
 }
 
 const getPlayerSearchResults = async (input) => {
     const json = await apiFetch(`/nfl/players/?fullName=${input}`);
-    return json?.players || json?.results || json || [];
+    return json?.players;
 }

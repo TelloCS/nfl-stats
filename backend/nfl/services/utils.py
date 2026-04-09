@@ -18,6 +18,13 @@ DEFAULT_HEADERS = {
     "Referer": "https://www.google.com/"
 }
 
+PIPELINE_CONFIG = {
+    "year": 2025,
+    "season_type": 3,
+    "start_week": 1,
+    "end_week": 2
+}
+
 class Endpoint(ABC):
     base_url = None
     

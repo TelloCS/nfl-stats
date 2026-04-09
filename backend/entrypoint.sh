@@ -1,21 +1,9 @@
 #!/bin/sh
 set -e
 
-if [ "$DB_NAME" = "nfl_db" ]
-then
-    echo "Waiting for postgres..."
+python manage.py wait_for_db
 
-    while ! nc -z $DB_HOST $DB_PORT; do
-      sleep 0.1
-    done
-
-    echo "PostgreSQL started"
-
-    echo "Collecting static files..."
-    python manage.py collectstatic --noinput
-
-    echo "Running migrations..."
-    python manage.py migrate
-fi
+echo "Applying database migrations..."
+python manage.py migrate
 
 exec "$@"

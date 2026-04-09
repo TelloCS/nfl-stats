@@ -3,7 +3,7 @@ import { ChartColumn, Shield, Users } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="relative min-h-[calc(100vh-80px)] bg-[#000000] flex flex-col justify-center overflow-hidden font-poppins">
+    <div className="relative min-h-[calc(100vh-81px)] bg-[#000000] flex flex-col justify-center overflow-hidden font-poppins">
       <div className="container mx-auto p-6 md:p-10 relative z-10 mb-12 flex flex-col">
         <div className="mx-auto justify-center flex flex-col">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">

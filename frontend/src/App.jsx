@@ -10,14 +10,15 @@ import PlayerDashboard from './pages/PlayerDashboard';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ErrorPage from './pages/ErrorPage';
+import UserProfile from './pages/UserProfile';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5,
-      refetchIntervalInBackground: true,
+      refetchIntervalInBackground: false,
     },
   },
 });
@@ -35,6 +36,19 @@ const router = createBrowserRouter([
         path: '/login',
         element: <Login />,
       },
+    ]
+  },
+  {
+    element: <ProtectedRoute />,
+    errorElement: <ErrorPage />,
+    children: [
+      { 
+        path: '/settings', 
+        element: <Layout />, 
+        children: [
+          { index: true, element: <UserProfile /> }
+        ]
+      }
     ]
   },
   {
@@ -57,7 +71,7 @@ const router = createBrowserRouter([
       {
         path: '/team/stats/',
         element: <TeamStats />
-      }
+      },
     ]
   }
 ]);

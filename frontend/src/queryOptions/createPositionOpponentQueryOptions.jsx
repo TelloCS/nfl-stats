@@ -5,6 +5,7 @@ export default function createPositionOpponentQueryOptions(position, opponent, s
     return infiniteQueryOptions({
         queryKey: ['positionOpponent', position, opponent, seasonYear, seasonType, location, { v: version }],
         queryFn: ({ pageParam }) => getPositionOpponent(position, opponent, seasonYear, seasonType, location, pageParam),
+        staleTime: Infinity,
         initialPageParam: 1,
         getNextPageParam: (lastPage) => {
             if (lastPage.next) {
@@ -30,6 +31,6 @@ const getPositionOpponent = async (position, opponent, seasonYear, seasonType, l
         page: pageParam.toString()
     });
 
-    const json = apiFetch(`/nfl/player/stats/gamelogs?${params.toString()}`);
+    const json = await apiFetch(`/nfl/player/stats/gamelogs?${params.toString()}`);
     return json;
 }

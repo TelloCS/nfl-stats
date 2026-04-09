@@ -11,6 +11,6 @@ export default function createPlayerStatsQueryOptions(player_id, player_slug, fi
 
 const getPlayerStats = async (player_id, player_slug, filters) => {
     const params = new URLSearchParams(filters).toString();     
-    const json = apiFetch(`/nfl/player/stats/id/${player_id}/${player_slug}${params ? `?${params}` : ''}`)
+    const json = await apiFetch(`/nfl/player/stats/id/${player_id}/${player_slug}${params ? `?${params}` : ''}`)
     return json
 }

@@ -361,7 +361,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 celerybeat-schedule*
-management
 **/migrations/*.py
 !**/migrations/__init__.py
 
@@ -369,3 +368,6 @@ management
 static/
 templates/
 structure.md
+
+manage.sh
+docker-compose.override.yml

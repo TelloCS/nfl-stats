@@ -5,10 +5,11 @@ export default function createUpcomingGamesQueryOptions(version){
     return queryOptions({
         queryKey: ['upcomingGames', { v: version }],
         queryFn : () => getUpcomingGames(),
+        staleTime: Infinity,
     })
 }
 
 const getUpcomingGames = async () => {
-    const json = apiFetch('/nfl/schedule/');
+    const json = await apiFetch('/nfl/schedule/');
     return json
 }

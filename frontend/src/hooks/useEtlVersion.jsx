@@ -7,5 +7,6 @@ export function useEtlVersion() {
     queryFn: () => apiFetch("/nfl/etl-version/"),
     refetchInterval: 60000, 
     staleTime: 0, 
+    refetchOnWindowFocus: true,
   });
 }

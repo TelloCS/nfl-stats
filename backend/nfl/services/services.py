@@ -1,5 +1,4 @@
 import os
-import time
 import logging
 import requests
 from dotenv import load_dotenv
@@ -9,7 +8,6 @@ from asyncio import TaskGroup, run
 from dateutil import parser
 from datetime import datetime, timezone
 from nfl import models
-from django.core.cache import cache
 from nfl.services.utils import (
     DEFAULT_HEADERS,
     Endpoint,
@@ -18,6 +16,7 @@ from nfl.services.utils import (
     Table,
     generate_slug
 )
+from nfl.services.utils import PIPELINE_CONFIG
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -210,7 +209,7 @@ class PlayerStats(EndpointGenerator):
                     games_played = len(category['events'])
                     
                     for event in category["events"]:
-                        if category['splitType'] != '2':
+                        if category['splitType'] not in ('2', '3'):
                             continue
 
                         event_id = str(event.get('eventId'))
@@ -375,14 +374,17 @@ class Events(EndpointGenerator):
         self.raw.clear()
 
 class OffensePassing(WebScraping):
-    base_url = os.getenv('OFFENSE_PASSING_URL')
+    base_url = str(os.getenv('OFFENSE_PASSING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=OffensePassing.base_url) as response:
+        url = OffensePassing.base_url.format(season_year=self.year)
+        print(url)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=OffensePassing.source).parser
     
@@ -408,6 +410,7 @@ class OffensePassing(WebScraping):
                 'pass_rating': float(item['Rate'] ),
                 'sacks': int(item['Sck']),
                 'sack_yards': int(item['SckY']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -423,14 +426,16 @@ class OffensePassing(WebScraping):
         self.raw = None
 
 class OffenseRushing(WebScraping):
-    base_url = os.getenv('OFFENSE_RUSHING_URL')
+    base_url = str(os.getenv('OFFENSE_RUSHING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=OffenseRushing.base_url) as response:
+        url = OffenseRushing.base_url.format(season_year=self.year)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=OffenseRushing.source).parser
 
@@ -451,6 +456,7 @@ class OffenseRushing(WebScraping):
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
                 'rush_fumbles': int(item['Rush FUM']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -466,14 +472,16 @@ class OffenseRushing(WebScraping):
         self.raw = None
 
 class OffenseReceiving(WebScraping):
-    base_url = os.getenv('OFFENSE_RECEIVING_URL')
+    base_url = str(os.getenv('OFFENSE_RECEIVING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=OffenseReceiving.base_url) as response:
+        url = OffenseReceiving.base_url.format(season_year=self.year)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=OffenseReceiving.source).parser
     
@@ -494,6 +502,7 @@ class OffenseReceiving(WebScraping):
                 'yards_per_reception': float(item['Yds/Rec']),
                 'rec_touchdowns': int(item['TD']),
                 'rec_fumbles': int(item['Rec FUM']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -509,14 +518,16 @@ class OffenseReceiving(WebScraping):
         self.raw = None
 
 class DefensePassing(WebScraping):
-    base_url = os.getenv('DEFENSE_PASSING_URL')
+    base_url = str(os.getenv('DEFENSE_PASSING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=DefensePassing.base_url) as response:
+        url = DefensePassing.base_url.format(season_year=self.year)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=DefensePassing.source).parser
 
@@ -541,6 +552,7 @@ class DefensePassing(WebScraping):
                 'interceptions': int(item['INT']),
                 'pass_rating': float(item['Rate'] ),
                 'sacks': int(item['Sck']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -556,14 +568,16 @@ class DefensePassing(WebScraping):
         self.raw = None
 
 class DefenseRushing(WebScraping):
-    base_url = os.getenv('DEFENSE_RUSHING_URL')
+    base_url = str(os.getenv('DEFENSE_RUSHING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=DefenseRushing.base_url) as response:
+        url = DefenseRushing.base_url.format(season_year=self.year)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=DefenseRushing.source).parser
 
@@ -585,6 +599,7 @@ class DefenseRushing(WebScraping):
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
                 'rush_fumbles': int(item['Rush FUM']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -600,14 +615,16 @@ class DefenseRushing(WebScraping):
         self.raw = None
 
 class DefenseReceiving(WebScraping):
-    base_url = os.getenv('DEFENSE_RECEIVING_URL')
+    base_url = str(os.getenv('DEFENSE_RECEIVING_URL'))
     source = "nfl"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=DefenseReceiving.base_url) as response:
+        url = DefenseReceiving.base_url.format(season_year=self.year)
+        async with session.get(url=url) as response:
             html = await response.text()
             self.raw = Table(html=html, source=DefenseReceiving.source).parser
 
@@ -629,6 +646,7 @@ class DefenseReceiving(WebScraping):
                 'rec_touchdowns': int(item['TD']),
                 'rec_fumbles': int(item['Rec FUM']),
                 'pass_defended': int(item['PDef']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -647,11 +665,13 @@ class AdvanceOffense(WebScraping):
     base_url = os.getenv('ADVANCE_OFFENSE_URL')
     source = "sumer"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=AdvanceOffense.base_url) as response:
+        params = { "season": self.year }
+        async with session.get(url=AdvanceOffense.base_url, params=params) as response:
             html = await response.text()
             self.raw = Table(html=html, source=AdvanceOffense.source).parser
 
@@ -667,7 +687,6 @@ class AdvanceOffense(WebScraping):
                 continue
 
             defaults = {
-                'season_year': int(item['Season']),
                 'expected_points_added_per_play': float(item['EPA/Play']),
                 'total_expected_points_added': float(item['Total EPA']),
                 'success_pct': float(item['Success %'].split('%')[0]),
@@ -676,6 +695,7 @@ class AdvanceOffense(WebScraping):
                 'average_depth_of_target': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
                 'interception_pct': float(item['Int %'].split('%')[0]),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -694,11 +714,13 @@ class AdvanceDefense(WebScraping):
     base_url = os.getenv('ADVANCE_DEFENSE_URL')
     source = "sumer"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
-        async with session.get(url=AdvanceDefense.base_url) as response:
+        params = { "season": self.year }
+        async with session.get(url=AdvanceDefense.base_url, params=params) as response:
             html = await response.text()
             self.raw = Table(html=html, source=AdvanceDefense.source).parser
 
@@ -714,7 +736,6 @@ class AdvanceDefense(WebScraping):
                 continue
 
             defaults = {
-                'season_year': int(item['Season']),
                 'expected_points_added_per_play': float(item['EPA/Play']),
                 'total_expected_points_added': float(item['Total EPA']),
                 'success_pct': float(item['Success %'].split('%')[0]),
@@ -723,6 +744,7 @@ class AdvanceDefense(WebScraping):
                 'average_depth_of_target_against': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
                 'interception_pct': float(item['Int %'].split('%')[0]),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -741,8 +763,9 @@ class CoverageSchemes(WebScraping):
     base_url = os.getenv('COVERAGE_SCHEMES_URL')
     source = "sharp"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=CoverageSchemes.base_url) as response:
@@ -765,6 +788,7 @@ class CoverageSchemes(WebScraping):
                 'zone_rate': float(item['Zone Rate'].split('%')[0]),
                 'middle_closed_rate': float(item['Middle Closed Rate'].split('%')[0]),
                 'middle_open_rate': float(item['Middle Open Rate'].split('%')[0]),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -783,8 +807,9 @@ class OffenseTendencies(WebScraping):
     base_url = os.getenv('OFFENSE_TENDENCIES_URL')
     source = "sharp"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=OffenseTendencies.base_url) as response:
@@ -808,6 +833,7 @@ class OffenseTendencies(WebScraping):
                 'airyards_per_att': float(item['AirYards/Att'].split('%')[0]),
                 'shotgun_rate': float(item['Shotgun Rate'].split('%')[0]),
                 'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0]),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -826,8 +852,9 @@ class CoverageStatsByPosition(WebScraping):
     base_url = os.getenv('COVERAGE_STATS_BY_POSITION_URL')
     source = "sharp"
 
-    def __init__(self):
+    def __init__(self, year):
         self.raw = None
+        self.year = year
 
     async def send_api_request(self, session: ClientSession):
         async with session.get(url=CoverageStatsByPosition.base_url) as response:
@@ -851,6 +878,7 @@ class CoverageStatsByPosition(WebScraping):
                 'yards_allowed_rb': float(item['YPT Allowed RB']),
                 'yards_allowed_outside': float(item['YPT Allowed Outside']),
                 'yards_allowed_slot': float(item['YPT Allowed Slot']),
+                'season_year': int(self.year),
                 'team': team_instance
             }
 
@@ -953,13 +981,7 @@ def should_pipeline_run() -> dict:
         return None
 
 def main():
-    manual_config = {
-        "year": 2025,
-        "season_type": 2,
-        "start_week": 7,
-        "end_week": 8
-    }
-
+    manual_config = PIPELINE_CONFIG
     # manual_config = None
     
     if manual_config:
@@ -984,17 +1006,17 @@ def main():
     events = Events()
     players = Players()
     stats = PlayerStats()
-    offense_passing = OffensePassing()
-    offense_rushing = OffenseRushing()
-    offense_receiving = OffenseReceiving()
-    defense_passing = DefensePassing()
-    defense_rushing = DefenseRushing()
-    defense_receiving = DefenseReceiving()
-    advance_offense = AdvanceOffense()
-    advance_defense = AdvanceDefense()
-    coverage_schemes = CoverageSchemes()
-    offense_tendencies = OffenseTendencies()
-    coverage_position = CoverageStatsByPosition()
+    offense_passing = OffensePassing(year=context['year'])
+    offense_rushing = OffenseRushing(year=context['year'])
+    offense_receiving = OffenseReceiving(year=context['year'])
+    defense_passing = DefensePassing(year=context['year'])
+    defense_rushing = DefenseRushing(year=context['year'])
+    defense_receiving = DefenseReceiving(year=context['year'])
+    advance_offense = AdvanceOffense(year=context['year'])
+    advance_defense = AdvanceDefense(year=context['year'])
+    coverage_schemes = CoverageSchemes(year=context['year'])
+    offense_tendencies = OffenseTendencies(year=context['year'])
+    coverage_position = CoverageStatsByPosition(year=context['year'])
 
     pl.create_endpoint(teams)
     pl.create_generator(events)

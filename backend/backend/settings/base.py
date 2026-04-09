@@ -20,7 +20,9 @@ from celery.schedules import crontab
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env_path = BASE_DIR.parent / '.env'
-load_dotenv(dotenv_path=env_path)
+
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
 
 # Application definition
 
@@ -31,6 +33,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'rest_framework',
     'django_filters',
     'corsheaders',
@@ -183,12 +186,13 @@ LOGOUT_REDIRECT_URL = '/login'
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'America/Chicago')
+CELERY_RESULT_EXPIRES = 3600
 
 # Celery Beat Schedule
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=5, hour=16, minute=30),
+        'schedule': crontab(day_of_week=2, hour=17, minute=52),
     },
     'refresh-nfl-schedule-every-minute': {
         'task': 'nfl.tasks.update_nfl_cache_task',
