@@ -981,8 +981,7 @@ def should_pipeline_run() -> dict:
         return None
 
 def main():
-    manual_config = PIPELINE_CONFIG
-    # manual_config = None
+    manual_config = None
     
     if manual_config:
         logger.info(f"MANUAL MODE: Forcing run for {manual_config}")

@@ -52,7 +52,10 @@ def weekly_schedule(force_refresh: bool = False) -> dict:
     
     logger.info(f"Cache Miss: Fetching search term {cache_key} from NFL")
     
-    base_url = os.getenv("WEEKLY_SCHEDULE_URL")
+    base_url = os.getenv(
+        "WEEKLY_SCHEDULE_URL",
+        "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+    )
     raw_data = fetch_from_nfl(base_url=base_url).json()
     if not raw_data: return None
 
