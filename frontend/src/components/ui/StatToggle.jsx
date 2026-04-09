@@ -9,7 +9,7 @@ export default function StatToggle({ options, activeKey, onSelect }) {
           onClick={() => onSelect(opt.key)}
           className={`whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors ${
             activeKey === opt.key
-              ? 'bg-neutral-800 text-white'
+              ? 'bg-neutral-800 text-white border border-neutral-600'
               : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800 hover:text-neutral-200'
           }`}
         >

@@ -59,7 +59,8 @@ class StatsLogicTest(TestCase):
         TeamOffensePassingStatsFactory(team=team, pass_yards=4000)
 
         fetched_team = Team.objects.get(abbreviation="DET")
-        self.assertEqual(fetched_team.team_offense_passing.pass_yards, 4000)
+        stats = fetched_team.team_offense_passing.get(pass_yards=4000)
+        self.assertEqual(stats.pass_yards, 4000)
 
     def test_game_teams_are_distinct(self):
         game = GameFactory()

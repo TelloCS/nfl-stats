@@ -7,19 +7,9 @@ from .models import (
     Game,
     PlayerGameStats,
     Player,
-    TeamOffensePassingStats,
-    TeamOffenseRushingStats,
-    TeamOffenseReceivingStats,
-    TeamDefensePassingStats,
-    TeamDefenseRushingStats,
-    TeamDefenseReceivingStats,
-    TeamAdvanceOffenseStats,
-    TeamAdvanceDefenseStats,
-    TeamCoverageSchemeStats,
-    TeamOffensePlayCallingStats,
-    TeamCoverageStatsByPosition,
     TeamRankSnapshot
 )
+from django.forms.models import model_to_dict
 
 
 #######################################################################################################################
@@ -44,15 +34,10 @@ class TotalSerializer(serializers.ModelSerializer):
 
 
 class TeamSerializerV1(serializers.ModelSerializer):
-    point_spread = PointSpreadSerializer(many=True, read_only=True)
-    moneyline = MoneylineSerializer(many=True, read_only=True)
-    total = TotalSerializer(many=True, read_only=True)
-
     class Meta:
         model = Team
         fields = [
             'id', 'slug', 'full_name', 'nickname', 'abbreviation', 'conference', 'division',
-            'point_spread', 'moneyline', 'total'
         ]
         read_only_fields = ['slug']
 
@@ -144,124 +129,35 @@ class PlayerSerializer(serializers.ModelSerializer):
 #######################################################################################################################
 
 
-class TeamOffensePassingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamOffensePassingStats
-        fields = [
-            'pass_attempts', 'completions', 'completion_pct', 'yards_per_attempt', 'pass_yards',
-            'pass_touchdowns', 'interceptions', 'pass_rating', 'sacks', 'sack_yards',
-        ]
-
-
-class TeamOffenseRushingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamOffenseRushingStats
-        fields = [
-            'rush_attempts', 'rush_yards', 'yards_per_carry', 'rush_touchdowns', 'rush_fumbles',
-        ]
-
-
-class TeamOffenseReceivingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamOffenseReceivingStats
-        fields = [
-            'receptions', 'rec_yards', 'yards_per_reception', 'rec_touchdowns', 'rec_fumbles',
-        ]
-
-
-class TeamDefensePassingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamDefensePassingStats
-        fields = [
-            'pass_attempts', 'completions', 'completion_pct', 'yards_per_attempt', 'pass_yards',
-            'pass_touchdowns', 'interceptions', 'pass_rating', 'sacks',
-        ]
-
-
-class TeamDefenseRushingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamDefenseRushingStats
-        fields = [
-            'rush_attempts', 'rush_yards', 'yards_per_carry', 'rush_touchdowns', 'rush_fumbles',
-        ]
-
-
-class TeamDefenseReceivingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamDefenseReceivingStats
-        fields = [
-            'receptions', 'rec_yards', 'yards_per_reception', 'rec_touchdowns', 'rec_fumbles', 'pass_defended',
-        ]
-
-
-class TeamAdvanceOffenseStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamAdvanceOffenseStats
-        fields = [
-            'expected_points_added_per_play', 'total_expected_points_added', 'success_pct',
-            'expected_points_added_per_pass', 'expected_points_added_per_rush',
-            'average_depth_of_target', 'scramble_pct', 'interception_pct',
-        ]
-
-
-class TeamAdvanceDefenseStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamAdvanceDefenseStats
-        fields = [
-            'expected_points_added_per_play', 'total_expected_points_added', 'success_pct',
-            'expected_points_added_allowed_per_pass', 'expected_points_added_allowed_per_rush',
-            'average_depth_of_target_against', 'scramble_pct', 'interception_pct',
-        ]
-
-
-class TeamCoverageSchemeStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamCoverageSchemeStats
-        fields = [
-            'man_rate', 'zone_rate', 'middle_closed_rate', 'middle_open_rate',
-        ]
-
-
-class TeamOffensePlayCallingStatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamOffensePlayCallingStats
-        fields = [
-            'motion_rate', 'play_action_rate', 'airyards_per_att', 'shotgun_rate', 'nohuddle_rate',
-        ]
-
-
-class TeamCoverageStatsByPositionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeamCoverageStatsByPosition
-        fields = [
-            'yards_allowed_wr', 'yards_allowed_te', 'yards_allowed_rb', 'yards_allowed_outside', 'yards_allowed_slot',
-        ]
-
-
 class TeamStatsSerializer(serializers.ModelSerializer):
-    team_offense_passing = TeamOffensePassingStatsSerializer(read_only=True)
-    team_offense_rushing = TeamOffenseRushingStatsSerializer(read_only=True)
-    team_offense_receiving = TeamOffenseReceivingStatsSerializer(read_only=True)
-    team_defense_passing = TeamDefensePassingStatsSerializer(read_only=True)
-    team_defense_rushing = TeamDefenseRushingStatsSerializer(read_only=True)
-    team_defense_receiving = TeamDefenseReceivingStatsSerializer(read_only=True)
-    team_advance_offense = TeamAdvanceOffenseStatsSerializer(read_only=True)
-    team_advance_defense = TeamAdvanceDefenseStatsSerializer(read_only=True)
-    team_coverage_rates = TeamCoverageSchemeStatsSerializer(read_only=True)
-    team_play_calling = TeamOffensePlayCallingStatsSerializer(read_only=True)
-    team_coverage_stats_by_position = TeamCoverageStatsByPositionSerializer(read_only=True)
-
     class Meta:
         model = Team
         fields = [
             'id', 'slug', 'full_name', 'nickname', 'abbreviation', 'conference', 'division',
+        ]
+        read_only_fields = ['slug']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        stat_keys = [
             'team_offense_passing', 'team_offense_rushing', 'team_offense_receiving',
             'team_defense_passing', 'team_defense_rushing', 'team_defense_receiving',
             'team_advance_offense', 'team_advance_defense', 'team_coverage_rates',
             'team_play_calling', 'team_coverage_stats_by_position'
         ]
 
-        read_only_fields = ['slug']
+        for key in stat_keys:
+            attr_name = f"prefetched_{key}"
+            prefetched_list = getattr(instance, attr_name, [])
+
+            if prefetched_list:
+                stats = model_to_dict(prefetched_list[0])
+                stats.pop('id', None)
+                stats.pop('team', None)
+                data[key] = stats
+            else:
+                data[key] = None
+        return data
 
 #######################################################################################################################
 
@@ -273,7 +169,7 @@ class TeamRankSnapshotSerializer(serializers.ModelSerializer):
 
 
 class TeamRanksSerializer(serializers.ModelSerializer):
-    rank_snapshot = TeamRankSnapshotSerializer(read_only=True)
+    rank_snapshot = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
@@ -284,6 +180,12 @@ class TeamRanksSerializer(serializers.ModelSerializer):
             'abbreviation',
             'rank_snapshot'
         ]
+
+    def get_rank_snapshot(self, obj):
+        snapshots = getattr(obj, 'prefetched_snapshots', [])
+        if snapshots:
+            return TeamRankSnapshotSerializer(snapshots[0]).data
+        return None
 
 #######################################################################################################################
 

@@ -47,15 +47,6 @@ export default function UserDropdown({ user, onLogout }) {
           </div>
 
           <Link
-            to="/profile"
-            className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            <User size={16} className="text-neutral-400" />
-            Your Profile
-          </Link>
-
-          <Link
             to="/settings"
             className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors"
             onClick={() => setIsOpen(false)}

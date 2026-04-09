@@ -12,7 +12,7 @@ import createTeamStatsRanksQueryOptions from "../queryOptions/createTeamStatsRan
 
 export default function PlayerDashboard() {
   const { player_id, player_slug } = useParams();
-  const { filters, setFilter } = useUrlFilters({ season_year: "" });
+  const { filters, setFilter } = useUrlFilters({ season_year: "", season_type: "" });
 
   const {
     data: playerData,
@@ -31,38 +31,62 @@ export default function PlayerDashboard() {
     isPending: isRankingPending,
     isError: isRankingError
   } = useVersionedQuery(
-    createTeamStatsRanksQueryOptions
+    createTeamStatsRanksQueryOptions,
+    filters
   );
 
   const isPending = isPlayerPending || isRankingPending;
   const isError = isPlayerError || isRankingError;
+  const hasRankings = rankingData && rankingData.length > 0;
 
   return (
     <>
       <UpcomingGames />
-      <div className="bg-[#000000] min-h-screen relative group">
+      <div className="bg-[#000000] min-h-[calc(100vh-218px)] relative group">
         {isPending ? (
           <div className="flex justify-center items-center h-[500px]">
             <CustomLoader />
           </div>
         ) : isError ? (
           <div className="flex flex-col justify-center items-center h-[500px] text-white">
-            <h2 className="text-3xl font-bold mb-2 uppercase">Player Not Found</h2>
-            <p className="text-neutral-500">
-              {playerError?.response?.status === 404
+            <p className="text-center">
+              {playerError?.status === 404
                 ? "The requested NFL player stats could not be located."
                 : "An unexpected error occurred while fetching stats."}
             </p>
+            <button
+              onClick={() => window.history.back()}
+              className="bg-neutral-900 mt-8 px-6 py-3 border border-neutral-800 rounded-md font-bold hover:bg-neutral-800 transition-colors"
+            >
+              Go Back
+            </button>
           </div>
         ) : (
           <div className="container mx-auto p-4 md:p-8 relative">
+            {!hasRankings && filters?.season_year && (
+              <div className="mb-6 p-4 bg-neutral-900 border border-neutral-800 rounded-lg">
+                <p className="text-neutral-400 text-sm">
+                  <span className="text-amber-500 font-semibold">Note:</span> Matchup rankings are currently unavailable for the {filters.season_year} season.
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="col-span-1 lg:col-span-2">
-                <PlayerPerformanceSection data={playerData} onFilterChange={setFilter} />
+              <div className={hasRankings ? "col-span-1 lg:col-span-2" : "col-span-1 lg:col-span-3"}>
+                <PlayerPerformanceSection
+                  data={playerData}
+                  onFilterChange={setFilter}
+                  filters={filters}
+                  hasRankings={hasRankings}
+                />
               </div>
-              <div className="col-span-1">
-                <MatchupAnalysisSection games={playerData?.stats} rankingData={rankingData} />
-              </div>
+              {hasRankings && (
+                <div className="col-span-1">
+                  <MatchupAnalysisSection
+                    games={playerData?.stats}
+                    rankingData={rankingData}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

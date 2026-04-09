@@ -9,9 +9,16 @@ import useUrlTableSort from '../hooks/useUrlTableSort';
 import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOptions';
 
+import { FilterConfig } from "../components/Config";
+import useUrlFilters, { sortParams } from "../hooks/useUrlFilters";
+import SelectDropdown from "../components/ui/SelectDropdown";
+
 export default function TeamStats() {
+  const { filters, setFilter } = useUrlFilters({
+    season_year: FilterConfig.season_year[0].value
+  });
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: teamData, isLoading } = useVersionedQuery(createTeamStatsQueryOptions);
+  const { data: teamData, isLoading } = useVersionedQuery(createTeamStatsQueryOptions, filters);
 
   const activeTabKey = searchParams.get("tab") || TeamStatMap[0].key;
 
@@ -36,20 +43,26 @@ export default function TeamStats() {
   const { sortedItems, handleHeaderClick, sortConfig } = useUrlTableSort(teamData, customGetters);
 
   const handleTabChange = (newTabKey) => {
-    setSearchParams({ tab: newTabKey });
+    setSearchParams((prevParams) => {
+      const updatedParams = new URLSearchParams(prevParams);
+      updatedParams.set("tab", newTabKey);
+      return sortParams(updatedParams);
+    });
   };
 
   return (
     <div className="min-h-screen bg-[#000000] text-neutral-200">
       <UpcomingGames />
-      
-      <FilterSection 
-        activeTabKey={activeTabConfig.key} 
-        onTabChange={handleTabChange} 
+
+      <FilterSection
+        activeTabKey={activeTabConfig.key}
+        onTabChange={handleTabChange}
+        filters={filters}
+        setFilter={setFilter}
       />
 
       <div className="container mx-auto flex flex-col p-4 md:p-8">
-        <ResultsTable 
+        <ResultsTable
           isLoading={isLoading}
           data={sortedItems}
           columnsToShow={columnsToShow}
@@ -62,24 +75,37 @@ export default function TeamStats() {
   );
 }
 
-const FilterSection = memo(({ activeTabKey, onTabChange }) => (
-  <div className="bg-[#000000] border-b border-neutral-800">
-    <div className="container mx-auto flex px-4 md:px-8 py-4 overflow-x-auto hide-scrollbar">
-      <div className="flex flex-nowrap gap-2 pt-1">
-        {TeamStatMap.map((tab) => (
-          <button 
-            key={tab.key} 
-            onClick={() => onTabChange(tab.key)}
-            className={`cursor-pointer whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors
+const FilterSection = memo(({ activeTabKey, onTabChange, filters, setFilter }) => (
+  <div className="border-b border-neutral-800">
+    <div className="container mx-auto px-4 md:px-8 py-4 bg-[#000000] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+
+      <div className="w-full md:w-auto overflow-x-auto hide-scrollbar">
+        <div className="flex flex-nowrap gap-3">
+          {TeamStatMap.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => onTabChange(tab.key)}
+              className={`whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors
               ${activeTabKey === tab.key
-                ? 'bg-neutral-800 text-white'
-                : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800 hover:text-neutral-200'
-              }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+                  ? 'bg-neutral-800 text-white border border-neutral-600'
+                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800 hover:text-neutral-200'
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <div className="w-full md:w-auto">
+        <SelectDropdown
+          value={filters?.season_year}
+          onChange={(v) => setFilter('season_year', v)}
+          options={FilterConfig.season_year}
+          minWidth="120px"
+        />
+      </div>
+
     </div>
   </div>
 ));

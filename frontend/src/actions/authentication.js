@@ -35,7 +35,7 @@ export const getProfile = async () => {
 };
 
 export const deleteAccount = async () => {
-    const { data } = await api.delete('delete-account/');
+    const { data } = await api.delete('/auth/delete-account');
     return data;
 };
 

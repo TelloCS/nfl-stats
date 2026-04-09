@@ -14,8 +14,8 @@ app_name = 'nfl'
 
 urlpatterns = [
     path('teams/', TeamListAPIView.as_view(), name='team-list-api-view'),
-    path('team/stats/', TeamStatsListView.as_view(), name='team-stats-view'),
-    path('team/stats/ranks/', TeamRanksListView.as_view(), name='team-stats-ranks-view'),
+    path('team/stats', TeamStatsListView.as_view(), name='team-stats-view'),
+    path('team/stats/ranks', TeamRanksListView.as_view(), name='team-stats-ranks-view'),
 
     # Used for autocomplete search bar
     path('players/', PlayerListAPIView.as_view(), name='player-list-api-view'),

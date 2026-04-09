@@ -32,7 +32,6 @@ export default function MatchupAnalysisSection({ games, rankingData }) {
       <div className="flex flex-col sm:flex-row sm:items-center text-neutral-400 justify-between mb-4 gap-4">
         <div className="min-w-0">
           <span className="font-semibold text-white text-lg">Matchups</span>
-          <p className="text-xs text-[#a1a1a1] italic">Only Current Season</p>
         </div>
         
         <SelectDropdown 

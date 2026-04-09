@@ -6,7 +6,6 @@ from celery.utils.log import get_task_logger
 from django.db import transaction
 from django.db.models import F, Window
 from django.db.models.functions import DenseRank
-from django.core.cache import cache
 from nfl.utils import refresh_application_cache
 from .models import (
     TeamRankSnapshot,
@@ -15,6 +14,7 @@ from .models import (
     TeamAdvanceOffenseStats, TeamAdvanceDefenseStats, TeamCoverageSchemeStats,
     TeamOffensePlayCallingStats, TeamCoverageStatsByPosition
 )
+from nfl.services.utils import PIPELINE_CONFIG
 
 logger = get_task_logger(__name__)
 
@@ -31,7 +31,7 @@ def weekly_nfl_sync():
             logger.info("Triggered follow-up rank update task")
             transaction.on_commit(lambda: update_team_rank_snapshots.delay())
     except Exception as e:
-        logger.error(f"Scheduled task failed: {e}")
+        logger.exception(f"Scheduled task failed: {e}")
 
 
 @shared_task
@@ -145,7 +145,7 @@ def update_team_rank_snapshots():
             tid = item['team_id']
             if tid not in master_data:
                 master_data[tid] = {}
-            stats_only = {k: v for k, v in item.items() if k != 'team_id'}
+            stats_only = {k: v for k, v in item.items() if k not in ['team_id', 'season_year']}
             master_data[tid].update(stats_only)
 
     merge_results(off_pass)
@@ -165,27 +165,21 @@ def update_team_rank_snapshots():
             for tid, stats in master_data.items():
                 TeamRankSnapshot.objects.update_or_create(
                     team_id=tid,
-                    defaults=stats
+                    defaults=stats,
+                    season_year=PIPELINE_CONFIG['year']
                 )
 
             logger.info("Updated TeamRankSnapshot Model")
             transaction.on_commit(finalize_rank_updates)
     except Exception as e:
-        logger.error(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
+        logger.exception(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
 
 
 def finalize_rank_updates():
     """
     Runs only after the ranks are safely committed to the database.
     """
-    # 1. Clear specific keys
-    cache_keys_to_delete = ["team_list", "team_stats", "team_ranks"]
-    cache.delete_many(cache_keys_to_delete)
-
-    # 2. Bump the global version
-    # This is what tells TanStack Query 'The ranks are ready!'
     refresh_application_cache()
-
     logger.info("Team caches invalidated and Global Version bumped.")
 
 

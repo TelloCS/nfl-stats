@@ -10,7 +10,6 @@ COPY requirements.txt .
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    netcat-openbsd \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -46,4 +45,4 @@ ENTRYPOINT ["./entrypoint.prod.sh"]
 
 USER nfl
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "backend.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "backend.wsgi:application", "--max-requests", "1000", "--max-requests-jitter", "50"]

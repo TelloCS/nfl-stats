@@ -1,6 +1,6 @@
 from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter
 from django.db.models import Q, F
-from .models import Player, PlayerGameStats
+from .models import Team, Player, PlayerGameStats
 
 
 class PlayerFilter(FilterSet):
@@ -21,6 +21,22 @@ class PlayerGameLogFilter(FilterSet):
     class Meta:
         model = Player
         fields = ('season_year', 'season_type',)
+
+
+class TeamRankFilter(FilterSet):
+    season_year = NumberFilter(field_name="rank_snapshot__season_year")
+
+    class Meta:
+        model = Team
+        fields = ['season_year']
+
+
+class TeamStatsFilter(FilterSet):
+    season_year = NumberFilter(field_name='team_offense_passing__season_year')
+
+    class Meta:
+        model = Team
+        fields = ['season_year']
 
 
 class PlayerMatchupsFilter(FilterSet):
