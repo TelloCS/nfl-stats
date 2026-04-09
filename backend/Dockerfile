@@ -39,13 +39,10 @@ FROM python AS prod
 ENV DJANGO_SETTINGS_MODULE=backend.settings.production
 
 COPY --chown=nfl:nfl . .
-
-RUN mkdir -p /app/backend/staticfiles
-RUN chown -R nfl:nfl /app/backend/staticfiles
-
 RUN chmod +x entrypoint.prod.sh
-
 ENTRYPOINT ["./entrypoint.prod.sh"]
+
+RUN chown -R nfl:nfl /app/backend
 
 USER nfl
 
