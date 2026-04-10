@@ -366,6 +366,6 @@ celerybeat-schedule*
 templates/
 structure.md
 
-manage.sh
 docker-compose.override.yml
+docker-compose.prod.yml
 local_backup.sql

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "../actions/authentication";
+import { logout } from "../api/authentication";
 import { useUser } from "../hooks/useUser";
 import { House , Menu, X } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
@@ -29,7 +29,9 @@ export default function Layout() {
       queryClient.clear();
       navigate("/login");
     },
-    onError: () => alert("Failed to logout. Please try again.")
+    onError: (error) => {
+      console.error("Logout failed:", error)
+    }
   });
 
   if (isLoading) return <div className="h-[80px] bg-neutral-950 border-b border-neutral-800" />;
