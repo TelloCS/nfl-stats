@@ -26,9 +26,23 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 ```
-3. In the root directory
+3. Use a docker-compose.override.yml to define target as dev for backend service, define env_file for each service, and set volumes.
+```text
+# Turn off nginx for hot reloading.
+nginx:
+    profiles:
+      - donotstart
+
+# Turn off dokploy-network.
+networks:
+  default:
+  dokploy-network:
+    external: false
+```
+
+4. In the root directory
 ```shell
-./manage.sh local
+docker compose up --build
 ```
 ## More things to know
 Don't need to sign up locally though it provides more API requests to the backend due to rate limiting being implemented. If experiencing rate limiting here is a easy work around.
@@ -43,7 +57,7 @@ docker exec -it [redis-container] redis-cli FLUSHALL
 ```
 - Should get a response saying "OK".
 
-Though this is tedious if you want you can modify DEFAULT_THROTTLE_RATES or even remove the ratelimit decorators in the nfl app views.py and just rebuild the docker container.
+You can modify DEFAULT_THROTTLE_RATES or even remove the ratelimit decorators in the nfl app views.py and just rebuild the docker container.
 ```text
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
@@ -51,8 +65,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '250/day',
-        'user': '750/day'
+        'anon': '50/minute',
+        'user': '5000/hour'
     },
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
