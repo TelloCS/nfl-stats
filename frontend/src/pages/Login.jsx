@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { login } from '../actions/authentication';
-import { useNavigate } from 'react-router-dom';
+import { login } from '../api/authentication';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
 
@@ -34,10 +34,6 @@ export default function Login() {
   const onSubmit = (e) => {
     e.preventDefault();
     loginMutation.mutate({ email, password });
-  };
-
-  const handleGuestAccess = () => {
-    navigate('/');
   };
 
   const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
@@ -126,23 +122,28 @@ export default function Login() {
           </div>
         </div>
 
-        <button
-          onClick={handleGuestAccess}
+        <Link
+          to="/"
           className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-400 bg-neutral-900 border border-neutral-800
           rounded-lg hover:bg-neutral-800 hover:text-white transition-colors'
         >
           Continue as Guest
-        </button>
+        </Link>
 
-        <p className='text-center text-sm text-white mt-6'>
-          Don't have an account?{' '}
-          <span
-            onClick={() => navigate('/signup')}
-            className='font-semibold text-neutral-400 hover:underline cursor-pointer'
-          >
-            Sign up
+        <div className='text-center text-sm text-white mt-6'>
+          <span>
+            Don't have an account?{' '}
           </span>
-        </p>
+          <Link
+            to='/signup'
+          >
+            <span
+              className='font-semibold text-neutral-400 hover:underline cursor-pointer'
+            >
+              Sign Up
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );

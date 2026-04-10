@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import api from '../actions/authentication/';
+import api from '../api/authentication/';
 
 let hasRequestedToken = false;
 
@@ -14,7 +14,7 @@ const CSRFToken = () => {
       if (!hasRequestedToken && !cookieExists) {
         try {
           hasRequestedToken = true;
-          await api.get('/auth/csrf-cookie');
+          await api.get('/auth/csrf-cookie/');
           
         } catch {
           hasRequestedToken = false;

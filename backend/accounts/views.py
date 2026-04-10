@@ -103,7 +103,7 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             logout(request=request)
-            return Response({"success": "Logged out successfully"})
+            return Response({"success": "Logged out successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(f"Logging out error: {e}")
             return Response({"error": "Something went wrong when logging out"})
@@ -115,12 +115,15 @@ class DeleteAccountView(APIView):
     def delete(self, request):
         try:
             user = request.user
-            logout(request=request)
             user.delete()
-            return Response({'success': 'Account deleted'}, status=status.HTTP_204_NO_CONTENT)
+            logout(request=request)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             logger.exception(f"Deleting user error: {e}")
-            return Response({'error': 'Something went wrong when trying to delete user'})
+            return Response(
+                {'error': 'Internal server error during deletion'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

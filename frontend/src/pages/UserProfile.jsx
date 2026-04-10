@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
-import { deleteAccount } from '../actions/authentication';
+import { deleteAccount } from '../api/authentication';
 
 const UserProfile = () => {
   const { data: user } = useUser();
@@ -15,18 +15,16 @@ const UserProfile = () => {
     mutationFn: deleteAccount,
     onSuccess: () => {
       queryClient.clear();
-      queryClient.setQueryData(['userProfile'], null);
       navigate('/', { replace: true });
     },
     onError: (error) => {
-      if (error.response?.status === 500) {
-        console.warn("Server 500 error, but account was likely deleted. Forcing cleanup...");
+      if (error.response?.status === 403 || error.response?.status === 404) {
         queryClient.clear();
         navigate('/', { replace: true });
         return;
       }
 
-      console.error("Delete failed:", error);
+      console.error("Deleting Account failed:", error);
     }
   });
 

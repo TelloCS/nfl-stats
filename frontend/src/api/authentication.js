@@ -14,28 +14,28 @@ api.defaults.xsrfHeaderName = 'X-CSRFToken';
 
 export const register = async ({ username, email, password1, password2 }) => {
     const body = JSON.stringify({ username, email, password1, password2 });
-    const { data } = await api.post('/auth/signup', body);
+    const { data } = await api.post('/auth/signup/', body);
     return data;
 };
 
 export const login = async ({ email, password }) => {
     const body = JSON.stringify({ email, password });
-    const { data } = await api.post('/auth/login', body);
+    const { data } = await api.post('/auth/login/', body);
     return data;
 };
 
 export const logout = async () => {
-    const { data } = await api.post('/auth/logout');
+    const { data } = await api.post('/auth/logout/');
     return data;
 };
 
 export const getProfile = async () => {
-    const { data } = await api.get('/auth/user/me');
+    const { data } = await api.get('/auth/user/me/');
     return data;
 };
 
 export const deleteAccount = async () => {
-    const { data } = await api.delete('/auth/delete-account');
+    const { data } = await api.delete('/auth/delete-account/');
     return data;
 };
 

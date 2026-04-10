@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { register } from '../actions/authentication';
-import { useNavigate } from 'react-router-dom';
+import { register } from '../api/authentication';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
 
@@ -43,11 +43,7 @@ export default function Register() {
 
     registerMutation.mutate({ username, email, password1, password2 });
   };
-
-  const handleGuestAccess = () => {
-    navigate('/');
-  };
-
+  
   const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
 
   return (
@@ -153,23 +149,28 @@ export default function Register() {
           </div>
         </div>
 
-        <button
-          onClick={handleGuestAccess}
+        <Link
+          to="/"
           className='w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-neutral-400 bg-neutral-900 border border-neutral-800
           rounded-lg hover:bg-neutral-800 hover:text-white transition-colors'
         >
           Continue as Guest
-        </button>
+        </Link>
 
-        <p className='text-center text-sm text-white mt-6'>
-          Already have an account?{' '}
-          <span
-            onClick={() => navigate('/login')}
-            className='font-semibold text-neutral-400 hover:underline cursor-pointer'
-          >
-            Log in
+        <div className='text-center text-sm text-white mt-6'>
+          <span>
+            Already have an account?{' '}
           </span>
-        </p>
+          <Link
+            to='/login'
+          >
+            <span
+              className='font-semibold text-neutral-400 hover:underline cursor-pointer'
+            >
+              Log in
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );
