@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function UserDropdown({ user, onLogout }) {

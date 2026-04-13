@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 # Not currently in use
-useAuth.jsx
 useAuthv2.jsx
 SampleGraph.jsx
 DropdownFilter.jsx

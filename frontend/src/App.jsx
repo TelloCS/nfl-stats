@@ -1,6 +1,7 @@
 import './App.css';
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './context/AuthProvider';
 import PublicRoute from "./components/PublicRoute";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
@@ -25,53 +26,42 @@ const queryClient = new QueryClient({
 
 const router = createBrowserRouter([
   {
-    element: <PublicRoute />,
-    errorElement: <ErrorPage />,
+    element: (
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    ),
     children: [
       {
-        path: '/signup',
-        element: <Register />,
-      },
-      {
-        path: '/login',
-        element: <Login />,
-      },
-    ]
-  },
-  {
-    element: <ProtectedRoute />,
-    errorElement: <ErrorPage />,
-    children: [
-      { 
-        path: '/settings', 
-        element: <Layout />, 
+        element: <PublicRoute />,
+        errorElement: <ErrorPage />,
         children: [
-          { index: true, element: <UserProfile /> }
+          { path: '/signup', element: <Register /> },
+          { path: '/login', element: <Login /> },
+        ]
+      },
+      {
+        element: <ProtectedRoute />,
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            path: '/settings',
+            element: <Layout />,
+            children: [{ index: true, element: <UserProfile /> }]
+          }
+        ]
+      },
+      {
+        path: '/',
+        element: <Layout />,
+        errorElement: <ErrorPage />,
+        children: [
+          { index: true, element: <Home /> },
+          { path: '/player/stats/id/:player_id/:player_slug', element: <PlayerDashboard /> },
+          { path: '/position-vs-opponent/', element: <PositionOpponent /> },
+          { path: '/team/stats/', element: <TeamStats /> },
         ]
       }
-    ]
-  },
-  {
-    path: '/',
-    element: <Layout />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <Home />
-      },
-      {
-        path: '/player/stats/id/:player_id/:player_slug',
-        element: <PlayerDashboard />
-      },
-      {
-        path: '/position-vs-opponent/',
-        element: <PositionOpponent />
-      },
-      {
-        path: '/team/stats/',
-        element: <TeamStats />
-      },
     ]
   }
 ]);

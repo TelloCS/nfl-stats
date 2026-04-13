@@ -55,13 +55,12 @@ class SignUpView(APIView):
             return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.create_user(
+            User.objects.create_user(
                 email=email,
                 username=username,
                 password=p1
             )
 
-            login(request=request, user=user)
             return Response({'success': 'User created'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.exception(f"Signup Error: {e}")

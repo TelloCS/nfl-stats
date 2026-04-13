@@ -1,31 +1,16 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { login } from '../api/authentication';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const { loginMutation } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(location.state?.message || null);
-
-  const queryClient = useQueryClient();
-
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-      navigate('/');
-    },
-    onError: () => {
-      setSuccessMessage(null);
-    }
-  });
 
   const { email, password } = formData;
 
@@ -49,14 +34,6 @@ export default function Login() {
           </div>
           <h1 className='text-2xl font-bold text-white'>Sign in with email</h1>
         </div>
-
-        {successMessage && (
-          <div className="mb-6 p-3 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg
-          text-center flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-1">
-            <CheckCircle size={16} />
-            {successMessage}
-          </div>
-        )}
 
         <form onSubmit={onSubmit} className='space-y-4'>
           <div className='relative'>

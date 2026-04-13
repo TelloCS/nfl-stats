@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
 import CustomLoader from './CustomLoader';
 
 const PublicRoute = () => {
-  const { data: user, isLoading } = useUser();
+  const { isLoggedIn, isLoading } = useAuth();
 
   if (isLoading)
     return (
@@ -15,7 +15,7 @@ const PublicRoute = () => {
       </div>
     )
 
-  if (user) {
+  if (isLoggedIn) {
     return <Navigate to="/" replace />;
   }
 

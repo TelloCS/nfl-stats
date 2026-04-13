@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { register } from '../api/authentication';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { UserPlus, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
-  const navigate = useNavigate();
+  const { registerMutation } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -14,30 +13,17 @@ export default function Register() {
     password2: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [validationError, setValidationError] = useState(null);
-
-  const registerMutation = useMutation({
-    mutationFn: register,
-    onSuccess: () => {
-      navigate('/', { state: { message: "Account created. Redirecting..." } });
-    },
-    onError: () => {
-      setValidationError(null);
-    }
-  });
 
   const { username, email, password1, password2 } = formData;
 
   const onChange = e => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationError(null);
   };
 
   const onSubmit = e => {
     e.preventDefault();
 
     if (password1 !== password2) {
-      setValidationError("Passwords do not match");
       return;
     }
 
@@ -134,9 +120,9 @@ export default function Register() {
           </button>
         </form>
 
-        {(validationError || registerMutation.isError) && (
+        {registerMutation.isError && (
           <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center animate-in fade-in slide-in-from-top-1">
-            {validationError || registerMutation.error?.response?.data?.error || "Registration failed"}
+            {registerMutation.error?.response?.data?.error || "Registration failed"}
           </div>
         )}
 
