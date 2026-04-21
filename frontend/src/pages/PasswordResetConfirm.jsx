@@ -11,7 +11,6 @@ const PasswordResetConfirm = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [message, setMessage] = useState('');
   const [status, setStatus] = useState({ type: '', msg: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -88,7 +87,7 @@ const PasswordResetConfirm = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              disabled={isLoading || message}
+              disabled={isLoading}
             />
             <PasswordToggle isVisible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
           </div>
@@ -105,7 +104,7 @@ const PasswordResetConfirm = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              disabled={isLoading || message}
+              disabled={isLoading}
             />
             <button
               type="button"
@@ -119,7 +118,7 @@ const PasswordResetConfirm = () => {
             className='w-full py-2.5 px-4 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-lg
             hover:bg-emerald-500 hover:border-emerald-500 transition-colors mt-2'
             type="submit"
-            disabled={isLoading || message}
+            disabled={isLoading}
             style={{ padding: '10px', cursor: 'pointer' }}
           >
             {isLoading ? 'Resetting...' : 'Reset Password'}
