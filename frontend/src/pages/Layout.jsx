@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "../api/authentication";
-import { useUser } from "../hooks/useUser";
+import { Outlet, Link } from "react-router-dom";
 import { House , Menu, X } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
+import { useAuth } from "../hooks/useAuth";
 
 export default function Layout() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { data: user, isLoading } = useUser();
+  const { user, isLoading, isLoggedIn, logoutMutation } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -22,17 +18,6 @@ export default function Layout() {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  const logoutMutation = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      queryClient.clear();
-      navigate("/login");
-    },
-    onError: (error) => {
-      console.error("Logout failed:", error)
-    }
-  });
 
   if (isLoading) return <div className="h-[80px] bg-neutral-950 border-b border-neutral-800" />;
 
@@ -54,7 +39,7 @@ export default function Layout() {
             <div className="flex items-center gap-4 lg:gap-8">
               <SearchBar />
               <div className="flex gap-4 items-center">
-                {user ? (
+                {isLoggedIn ? (
                   <UserDropdown user={user} onLogout={() => logoutMutation.mutate()} />
                 ) : (
                   <div className="hidden lg:flex items-center gap-4">

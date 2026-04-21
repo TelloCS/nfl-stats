@@ -1,32 +1,14 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../hooks/useUser';
-import { deleteAccount } from '../api/authentication';
+import { useAuth } from '../hooks/useAuth';
 
 const UserProfile = () => {
-  const { data: user } = useUser();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
+  const { user, deleteMutation } = useAuth();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const mutation = useMutation({
-    mutationFn: deleteAccount,
-    onSuccess: () => {
-      queryClient.clear();
-      navigate('/', { replace: true });
-    },
-    onError: (error) => {
-      if (error.response?.status === 403 || error.response?.status === 404) {
-        queryClient.clear();
-        navigate('/', { replace: true });
-        return;
-      }
-
-      console.error("Deleting Account failed:", error);
-    }
-  });
+  const onSubmit = e => {
+    e.preventDefault();
+    deleteMutation.mutate()
+  }
 
   return (
     <div className="relative min-h-[calc(100vh-81px)] bg-[#000000] flex flex-col justify-center overflow-hidden font-poppins">
@@ -62,11 +44,11 @@ const UserProfile = () => {
               <p className="text-white font-medium mb-3">Are you absolutely sure?</p>
               <div className="flex gap-3 justify-center">
                 <button
-                  onClick={() => mutation.mutate()}
-                  disabled={mutation.isPending}
+                  onClick={() => onSubmit()}
+                  disabled={deleteMutation.isPending}
                   className="px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-md hover:bg-red-600 disabled:opacity-50"
                 >
-                  {mutation.isPending ? 'Processing...' : 'Yes, Delete My Account'}
+                  {deleteMutation.isPending ? 'Processing...' : 'Yes, Delete My Account'}
                 </button>
                 <button
                   onClick={() => setShowConfirm(false)}
@@ -78,7 +60,7 @@ const UserProfile = () => {
             </div>
           )}
 
-          {mutation.isError && (
+          {deleteMutation.isError && (
             <p className="mt-3 text-sm text-red-600 font-medium">
               Error deleting account. Please verify your session and try again.
             </p>

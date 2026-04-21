@@ -39,4 +39,15 @@ export const deleteAccount = async () => {
     return data;
 };
 
+export const passwordResetRequest = async ({ email }) => {
+    const { data } = await api.post('/auth/password-reset/', { email });
+    return data
+}
+
+export const passwordResetConfirm = async (uid, token, newPassword) => {
+    const body = { uid, token, new_password: newPassword };
+    const { data } = await api.post('/auth/password-reset-confirm/', body);
+    return data;
+}
+
 export default api;

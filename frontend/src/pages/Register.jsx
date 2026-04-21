@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { register } from '../api/authentication';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { UserPlus, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
-  const navigate = useNavigate();
+  const { registerMutation } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -14,30 +13,17 @@ export default function Register() {
     password2: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [validationError, setValidationError] = useState(null);
-
-  const registerMutation = useMutation({
-    mutationFn: register,
-    onSuccess: () => {
-      navigate('/', { state: { message: "Account created. Redirecting..." } });
-    },
-    onError: () => {
-      setValidationError(null);
-    }
-  });
 
   const { username, email, password1, password2 } = formData;
 
   const onChange = e => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationError(null);
   };
 
   const onSubmit = e => {
     e.preventDefault();
 
     if (password1 !== password2) {
-      setValidationError("Passwords do not match");
       return;
     }
 
@@ -47,18 +33,21 @@ export default function Register() {
   const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center bg-[#000000] py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex flex-col items-center justify-center bg-[#000000] sm:p-6'>
       <CSRFToken />
 
-      <div className='w-full max-w-[400px] bg-neutral-900 border border-neutral-800 p-8 rounded-3xl'>
-        <div className='flex flex-col items-center text-center pb-8'>
+      <div className='w-full min-h-screen sm:min-h-0 sm:max-w-[450px] 
+                      bg-neutral-900 border-none sm:border border-neutral-800 sm:rounded-3xl 
+                      flex flex-col items-center justify-center p-12 sm:p-10'>
+        
+        <div className='w-full flex flex-col items-center text-center mb-8'>
           <div className='bg-neutral-900 p-3 rounded-2xl mb-4 border border-neutral-800'>
             <UserPlus size={28} className="text-neutral-400" />
           </div>
           <h1 className='text-2xl font-bold text-white'>Create Account</h1>
         </div>
 
-        <form onSubmit={onSubmit} className='space-y-4'>
+        <form onSubmit={onSubmit} className='w-full space-y-4'>
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <User size={18} className="text-neutral-400" />
@@ -134,18 +123,18 @@ export default function Register() {
           </button>
         </form>
 
-        {(validationError || registerMutation.isError) && (
-          <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center animate-in fade-in slide-in-from-top-1">
-            {validationError || registerMutation.error?.response?.data?.error || "Registration failed"}
+        {registerMutation.isError && (
+          <div className="w-full mt-4 p-3 text-sm text-red-400 bg-red-900/20 border border-red-900/50 rounded-lg text-center animate-in fade-in slide-in-from-top-1">
+            {registerMutation.error?.response?.data?.error || "Registration failed"}
           </div>
         )}
 
-        <div className="relative my-6">
+        <div className="relative w-full my-8">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-neutral-800"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-neutral-900 text-neutral-400">or</span>
+            <span className="px-4 bg-neutral-900 text-neutral-500 uppercase tracking-widest text-xs">or</span>
           </div>
         </div>
 
@@ -157,18 +146,10 @@ export default function Register() {
           Continue as Guest
         </Link>
 
-        <div className='text-center text-sm text-white mt-6'>
-          <span>
-            Already have an account?{' '}
-          </span>
-          <Link
-            to='/login'
-          >
-            <span
-              className='font-semibold text-neutral-400 hover:underline cursor-pointer'
-            >
-              Log in
-            </span>
+        <div className='text-center text-sm text-neutral-500 mt-8'>
+          Already have an account?{' '}
+          <Link to='/login' className='font-semibold text-neutral-300 hover:text-white hover:underline transition-colors'>
+            Log in
           </Link>
         </div>
       </div>
@@ -180,7 +161,7 @@ const PasswordToggle = ({ isVisible, onToggle }) => (
   <button
     type="button"
     onClick={onToggle}
-    className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600 transition-colors"
+    className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-white transition-colors"
   >
     {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
   </button>
