@@ -47,7 +47,7 @@ services:
       target: ${BUILD_TARGET:-prod}
       args:
         - BUILD_ENV=${APP_ENV:-prod}
-    command: celery -A nfl worker --loglevel=info --concurrency=2
+    command: celery -A backend worker --loglevel=info --concurrency=2
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - CELERY_WORKER_MAX_TASKS_PER_CHILD=100
@@ -69,7 +69,7 @@ services:
       target: ${BUILD_TARGET:-prod}
       args:
         - BUILD_ENV=${APP_ENV:-prod}
-    command: celery -A nfl beat --loglevel=info
+    command: celery -A backend beat --loglevel=info
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
@@ -101,6 +101,14 @@ services:
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       - DJANGO_SETTINGS_MODULE=backend.settings.${APP_ENV:-production}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - PASSWORD_RESET_TIMEOUT=${PASSWORD_RESET_TIMEOUT}
+      - FRONTEND_URL=${FRONTEND_URL}
     ports:
       - 8000:8000
     logging:
@@ -125,8 +133,6 @@ services:
       target: ${BUILD_TARGET:-prod}
       args:
         - BUILD_ENV=${APP_ENV:-prod}
-    volumes:
-      - frontend_static:/usr/share/nginx/html
     environment:
       - NODE_OPTIONS=--max-old-space-size=2048
     ports:
@@ -139,7 +145,6 @@ services:
     restart: always
     volumes:
       - ./nginx:/etc/nginx:ro
-      - frontend_static:/usr/share/nginx/html:ro
       - static_volume:/app/backend/staticfiles:ro
     depends_on:
       - frontend

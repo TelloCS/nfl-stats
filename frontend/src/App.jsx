@@ -13,6 +13,8 @@ import Login from './pages/Login';
 import ErrorPage from './pages/ErrorPage';
 import UserProfile from './pages/UserProfile';
 import ProtectedRoute from './components/ProtectedRoute';
+import PasswordResetRequest from './pages/PasswordResetRequest';
+import PasswordResetConfirm from './pages/PasswordResetConfirm';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +40,8 @@ const router = createBrowserRouter([
         children: [
           { path: '/signup', element: <Register /> },
           { path: '/login', element: <Login /> },
+          { path: '/forgot-password', element: <PasswordResetRequest />},
+          { path: '/password-reset-confirm/:uid/:token', element: <PasswordResetConfirm />}
         ]
       },
       {
