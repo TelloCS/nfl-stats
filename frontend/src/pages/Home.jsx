@@ -4,28 +4,28 @@ import { ChartColumn, Shield, Users } from 'lucide-react';
 export default function Home() {
   return (
     <div className="relative min-h-[calc(100vh-81px)] bg-[#000000] flex flex-col justify-center overflow-hidden font-poppins">
-      <div className="container mx-auto p-6 md:p-10 relative z-10 mb-12 flex flex-col">
+      <div className="container mx-auto p-6 md:p-10 relative z-10 my-12 flex flex-col">
         <div className="mx-auto justify-center flex flex-col">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight text-center sm:text-left">
             Advance NFL Analytics & Stats
           </h1>
 
-          <p className="text-lg mb-10 leading-relaxed max-w-2xl text-neutral-400">
+          <p className="text-lg mb-10 leading-relaxed max-w-2xl text-neutral-400 text-center sm:text-left">
             Dive deep into weekly matchups, team performance metrics, and player statistics.
           </p>
 
-          <div className="flex flex-wrap gap-4 mb-16">
-            <Link
-              to="/position-vs-opponent"
-              className="px-8 py-4 text-white bg-emerald-600 rounded-md font-semibold text-lg hover:bg-emerald-500 transition-colors"
-            >
-              Analyze Matchups
-            </Link>
+          <div className="flex flex-wrap gap-4 mb-16 justify-center sm:justify-start">
             <Link
               to="/team/stats"
               className="px-8 py-4 text-white bg-neutral-900 rounded-md font-semibold text-lg hover:bg-neutral-800 transition-colors"
             >
               View Team Stats
+            </Link>
+            <Link
+              to="/position-vs-opponent"
+              className="px-8 py-4 text-white bg-emerald-600 rounded-md font-semibold text-lg hover:bg-emerald-500 transition-colors"
+            >
+              Analyze Matchups
             </Link>
           </div>
 
