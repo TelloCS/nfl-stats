@@ -44,7 +44,7 @@ const UserProfile = () => {
               <p className="text-white font-medium mb-3">Are you absolutely sure?</p>
               <div className="flex gap-3 justify-center">
                 <button
-                  onClick={() => onSubmit()}
+                  onClick={(e) => onSubmit(e)}
                   disabled={deleteMutation.isPending}
                   className="px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-md hover:bg-red-600 disabled:opacity-50"
                 >
