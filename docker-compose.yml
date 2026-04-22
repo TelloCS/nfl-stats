@@ -163,6 +163,8 @@ services:
       target: ${BUILD_TARGET:-prod}
       args:
         - BUILD_ENV=${APP_ENV:-prod}
+    volumes:
+    - frontend_static:/usr/share/nginx/html
     environment:
       - NODE_OPTIONS=--max-old-space-size=2048
     ports:
@@ -175,6 +177,7 @@ services:
     restart: always
     volumes:
       - ./nginx:/etc/nginx:ro
+      - frontend_static:/usr/share/nginx/html:ro
       - static_volume:/app/backend/staticfiles:ro
     depends_on:
       - frontend
