@@ -33,6 +33,7 @@ const router = createBrowserRouter([
         <Outlet />
       </AuthProvider>
     ),
+    errorElement: <ErrorPage />,
     children: [
       {
         element: <PublicRoute />,
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
           { path: '/player/stats/id/:player_id/:player_slug', element: <PlayerDashboard /> },
           { path: '/position-vs-opponent/', element: <PositionOpponent /> },
           { path: '/team/stats/', element: <TeamStats /> },
+          { path: '*', element: <ErrorPage /> }
         ]
       }
     ]
