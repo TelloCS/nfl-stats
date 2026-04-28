@@ -26,5 +26,5 @@ urlpatterns = [
     ),
     path('player/stats/gamelogs', PlayerGameStatsMatchupsListView.as_view(), name='player-stats-gamelogs-view'),
     path('schedule/', NFLScheduleView.as_view(), name='schedule'),
-    path('etl-version/', ETLVersionView.as_view(), name='etl-version'),
+    path('sync-status/', ETLVersionView.as_view(), name='sync-status'),
 ]
