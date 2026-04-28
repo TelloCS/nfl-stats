@@ -35,6 +35,7 @@ from .filters import (
 )
 from .mixins import KeyBasedCacheMixin
 from .services.nfl_service import weekly_schedule
+from nfl.utils import is_nfl_in_season
 
 
 class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
@@ -266,5 +267,6 @@ class ETLVersionView(KeyBasedCacheMixin, APIView):
 
         return Response({
             'version': version,
-            'time': timezone.now().timestamp()
+            'in_season': is_nfl_in_season(),
+            'time': timezone.now().isoformat()
         })

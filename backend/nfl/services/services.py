@@ -16,7 +16,6 @@ from nfl.services.utils import (
     Table,
     generate_slug
 )
-from nfl.services.utils import PIPELINE_CONFIG
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -407,15 +406,14 @@ class OffensePassing(WebScraping):
                 'pass_yards': int(item['Pass Yds']),
                 'pass_touchdowns': int(item['TD']),
                 'interceptions': int(item['INT']),
-                'pass_rating': float(item['Rate'] ),
+                'pass_rating': float(item['Rate']),
                 'sacks': int(item['Sck']),
-                'sack_yards': int(item['SckY']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'sack_yards': int(item['SckY'])
             }
 
             _, created = models.TeamOffensePassingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -455,13 +453,12 @@ class OffenseRushing(WebScraping):
                 'rush_yards': int(item['Rush Yds']),
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
-                'rush_fumbles': int(item['Rush FUM']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'rush_fumbles': int(item['Rush FUM'])
             }
 
             _, created = models.TeamOffenseRushingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
             
@@ -501,13 +498,12 @@ class OffenseReceiving(WebScraping):
                 'rec_yards': int(item['Yds']),
                 'yards_per_reception': float(item['Yds/Rec']),
                 'rec_touchdowns': int(item['TD']),
-                'rec_fumbles': int(item['Rec FUM']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'rec_fumbles': int(item['Rec FUM'])
             }
 
             _, created = models.TeamOffenseReceivingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -552,12 +548,11 @@ class DefensePassing(WebScraping):
                 'interceptions': int(item['INT']),
                 'pass_rating': float(item['Rate'] ),
                 'sacks': int(item['Sck']),
-                'season_year': int(self.year),
-                'team': team_instance
             }
 
             _, created = models.TeamDefensePassingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -598,13 +593,12 @@ class DefenseRushing(WebScraping):
                 'rush_yards': int(item['Rush Yds']),
                 'yards_per_carry': float(item['YPC']),
                 'rush_touchdowns': int(item['TD']),
-                'rush_fumbles': int(item['Rush FUM']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'rush_fumbles': int(item['Rush FUM'])
             }
 
             _, created = models.TeamDefenseRushingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -645,13 +639,12 @@ class DefenseReceiving(WebScraping):
                 'yards_per_reception': float(item['Yds/Rec']),
                 'rec_touchdowns': int(item['TD']),
                 'rec_fumbles': int(item['Rec FUM']),
-                'pass_defended': int(item['PDef']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'pass_defended': int(item['PDef'])
             }
 
             _, created = models.TeamDefenseReceivingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -694,13 +687,12 @@ class AdvanceOffense(WebScraping):
                 'expected_points_added_per_rush': float(item['EPA/Rush']),
                 'average_depth_of_target': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
-                'interception_pct': float(item['Int %'].split('%')[0]),
-                'season_year': int(self.year),
-                'team': team_instance
+                'interception_pct': float(item['Int %'].split('%')[0])
             }
 
             _, created = models.TeamAdvanceOffenseStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -743,13 +735,12 @@ class AdvanceDefense(WebScraping):
                 'expected_points_added_allowed_per_rush': float(item['EPA/Rush']),
                 'average_depth_of_target_against': float(item['ADoT']),
                 'scramble_pct': float(item['Scramble %'].split('%')[0]),
-                'interception_pct': float(item['Int %'].split('%')[0]),
-                'season_year': int(self.year),
-                'team': team_instance
+                'interception_pct': float(item['Int %'].split('%')[0])
             }
 
             _, created = models.TeamAdvanceDefenseStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -787,13 +778,12 @@ class CoverageSchemes(WebScraping):
                 'man_rate': float(item['Man Rate'].split('%')[0]),
                 'zone_rate': float(item['Zone Rate'].split('%')[0]),
                 'middle_closed_rate': float(item['Middle Closed Rate'].split('%')[0]),
-                'middle_open_rate': float(item['Middle Open Rate'].split('%')[0]),
-                'season_year': int(self.year),
-                'team': team_instance
+                'middle_open_rate': float(item['Middle Open Rate'].split('%')[0])
             }
 
             _, created = models.TeamCoverageSchemeStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -832,13 +822,12 @@ class OffenseTendencies(WebScraping):
                 'play_action_rate': float(item['Play Action Rate'].split('%')[0]),
                 'airyards_per_att': float(item['AirYards/Att'].split('%')[0]),
                 'shotgun_rate': float(item['Shotgun Rate'].split('%')[0]),
-                'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0]),
-                'season_year': int(self.year),
-                'team': team_instance
+                'nohuddle_rate': float(item['NoHuddle Rate'].split('%')[0])
             }
 
             _, created = models.TeamOffensePlayCallingStats.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -877,13 +866,12 @@ class CoverageStatsByPosition(WebScraping):
                 'yards_allowed_te': float(item['YPT Allowed TE']),
                 'yards_allowed_rb': float(item['YPT Allowed RB']),
                 'yards_allowed_outside': float(item['YPT Allowed Outside']),
-                'yards_allowed_slot': float(item['YPT Allowed Slot']),
-                'season_year': int(self.year),
-                'team': team_instance
+                'yards_allowed_slot': float(item['YPT Allowed Slot'])
             }
 
             _, created = models.TeamCoverageStatsByPosition.objects.update_or_create(
                 team=team_instance,
+                season_year=int(self.year),
                 defaults=defaults
             )
 
@@ -909,7 +897,7 @@ class NFLPipeline(object):
         self.generators.append(generator)
     
     async def extract_data(self):
-       async with ClientSession(headers=DEFAULT_HEADERS) as session:
+       async with ClientSession() as session:
             if not self.endpoints:
                 logger.info('No endpoints to process.')
             else:
@@ -933,7 +921,7 @@ def should_pipeline_run() -> dict:
     base_url = os.getenv("EVENTS_URL")
 
     try:
-        response = requests.get(base_url, timeout=10, headers=DEFAULT_HEADERS)
+        response = requests.get(base_url, timeout=10)
 
         if response.status_code != 200:
             return None
@@ -980,20 +968,15 @@ def should_pipeline_run() -> dict:
         logger.error(f"Error checking season status: {e}")
         return None
 
-def main():
-    manual_config = None
-    
+def get_pipeline_context(manual_config: dict = None):
     if manual_config:
         logger.info(f"MANUAL MODE: Forcing run for {manual_config}")
-        context = manual_config
-    else:
-        logger.info("AUTO MODE: Checking if NFL is in season...")
-        context = should_pipeline_run()
-        
-        if not context:
-            logger.info("NFL is out of season. Exiting.")
-            return
+        return manual_config
 
+    logger.info("AUTO MODE: Checking if NFL is in season...")
+    return should_pipeline_run()
+
+def main(context: dict):
     pl = NFLPipeline(
         year=context['year'],
         season_type=context['season_type'],
