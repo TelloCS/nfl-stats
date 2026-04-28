@@ -4,7 +4,6 @@ export default function ErrorPage() {
   const error = useRouteError();
 
   const statusCode = error?.status || "500";
-  const errorMessage = error?.statusText || error?.message || "An unexpected error occurred.";
 
   const errorContent = {
     400: {
