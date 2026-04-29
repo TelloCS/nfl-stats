@@ -156,31 +156,17 @@ services:
         reservations:
           memory: 256M
 
-  frontend:
+  nginx:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: nginx/Dockerfile
       target: ${BUILD_TARGET:-prod}
       args:
-        - BUILD_ENV=${APP_ENV:-prod}
-    volumes:
-    - frontend_static:/usr/share/nginx/html
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=2048
-    ports:
-      - 127.0.0.1:5173:5173
-    depends_on:
-      - backend
-
-  nginx:
-    image: nginx:1.25-alpine
+          - BUILD_ENV=${APP_ENV:-prod}
     restart: always
     volumes:
-      - ./nginx:/etc/nginx:ro
-      - frontend_static:/usr/share/nginx/html:ro
       - static_volume:/app/backend/staticfiles:ro
     depends_on:
-      - frontend
       - backend
     networks:
       - default
@@ -195,7 +181,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  frontend_static:
   static_volume:
 
 networks:
