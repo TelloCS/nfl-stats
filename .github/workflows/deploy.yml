@@ -31,16 +31,16 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/nfl-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/nfl-backend:${{ github.sha }}
 
-      - name: Build and Push Frontend
+      - name: Build and Push Nginx
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: . 
+          file: ./nginx/Dockerfile
           target: prod
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/nfl-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/nfl-frontend:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/nfl-nginx:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/nfl-nginx:${{ github.sha }}
 
       - name: Trigger Dokploy Deployment
         run: |
