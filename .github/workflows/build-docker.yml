@@ -6,6 +6,7 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
+      - 'nginx/**'
   pull_request:
     branches:
       - main
@@ -28,10 +29,10 @@ jobs:
           push: false
           load: true
 
-      - name: Build Frontend
+      - name: Build Nginx
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: . 
+          file: ./nginx/Dockerfile
           push: false
           load: true
