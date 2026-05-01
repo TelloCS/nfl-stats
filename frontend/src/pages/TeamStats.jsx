@@ -1,6 +1,6 @@
 import { useMemo, memo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
 
 import { TeamStatMap } from '../components/Config';
 import UpcomingGames from '../components/UpcomingGames';
@@ -51,27 +51,28 @@ export default function TeamStats() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] text-neutral-200">
+    <>
       <UpcomingGames />
-
-      <FilterSection
-        activeTabKey={activeTabConfig.key}
-        onTabChange={handleTabChange}
-        filters={filters}
-        setFilter={setFilter}
-      />
-
-      <div className="container mx-auto flex flex-col p-4 md:p-8">
-        <ResultsTable
-          isLoading={isLoading}
-          data={sortedItems}
-          columnsToShow={columnsToShow}
-          tableKey={tableKey}
-          sortConfig={sortConfig}
-          onHeaderClick={handleHeaderClick}
+      <div className="min-h-[calc(100vh-218px)] bg-[#000000] text-neutral-200">
+        <FilterSection
+          activeTabKey={activeTabConfig.key}
+          onTabChange={handleTabChange}
+          filters={filters}
+          setFilter={setFilter}
         />
+
+        <div className="container mx-auto flex flex-col p-4 md:p-8">
+          <ResultsTable
+            isLoading={isLoading}
+            data={sortedItems}
+            columnsToShow={columnsToShow}
+            tableKey={tableKey}
+            sortConfig={sortConfig}
+            onHeaderClick={handleHeaderClick}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -80,7 +81,7 @@ const FilterSection = memo(({ activeTabKey, onTabChange, filters, setFilter }) =
     <div className="container mx-auto px-4 md:px-8 py-4 bg-[#000000] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 
       <div className="w-full md:w-auto overflow-x-auto hide-scrollbar">
-        <div className="flex flex-nowrap gap-3">
+        <div className="flex gap-1.5 pb-2 flex-nowrap">
           {TeamStatMap.map((tab) => (
             <button
               key={tab.key}
@@ -110,32 +111,48 @@ const FilterSection = memo(({ activeTabKey, onTabChange, filters, setFilter }) =
   </div>
 ));
 
-const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfig, onHeaderClick }) => (
-  <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
-    <table className="w-full border-collapse border-spacing-0 text-left">
-      <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
-        <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3">
-          <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">
-            Team
-          </th>
-          {columnsToShow.map((stat) => (
-            <SortableTh
-              key={stat.key}
-              label={stat.label}
-              sortKey={stat.key}
-              activeSort={sortConfig}
-              onClick={() => onHeaderClick(stat.key)}
-            />
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-neutral-800/50">
-        {isLoading ? (
-          <tr>
-            <td colSpan="100%" className="p-12 text-center text-neutral-500">Loading team data...</td>
+const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfig, onHeaderClick }) => {
+  // 1. Handle Loading State
+  if (isLoading) {
+    return (
+      <div className="w-full p-12 text-center text-neutral-500 border border-neutral-800 rounded-lg bg-neutral-900 font-mono">
+        Loading team data...
+      </div>
+    );
+  }
+
+  // 2. Handle "No Results" State - This hides the table entirely
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full p-12 space-y-4 border border-neutral-800 rounded-lg bg-neutral-900 font-mono text-neutral-500">
+        <SearchX size={32} className="text-neutral-700" />
+        <p>No results found.</p>
+      </div>
+    );
+  }
+
+  // 3. Render Table only if data exists
+  return (
+    <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
+      <table className="w-full border-collapse border-spacing-0 text-left">
+        <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
+          <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3">
+            <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">
+              Team
+            </th>
+            {columnsToShow.map((stat) => (
+              <SortableTh
+                key={stat.key}
+                label={stat.label}
+                sortKey={stat.key}
+                activeSort={sortConfig}
+                onClick={() => onHeaderClick(stat.key)}
+              />
+            ))}
           </tr>
-        ) : data?.length > 0 ? (
-          data.map((team, index) => (
+        </thead>
+        <tbody className="divide-y divide-neutral-800/50">
+          {data.map((team, index) => (
             <tr key={team.id || index} className="group hover:bg-neutral-800/50 transition duration-150 h-[48px] text-xs text-neutral-300">
               <td className="px-2 text-nowrap font-medium text-white sticky left-0 bg-neutral-900 group-hover:bg-neutral-800 transition-colors">
                 {team.full_name}
@@ -147,16 +164,12 @@ const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfi
                 </td>
               ))}
             </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="100%" className="p-12 text-center text-neutral-500">No results found.</td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-));
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+});
 
 const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
   <th onClick={onClick} className="cursor-pointer hover:text-white transition-colors group">

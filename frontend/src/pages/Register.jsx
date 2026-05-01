@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { UserPlus, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
@@ -6,6 +6,11 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
   const { registerMutation } = useAuth();
+
+  useEffect(() => {
+    registerMutation.reset?.();
+  }, []);
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -29,7 +34,7 @@ export default function Register() {
 
     registerMutation.mutate({ username, email, password1, password2 });
   };
-  
+
   const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
 
   return (
@@ -39,7 +44,7 @@ export default function Register() {
       <div className='w-full min-h-screen sm:min-h-0 sm:max-w-[450px] 
                       bg-neutral-900 border-none sm:border border-neutral-800 sm:rounded-3xl 
                       flex flex-col items-center justify-center p-12 sm:p-10'>
-        
+
         <div className='w-full flex flex-col items-center text-center mb-8'>
           <div className='bg-neutral-900 p-3 rounded-2xl mb-4 border border-neutral-800'>
             <UserPlus size={28} className="text-neutral-400" />

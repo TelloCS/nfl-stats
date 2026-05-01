@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerSearchQueryOptions from "../queryOptions/createPlayerSearchQueryOptions";
 
-export default function SearchBar() {
+export default function SearchBar({ onSearchComplete = null }) {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [debouncedInput, setDebouncedInput] = useState("");
@@ -43,6 +43,7 @@ export default function SearchBar() {
         setInput(selected.fullName);
         setShowResults(false);
         navigate(`/player/stats/id/${selected.id}/${selected.slug}`);
+        onSearchComplete?.();
       }
     } else if (e.key === "Escape") {
       setShowResults(false);
@@ -79,6 +80,7 @@ export default function SearchBar() {
               onClick={() => {
                 setShowResults(false);
                 setInput(r.fullName);
+                onSearchComplete?.();
               }}
               role="option"
               aria-selected={index === selectedIndex}

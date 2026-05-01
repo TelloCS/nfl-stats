@@ -37,31 +37,33 @@ export default function PositionOpponent() {
   const { sortedItems: sortedGameLogs, handleHeaderClick, sortConfig } = useUrlTableSort(flatData, customGetters);
 
   return (
-    <div className="min-h-screen bg-[#000000]">
+    <>
       <UpcomingGames />
-      <FilterSection
-        filters={filters}
-        onFilterChange={setFilter}
-        stats={stats}
-        isLoading={isLoading}
-      />
-
-      <div className="container mx-auto flex flex-col p-4 md:p-8">
-        <ResultsTable
+      <div className="min-h-[calc(100vh-218px)] bg-[#000000]">
+        <FilterSection
+          filters={filters}
+          onFilterChange={setFilter}
+          stats={stats}
           isLoading={isLoading}
-          data={sortedGameLogs}
-          statsToShow={statsToShow}
-          sortConfig={sortConfig}
-          onHeaderClick={handleHeaderClick}
         />
 
-        <LoadMoreButton
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
-        />
+        <div className="container mx-auto flex flex-col p-4 md:p-8">
+          <ResultsTable
+            isLoading={isLoading}
+            data={sortedGameLogs}
+            statsToShow={statsToShow}
+            sortConfig={sortConfig}
+            onHeaderClick={handleHeaderClick}
+          />
+
+          <LoadMoreButton
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import CSRFToken from '../components/CSRFToken';
@@ -6,6 +6,11 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
   const { loginMutation } = useAuth();
+
+  useEffect(() => {
+    loginMutation.reset?.();
+  }, []);
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''

@@ -1,34 +1,49 @@
 import { memo } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
 
-const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderClick }) => (
-  <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
-    <table className="w-full border-collapse border-spacing-0 text-left">
-      <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
-        <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
-          <SortableTh label="Wk" sortKey="week" activeSort={sortConfig} onClick={() => onHeaderClick('week')} />
-          <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">Player</th>
-          <th className="text-nowrap">Pos</th>
-          <th className="text-nowrap">Team</th>
-          <th className="text-nowrap">Matchup</th>
-          <th className="text-nowrap">Score</th>
-          {statsToShow.map((stat) => (
-            <SortableTh
-              key={stat.key}
-              label={stat.label}
-              sortKey={stat.key}
-              activeSort={sortConfig}
-              onClick={() => onHeaderClick(stat.key)}
-            />
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-neutral-800/50">
-        {isLoading ? (
-          <tr><td colSpan="100%" className="p-12 text-center text-neutral-500">Loading player data...</td></tr>
-        ) : data?.length > 0 ? (
-          data.map((log) => (
-            <tr key={log.id} className="hover:bg-neutral-800/50 transition duration-150 h-[48px] text-xs text-neutral-300 [&>td]:px-2 [&>td]:text-left">
+const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderClick }) => {
+  if (isLoading) {
+    return (
+      <div className="w-full p-12 text-center text-neutral-500 border border-neutral-800 rounded-lg bg-neutral-900 font-mono">
+        Loading player data...
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full p-12 space-y-4 border border-neutral-800 rounded-lg bg-neutral-900 font-mono text-neutral-500">
+        <SearchX size={32} className="text-neutral-700" />
+        <p>No results found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
+      <table className="w-full border-collapse border-spacing-0 text-left">
+        <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
+          <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
+            <SortableTh label="Wk" sortKey="week" activeSort={sortConfig} onClick={() => onHeaderClick('week')} />
+            <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">Player</th>
+            <th className="text-nowrap">Pos</th>
+            <th className="text-nowrap">Team</th>
+            <th className="text-nowrap">Matchup</th>
+            <th className="text-nowrap">Score</th>
+            {statsToShow.map((stat) => (
+              <SortableTh
+                key={stat.key}
+                label={stat.label}
+                sortKey={stat.key}
+                activeSort={sortConfig}
+                onClick={() => onHeaderClick(stat.key)}
+              />
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-800/50">
+          {data.map((log) => (
+            <tr key={log.id} className="hover:bg-neutral-800/50 transition duration-150 h-[48px] text-xs text-neutral-300 [&>td]:px-2 [&>td]:text-left group">
               <td className="text-nowrap text-neutral-500">{log.game.week}</td>
               <td className="text-nowrap font-medium text-white sticky left-0 bg-neutral-900 group-hover:bg-neutral-800">
                 {log.player.fullName}
@@ -43,14 +58,12 @@ const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderC
                 </td>
               ))}
             </tr>
-          ))
-        ) : (
-          <tr><td colSpan="100%" className="p-12 text-center text-neutral-500">No results found.</td></tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-));
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+});
 
 const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
   <th onClick={onClick} className="cursor-pointer hover:text-white transition-colors group">
