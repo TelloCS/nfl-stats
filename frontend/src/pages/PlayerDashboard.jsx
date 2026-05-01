@@ -42,14 +42,14 @@ export default function PlayerDashboard() {
   return (
     <>
       <UpcomingGames />
-      <div className="bg-[#000000] min-h-[calc(100vh-218px)] relative group">
+      <div className="bg-black min-h-[calc(100vh-218px)] relative group">
         {isPending ? (
           <div className="flex justify-center items-center h-[500px]">
             <CustomLoader />
           </div>
         ) : isError ? (
           <div className="flex flex-col justify-center items-center h-[500px] text-white">
-            <p className="text-center">
+            <p className="text-neutral-400 text-center max-w-md mb-8 px-2">
               {playerError?.status === 404
                 ? "The requested NFL player stats could not be located."
                 : "An unexpected error occurred while fetching stats."}

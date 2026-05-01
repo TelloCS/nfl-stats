@@ -28,8 +28,7 @@ export default function UserDropdown({ user, onLogout }) {
 
         {!isOpen && (
           <div className="absolute right-0 top-full mt-2 w-max max-w-[200px] px-3 py-2 bg-neutral-900 text-white text-xs rounded-md opacity-0 translate-y-[-5px] group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none z-50">
-            <p className="font-semibold truncate">{user?.username}</p>
-            <p className="text-neutral-400 truncate">{user?.email}</p>
+            <p className='text-neutral-400 truncate'>Open user navigation menu</p>
           </div>
         )}
       </button>
@@ -38,7 +37,7 @@ export default function UserDropdown({ user, onLogout }) {
         <div className="absolute right-0 mt-2 w-56 bg-neutral-900 rounded-lg border border-neutral-800 py-1 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
 
           <div className="px-4 py-3 border-b border-neutral-800 mb-1">
-            <p className="text-sm font-medium text-white truncate">
+            <p className="text-sm font-semibold text-white truncate">
               {user?.username}
             </p>
             <p className="text-xs text-neutral-400 truncate">
@@ -62,7 +61,7 @@ export default function UserDropdown({ user, onLogout }) {
               setIsOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors text-left"
           >
             <LogOut size={16} />
             Sign out
