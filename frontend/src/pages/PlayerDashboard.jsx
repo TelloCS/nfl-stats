@@ -66,7 +66,7 @@ export default function PlayerDashboard() {
         ) : (
           <div className="container mx-auto p-4 md:p-8 relative">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className={playerData?.stats.length > 0 ? "col-span-1 lg:col-span-2" : "col-span-1 lg:col-span-3"}>
+              <div className={playerData?.stats.length > 0 && hasRankings ? "col-span-1 lg:col-span-2" : "col-span-1 lg:col-span-3"}>
                 <PlayerPerformanceSection
                   data={playerData}
                   onFilterChange={setFilter}
