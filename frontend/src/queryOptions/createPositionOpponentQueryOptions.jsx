@@ -1,4 +1,4 @@
-import { infiniteQueryOptions } from '@tanstack/react-query'
+import { infiniteQueryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
 
 export default function createPositionOpponentQueryOptions(position, opponent, seasonYear, seasonType, location, version) {
@@ -6,6 +6,7 @@ export default function createPositionOpponentQueryOptions(position, opponent, s
         queryKey: ['positionOpponent', position, opponent, seasonYear, seasonType, location, { v: version }],
         queryFn: ({ pageParam }) => getPositionOpponent(position, opponent, seasonYear, seasonType, location, pageParam),
         staleTime: Infinity,
+        placeholderData: keepPreviousData,
         initialPageParam: 1,
         getNextPageParam: (lastPage) => {
             if (lastPage.next) {

@@ -1,11 +1,12 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
 
 export default function createTeamsQueryOptions(version) {
     return queryOptions({
         queryKey: ['teams', { v: version }],
         queryFn : getTeams,
-        staleTime: Infinity
+        staleTime: Infinity,
+        placeholderData: keepPreviousData,
     })
 }
 

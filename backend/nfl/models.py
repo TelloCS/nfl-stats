@@ -150,7 +150,7 @@ class TeamOffensePassingStats(models.Model):
         related_name='team_offense_passing',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     pass_attempts = models.IntegerField(default=0)
     completions = models.IntegerField(default=0)
     completion_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -173,7 +173,7 @@ class TeamOffenseRushingStats(models.Model):
         related_name='team_offense_rushing',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     rush_attempts = models.IntegerField(default=0)
     rush_yards = models.IntegerField(default=0)
     yards_per_carry = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -191,7 +191,7 @@ class TeamOffenseReceivingStats(models.Model):
         related_name='team_offense_receiving',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     receptions = models.IntegerField(default=0)
     rec_yards = models.IntegerField(default=0)
     yards_per_reception = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -209,7 +209,7 @@ class TeamDefensePassingStats(models.Model):
         related_name='team_defense_passing',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     pass_attempts = models.IntegerField(default=0)
     completions = models.IntegerField(default=0)
     completion_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -231,7 +231,7 @@ class TeamDefenseRushingStats(models.Model):
         related_name='team_defense_rushing',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     rush_attempts = models.IntegerField(default=0)
     rush_yards = models.IntegerField(default=0)
     yards_per_carry = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -249,7 +249,7 @@ class TeamDefenseReceivingStats(models.Model):
         related_name='team_defense_receiving',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     receptions = models.IntegerField(default=0)
     rec_yards = models.IntegerField(default=0)
     yards_per_reception = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -268,7 +268,7 @@ class TeamAdvanceOffenseStats(models.Model):
         related_name='team_advance_offense',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     expected_points_added_per_play = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     total_expected_points_added = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     success_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -289,7 +289,7 @@ class TeamAdvanceDefenseStats(models.Model):
         related_name='team_advance_defense',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     expected_points_added_per_play = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     total_expected_points_added = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     success_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -310,7 +310,7 @@ class TeamCoverageSchemeStats(models.Model):
         related_name='team_coverage_rates',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     man_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     zone_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     middle_closed_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -327,7 +327,7 @@ class TeamOffensePlayCallingStats(models.Model):
         related_name='team_play_calling',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     motion_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     play_action_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     airyards_per_att = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -345,7 +345,7 @@ class TeamCoverageStatsByPosition(models.Model):
         related_name='team_coverage_stats_by_position',
         null=False)
 
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
     yards_allowed_wr = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     yards_allowed_te = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     yards_allowed_rb = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -393,7 +393,7 @@ class Total(models.Model):
 class TeamRankSnapshot(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='rank_snapshot', null=False)
     updated_at = models.DateTimeField(auto_now=True)
-    season_year = models.PositiveSmallIntegerField(null=False, default=2024)
+    season_year = models.PositiveSmallIntegerField(null=False)
 
     off_pass_yards_rank = models.IntegerField(default=0)
     off_pass_tds_rank = models.IntegerField(default=0)

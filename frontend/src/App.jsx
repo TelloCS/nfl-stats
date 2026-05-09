@@ -1,7 +1,10 @@
 import './App.css';
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { AuthProvider } from './context/AuthProvider';
+import { ThemeProvider } from './theme';
 import PublicRoute from "./components/PublicRoute";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
@@ -19,11 +22,24 @@ import PasswordResetConfirm from './pages/PasswordResetConfirm';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
+      gcTime: 1000 * 60 * 60 * 24,
+      staleTime: Infinity,
+      retry: 1,
+      retryDelay: (attempt) => Math.min(attempt * 1000, 5000),
+      refetchOnWindowFocus: true,
       refetchIntervalInBackground: false,
+      refetchOnReconnect: true,
     },
   },
+});
+
+const sessionStoragePersister = createSyncStoragePersister({
+  storage: window.sessionStorage,
+});
+
+persistQueryClient({
+  queryClient,
+  persister: sessionStoragePersister,
 });
 
 const router = createBrowserRouter([
@@ -75,7 +91,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ThemeProvider> 
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

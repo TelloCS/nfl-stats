@@ -1,15 +1,70 @@
 @import "tailwindcss";
 
 @theme {
-  --font-poppins: "Poppins", sans-serif;
-  --font-roboto: "Roboto", sans-serif;
+    /* Fonts */
+    --font-poppins: "Poppins", sans-serif;
+    --font-roboto: "Roboto", sans-serif;
+
+    /* Main Backgrounds & Surfaces */
+    --color-background: var(--app-ink);
+    --color-geodude-700: var(--app-geodude-700);
+    --color-geodude-800: var(--app-geodude-800);
+    --color-geodude-900: var(--app-geodude-900);
+    --color-geodude-950: var(--app-geodude-950);
+
+    /* Borders */
+    --color-geodude-333: var(--app-geodude-333);
+
+    /* Special/Inverted */
+    --color-inverted-bg: var(--app-bg-inverted);
+    --color-inverted-text: var(--app-text-inverted);
+
+    /* Text Colors */
+    --color-foreground: var(--app-paper);
+    --color-paper-200: var(--app-paper-200);
+    --color-paper-300: var(--app-paper-300);
+    --color-paper-400: var(--app-paper-400);
+    --color-paper-500: var(--app-paper-500);
+
+    /* Brand */
+    --color-primary: var(--app-primary);
+    --color-secondary: var(--app-secondary);
+    --color-tertiary: var(--app-tertiary);
+
+    /* Red/Error System */
+    --color-error-950: var(--app-error-950);
+    --color-error-900: var(--app-error-900);
+    --color-error-800: var(--app-error-800);
+    --color-error-600: var(--app-error-600);
+    --color-error-500: var(--app-error-500);
+
+    /* Status Text */
+    --color-status-error: var(--app-text-error);
+    --color-status-info: var(--app-text-info);
+    --color-status-success: var(--app-text-success);
+    --color-status-accent: var(--app-text-accent);
+    --color-status-aware: var(--app-text-aware);
 }
 
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #595959 #171717;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    body {
+        /* This applies the 'Ink' background and 'Paper' text globally */
+        @apply bg-background text-foreground antialiased transition-colors duration-200;
+
+        /* Standardize the default 'border' color to Geodude-800 */
+        --color-border: var(--app-geodude-800);
+    }
+
+    * {
+        scrollbar-width: thin;
+        /* Scrollbars now use Geodude-800 for the thumb and Geodude-950 for the track */
+        scrollbar-color: var(--app-geodude-800) var(--app-geodude-950);
+    }
 }
 
 .container {
-    max-width: 1680px;
+    @apply mx-auto;
+    max-width: 1680px; /* Custom container width as defined */
 }

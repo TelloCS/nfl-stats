@@ -4,6 +4,7 @@ import requests
 from requests import Response
 from typing import Optional
 from django.core.cache import cache
+from nfl.services.utils import parse_event
 
 logger = logging.getLogger(__name__)
 
@@ -56,53 +57,21 @@ def weekly_schedule(force_refresh: bool = False) -> dict:
         "WEEKLY_SCHEDULE_URL",
         "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
     )
-    raw_data = fetch_from_nfl(base_url=base_url).json()
-    if not raw_data: return None
-
+    response = fetch_from_nfl(base_url=base_url)
+    raw_data = response.json() if response else {}
+    
+    events = raw_data.get("events", [])
+    if not events: return None
+    
     custom_payload = {
         "season": raw_data.get("season"),
         "week": raw_data.get("week"),
-        "events": []
+        "events": [parse_event(e) for e in raw_data.get("events", [])]
     }
-
-    events = raw_data.get("events", [])
-    
-    for event in events:
-        custom_event = {
-            "date": event.get("date"),
-            "name": event.get("name"),
-            "shortName": event.get("shortName"),
-            "season": event.get("season"),
-            "week": event.get("week"),
-            "competitions": [],
-            "status": event.get("status")
-        }
-
-        for comp in event.get("competitions", []):
-            custom_comp = {"competitors": []}
-
-            for competitor in comp.get("competitors", []):
-                team_data = competitor.get("team", {})
-                
-                custom_competitor = {
-                    "homeAway": competitor.get("homeAway"),
-                    "winner": competitor.get("winner"),
-                    "score": competitor.get("score"),
-                    "team": {
-                        "name": team_data.get("name"),
-                        "abbreviation": team_data.get("abbreviation"),
-                        "displayName": team_data.get("displayName"),
-                        "shortDisplayName": team_data.get("shortDisplayName"),
-                        "color": team_data.get("color")
-                    }
-                }
-                custom_comp["competitors"].append(custom_competitor)
-            custom_event["competitions"].append(custom_comp)
-        custom_payload["events"].append(custom_event)
 
     # if any event is still active reduce ttl
     is_live = any(not e["status"]["type"]["completed"] for e in events)
-    ttl = 60 if is_live else 60 * 60 * 12
+    ttl = 60 if is_live else 43200
     cache.set(cache_key, custom_payload, ttl)
 
     return custom_payload

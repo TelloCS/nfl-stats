@@ -3,17 +3,53 @@ export const GameCard = ({ event }) => {
   const home = competitors.find(c => c.homeAway === "home");
   const away = competitors.find(c => c.homeAway === "away");
 
+  const status = event.status?.type?.name; // e.g., "STATUS_SCHEDULED", "STATUS_IN_PROGRESS", "STATUS_FINAL"
+  const isCompleted = event.status?.type?.completed;
+  const isUpcoming = status === "STATUS_SCHEDULED";
+
+  // Format Date: "Oct 24"
+  const dateLabel = new Date(event?.date).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric'
+  });
+
+  // Format Time: "7:30 PM"
+  const timeLabel = new Date(event?.date).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  const isWinner = (team) => isCompleted && team?.winner;
+
+  const TeamRow = ({ team }) => (
+    <div className="flex items-center justify-between w-full py-1 text-sm">
+      <span className={`font-medium truncate ${isWinner(team) ? "text-foreground" : "text-paper-300"}`}>
+        {team?.team?.displayName}
+      </span>
+
+      {/* Only show score if the game is NOT upcoming */}
+      {!isUpcoming && (
+        <span className={`font-mono ${isWinner(team) ? "text-primary font-bold" : "text-paper-500"}`}>
+          {team?.score || "0"}
+        </span>
+      )}
+    </div>
+  );
+
   return (
-    <div className="flex-none w-[140px] text-center text-xs">
-      <div className="border border-neutral-800 rounded-md p-3 hover:border-neutral-700 transition-colors h-full flex flex-col justify-between gap-2 bg-neutral-900">
-        <div className="text-neutral-300 font-medium tracking-wide">
-          {home?.team?.abbreviation} <span className="text-neutral-500 font-normal">vs</span> {away?.team?.abbreviation}
+    <div className="flex-none w-[320px] font-poppins">
+      <div className="bg-geodude-900 border border-geodude-800 rounded-lg p-4 hover:border-geodude-700 transition-all duration-200">
+
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-geodude-800 text-xs uppercase tracking-widest">
+          <span className="text-paper-400">{dateLabel}</span>
+          <span className={isCompleted ? "text-paper-400" : "text-primary font-bold"}>
+            {isUpcoming ? timeLabel : (event.status?.type?.detail || "Final")}
+          </span>
         </div>
-        <div className="text-neutral-500">
-          {event.status?.type?.completed ? "Final" : "Upcoming"}
-        </div>
-        <div className="text-emerald-400 font-mono font-semibold bg-emerald-500/10 border border-emerald-500/20 rounded py-1 mt-1 flex justify-center gap-2">
-          <span>{home?.score || "0"}</span>-<span>{away?.score || "0"}</span>
+
+        <div className="flex flex-col gap-1 relative">
+          <TeamRow team={away} />
+          <TeamRow team={home} />
         </div>
       </div>
     </div>

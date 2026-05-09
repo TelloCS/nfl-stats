@@ -39,7 +39,7 @@ export default function PositionOpponent() {
   return (
     <>
       <UpcomingGames />
-      <div className="min-h-[calc(100vh-218px)] bg-[#000000]">
+      <div className="min-h-[calc(100vh-218px)] bg-background">
         <FilterSection
           filters={filters}
           onFilterChange={setFilter}
@@ -75,17 +75,17 @@ const LoadMoreButton = ({ hasNextPage, isFetchingNextPage, fetchNextPage }) => {
       <button
         onClick={() => fetchNextPage()}
         disabled={isFetchingNextPage}
-        className="flex items-center gap-3 bg-[#000000] border border-neutral-700 text-neutral-300 px-8 py-3 rounded-full text-sm font-bold hover:bg-neutral-800 hover:text-white hover:border-neutral-500 disabled:opacity-50 disabled:shadow-none transition-all duration-200 ease-in-out"
+        className="flex items-center gap-3 bg-background border border-geodude-700 text-paper-300 px-8 py-3 rounded-full text-sm font-bold hover:bg-geodude-800 hover:text-foreground hover:border-paper-500 disabled:opacity-50 disabled:shadow-none transition-all duration-200 ease-in-out"
       >
         {isFetchingNextPage ? (
           <>
-            <Loader2 className="animate-spin text-emerald-500" size={18} />
+            <Loader2 className="animate-spin text-primary" size={18} />
             <span>Loading more...</span>
           </>
         ) : (
           <>
             <span>Load More Games</span>
-            <Search size={16} className="text-neutral-500 group-hover:text-neutral-300 transition-colors" />
+            <Search size={16} className="text-paper-500 group-hover:text-paper-300 transition-colors" />
           </>
         )}
       </button>

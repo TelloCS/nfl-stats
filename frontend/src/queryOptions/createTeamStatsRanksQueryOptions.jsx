@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
 
 export default function createTeamStatsRanksQueryOptions(filters, version) {
@@ -6,6 +6,7 @@ export default function createTeamStatsRanksQueryOptions(filters, version) {
         queryKey: ['teamStatsRanks', filters, { v: version }],
         queryFn : () => getTeamStatsRanks(filters),
         staleTime: Infinity,
+        placeholderData: keepPreviousData,
     })
 }
 

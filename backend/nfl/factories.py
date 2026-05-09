@@ -82,6 +82,7 @@ class TeamOffensePassingStatsFactory(factory.django.DjangoModelFactory):
         model = TeamOffensePassingStats
 
     team = factory.SubFactory(TeamFactory)
+    season_year = factory.Faker('random_int', min=2020, max=2024)
     pass_attempts = factory.Faker('random_int', min=300, max=600)
     pass_yards = factory.Faker('random_int', min=3000, max=5000)
     pass_touchdowns = factory.Faker('random_int', min=20, max=40)

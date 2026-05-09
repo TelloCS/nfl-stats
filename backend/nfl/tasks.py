@@ -198,12 +198,13 @@ def finalize_rank_updates():
     retry_backoff_max=30
 )
 def update_nfl_cache_task():
-    logger.info("Starting NFL Schedule cache refresh...")
+    try:
+        data = weekly_schedule(force_refresh=True)
+        if not data or not data.get("events"):
+            raise ValueError("Empty events list from NFL API")
 
-    data = weekly_schedule(force_refresh=True)
-
-    if not data:
-        raise ValueError("NFL API returned empty data; forcing a retry.")
-
-    logger.info("NFL background refresh successful.")
-    return True
+        logger.info("NFL background refresh successful.")
+        return True
+    except Exception as e:
+        logger.error(f"Schedule refresh failed: {str(e)}")
+        raise

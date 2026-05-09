@@ -11,9 +11,9 @@ export default function UpcomingGames() {
   if (isPending || !data?.events?.length) return null;
 
   return (
-    <div className="w-full bg-black border-b border-neutral-800 py-4 group">
+    <div className="w-full bg-background border-b border-geodude-800 py-4 group">
       <div className="container mx-auto px-4 md:px-8 relative">
-        
+
         {canScroll && (
           <>
             <ScrollButton direction="left" onClick={() => scroll("left")} />
@@ -23,9 +23,8 @@ export default function UpcomingGames() {
 
         <div
           ref={scrollRef}
-          className={`flex overflow-x-auto gap-3 md:gap-4 scrollbar-hide scroll-smooth px-1 ${
-            !canScroll ? "justify-center" : "justify-start"
-          }`}
+          className={`flex overflow-x-auto gap-3 md:gap-4 scrollbar-hide scroll-smooth px-1 ${!canScroll ? "justify-center" : "justify-start"
+            }`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {data.events.map((event, idx) => (
@@ -43,8 +42,8 @@ const ScrollButton = ({ direction, onClick }) => {
     <button
       onClick={onClick}
       className={`absolute ${isLeft ? "left-2 md:left-6" : "right-2 md:right-6"} 
-      top-1/2 -translate-y-1/2 z-10 bg-neutral-800 border border-neutral-800 
-      rounded-full p-1.5 text-neutral-400 hover:text-white transition-all hidden md:flex`}
+      top-1/2 -translate-y-1/2 z-10 bg-geodude-800 border border-geodude-800
+      rounded-full p-1.5 text-paper-400 hover:text-foreground transition-all hidden md:flex`}
     >
       {isLeft ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
     </button>

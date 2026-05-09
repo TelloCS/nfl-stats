@@ -34,25 +34,25 @@ export default function ErrorPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-81px)] bg-[#000000] flex flex-col justify-center overflow-hidden font-poppins">
+    <div className="relative min-h-[calc(100vh-81px)] bg-background flex flex-col justify-center overflow-hidden font-poppins">
       <div className="text-center">
 
-        <h1 className="text-[180px] font-black text-neutral-200 leading-none">
+        <h1 className="text-[180px] font-black text-paper-200 leading-none">
           {statusCode}
         </h1>
 
         <div className="relative mt-12">
-          <h2 className="text-3xl font-bold text-neutral-400 mb-3">
+          <h2 className="text-3xl font-bold text-paper-400 mb-3">
             {title}
           </h2>
 
-          <p className="text-neutral-500 mb-8 max-w-md mx-auto">
+          <p className="text-paper-500 mb-8 max-w-md mx-auto">
             {description}
           </p>
 
           <Link
             to="/"
-            className="bg-neutral-900 text-white px-8 py-4 border border-neutral-800 rounded-md font-bold hover:bg-neutral-800 transition-colors"
+            className="bg-geodude-900 text-foreground px-8 py-4 border border-geodude-800 rounded-md font-bold hover:bg-geodude-800 transition-colors"
           >
             Return to Home
           </Link>

@@ -7,9 +7,9 @@ const ProtectedRoute = () => {
 
   if (isLoading)
     return (
-      <div className='flex flex-col min-h-screen justify-center bg-[#000000]'>
+      <div className='flex flex-col min-h-screen justify-center bg-background'>
         <CustomLoader
-          color={"text-white"}
+          color={"text-foreground"}
           size={36}
         />
       </div>

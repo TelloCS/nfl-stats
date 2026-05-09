@@ -1,4 +1,4 @@
-import { useMemo, memo } from "react";
+import { useMemo, memo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
 
@@ -20,12 +20,37 @@ export default function TeamStats() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: teamData, isLoading } = useVersionedQuery(createTeamStatsQueryOptions, filters);
 
-  const activeTabKey = searchParams.get("tab") || TeamStatMap[0].key;
+  const availableTabs = useMemo(() => {
+    if (!teamData || teamData.length === 0) return [];
+    const firstTeam = teamData[0];
 
-  const activeTabConfig = useMemo(() =>
-    TeamStatMap.find(t => t.key === activeTabKey) || TeamStatMap[0],
-    [activeTabKey]
-  );
+    return TeamStatMap.filter(tab =>
+      Object.prototype.hasOwnProperty.call(firstTeam, tab.key)
+    );
+  }, [teamData]);
+
+  const activeTabKey = searchParams.get("tab");
+
+  const activeTabConfig = useMemo(() => {
+    const current = availableTabs.find(t => t.key === activeTabKey);
+    return current || availableTabs[0] || TeamStatMap[0];
+  }, [activeTabKey, availableTabs]);
+
+  const _activeTabKey = activeTabConfig.key;
+
+  useEffect(() => {
+    if (!isLoading && teamData?.length > 0 && availableTabs.length > 0) {
+      const isTabValid = availableTabs.some(t => t.key === activeTabKey);
+
+      if (!isTabValid) {
+        setSearchParams((prev) => {
+          const updated = new URLSearchParams(prev);
+          updated.set("tab", _activeTabKey);
+          return sortParams(updated);
+        }, { replace: true }); 
+      }
+    }
+  }, [isLoading, teamData, availableTabs, activeTabKey, _activeTabKey, setSearchParams]);
 
   const { key: tableKey, stats: columnsToShow } = activeTabConfig;
 
@@ -53,9 +78,10 @@ export default function TeamStats() {
   return (
     <>
       <UpcomingGames />
-      <div className="min-h-[calc(100vh-218px)] bg-[#000000] text-neutral-200">
+      <div className="bg-background text-paper-200">
         <FilterSection
-          activeTabKey={activeTabConfig.key}
+          tabs={availableTabs}
+          activeTabKey={_activeTabKey}
           onTabChange={handleTabChange}
           filters={filters}
           setFilter={setFilter}
@@ -76,20 +102,20 @@ export default function TeamStats() {
   );
 }
 
-const FilterSection = memo(({ activeTabKey, onTabChange, filters, setFilter }) => (
-  <div className="border-b border-neutral-800">
-    <div className="container mx-auto px-4 md:px-8 py-4 bg-[#000000] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+const FilterSection = memo(({ tabs, activeTabKey, onTabChange, filters, setFilter }) => (
+  <div className="border-b border-geodude-800">
+    <div className="container mx-auto px-4 md:px-8 py-4 bg-background flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 
       <div className="w-full md:w-auto overflow-x-auto hide-scrollbar">
         <div className="flex gap-1.5 pb-2 flex-nowrap">
-          {TeamStatMap.map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => onTabChange(tab.key)}
               className={`whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors
               ${activeTabKey === tab.key
-                  ? 'bg-neutral-800 text-white border border-neutral-600'
-                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800 hover:bg-neutral-800 hover:text-neutral-200'
+                  ? 'bg-geodude-800 text-foreground border border-geodude-800'
+                  : 'bg-geodude-900 text-paper-400 border border-geodude-800 hover:bg-geodude-800 hover:text-paper-200'
                 }`}
             >
               {tab.label}
@@ -112,32 +138,29 @@ const FilterSection = memo(({ activeTabKey, onTabChange, filters, setFilter }) =
 ));
 
 const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfig, onHeaderClick }) => {
-  // 1. Handle Loading State
   if (isLoading) {
     return (
-      <div className="w-full p-12 text-center text-neutral-500 border border-neutral-800 rounded-lg bg-neutral-900 font-mono">
+      <div className="w-full p-12 text-center text-paper-500 border border-geodude-800 rounded-lg bg-geodude-900 font-mono">
         Loading team data...
       </div>
     );
   }
 
-  // 2. Handle "No Results" State - This hides the table entirely
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center w-full p-12 space-y-4 border border-neutral-800 rounded-lg bg-neutral-900 font-mono text-neutral-500">
-        <SearchX size={32} className="text-neutral-700" />
+      <div className="flex flex-col items-center justify-center w-full p-12 space-y-4 border border-geodude-800 rounded-lg bg-geodude-900 font-mono text-paper-500">
+        <SearchX size={32} className="text-geodude-700" />
         <p>No results found.</p>
       </div>
     );
   }
 
-  // 3. Render Table only if data exists
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-neutral-800 bg-neutral-900 hide-scrollbar font-mono">
+    <div className="w-full overflow-x-auto rounded-lg border border-geodude-800 bg-geodude-900 hide-scrollbar font-mono">
       <table className="w-full border-collapse border-spacing-0 text-left">
-        <thead className="bg-neutral-950 text-neutral-400 h-[40px]">
-          <tr className="border-b border-neutral-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3">
-            <th className="text-nowrap sticky left-0 bg-neutral-950 z-10">
+        <thead className="bg-geodude-950 text-paper-400 h-[40px]">
+          <tr className="border-b border-geodude-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3">
+            <th className="text-nowrap sticky left-0 bg-geodude-950 z-10">
               Team
             </th>
             {columnsToShow.map((stat) => (
@@ -151,15 +174,15 @@ const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfi
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800/50">
+        <tbody className="divide-y divide-geodude-800/50">
           {data.map((team, index) => (
-            <tr key={team.id || index} className="group hover:bg-neutral-800/50 transition duration-150 h-[48px] text-xs text-neutral-300">
-              <td className="px-2 text-nowrap font-medium text-white sticky left-0 bg-neutral-900 group-hover:bg-neutral-800 transition-colors">
+            <tr key={team.id || index} className="group hover:bg-geodude-800/50 transition duration-150 h-[48px] text-xs text-paper-300">
+              <td className="px-2 text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800 transition-colors">
                 {team.full_name}
               </td>
 
               {columnsToShow.map((stat) => (
-                <td key={stat.key} className="px-2 text-nowrap text-left font-mono text-neutral-200">
+                <td key={stat.key} className="px-2 text-nowrap text-left font-mono text-paper-200">
                   {team[tableKey]?.[stat.key] ?? '-'}
                 </td>
               ))}
@@ -172,10 +195,10 @@ const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfi
 });
 
 const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
-  <th onClick={onClick} className="cursor-pointer hover:text-white transition-colors group">
+  <th onClick={onClick} className="cursor-pointer hover:text-foreground transition-colors group">
     <div className="flex gap-1">
       <span>{label}</span>
-      <div className="w-3 flex items-center justify-center text-neutral-600 group-hover:text-emerald-500 transition-colors">
+      <div className="w-3 flex items-center justify-center text-geodude-700 group-hover:text-primary transition-colors">
         {activeSort?.key === sortKey ? (
           activeSort.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
         ) : (

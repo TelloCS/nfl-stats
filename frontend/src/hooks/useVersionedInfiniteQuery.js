@@ -6,8 +6,12 @@ import { useEtlVersion } from "./useEtlVersion";
  * into any query options factory.
  */
 export function useVersionedInfiniteQuery(queryOptionsFactory, ...factoryArgs) {
-  const { data: etlData } = useEtlVersion();
-  const currentVersion = etlData?.version || 0;
+  const { data: etlData, isLoading: isVersionLoading } = useEtlVersion();
+
+  const currentVersion = etlData?.version;
   const options = queryOptionsFactory(...factoryArgs, currentVersion);
-  return useInfiniteQuery(options);
+  return useInfiniteQuery({
+    ...options,
+    enabled: !isVersionLoading && currentVersion !== undefined && options.enabled !== false,
+  });
 }

@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { apiFetch } from "../utils/apiFetch";
 
 export default function createPlayerSearchQueryOptions(input, version) {
@@ -7,7 +7,7 @@ export default function createPlayerSearchQueryOptions(input, version) {
         queryFn : () => getPlayerSearchResults(input),
         enabled : !!input && input.length >= 3,
         staleTime: Infinity,
-        retry: false,
+        placeholderData: keepPreviousData,
     })
 }
 

@@ -347,7 +347,8 @@ export const TeamRankingStatMap = [
 export const FilterConfig = {
   season_year: [
     { label: "2025", value: 2025 },
-    { label: "2024", value: 2024 }
+    { label: "2024", value: 2024 },
+    { label: "2023", value: 2023 }
   ],
   season_type: [
     { label: "Regular Season", value: 2 },
