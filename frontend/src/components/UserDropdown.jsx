@@ -1,13 +1,9 @@
 import { useState } from 'react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function UserDropdown({ user, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const getInitials = (name) => {
-    return name ? name.substring(0, 2).toUpperCase() : 'US';
-  };
 
   return (
     <div className="relative">
@@ -22,46 +18,46 @@ export default function UserDropdown({ user, onLogout }) {
         onClick={() => setIsOpen(!isOpen)}
         className="group relative focus:outline-none z-40"
       >
-        <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold hover:bg-emerald-700 hover:ring-2 hover:ring-offset-2 hover:ring-emerald-500 transition-all cursor-pointer">
-          {getInitials(user?.username || user?.email)}
+        <div className="flex items-center justify-center p-2 rounded-lg hover:bg-geodude-800 text-paper-400 hover:text-foreground transition-colors border border-transparent hover:border-geodude-800">
+          <User size={24} />
         </div>
 
         {!isOpen && (
-          <div className="absolute right-0 top-full mt-2 w-max max-w-[200px] px-3 py-2 bg-neutral-900 text-white text-xs rounded-md opacity-0 translate-y-[-5px] group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none z-50">
-            <p className='text-neutral-400 truncate'>Open user navigation menu</p>
+          <div className="absolute right-0 top-full mt-2 w-max max-w-[200px] px-3 py-2 bg-geodude-900 text-foreground text-xs rounded-md border border-geodude-800 opacity-0 translate-y-[-5px] group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none z-50">
+            <p className='text-paper-400 truncate'>Open user navigation menu</p>
           </div>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-neutral-900 rounded-lg border border-neutral-800 py-1 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+        <div className="absolute right-0 mt-2 w-56 bg-geodude-900 rounded-lg border border-geodude-800 py-1 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
 
-          <div className="px-4 py-3 border-b border-neutral-800 mb-1">
-            <p className="text-sm font-semibold text-white truncate">
+          <div className="px-4 py-3 border-b border-geodude-800 mb-1">
+            <p className="text-sm font-semibold text-foreground truncate">
               {user?.username}
             </p>
-            <p className="text-xs text-neutral-400 truncate">
+            <p className="text-xs text-paper-400 truncate">
               {user?.email}
             </p>
           </div>
 
           <Link
             to="/settings"
-            className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors"
+            className="flex items-center gap-3 px-4 py-2 text-sm text-paper-400 hover:bg-geodude-800 transition-colors"
             onClick={() => setIsOpen(false)}
           >
-            <Settings size={16} className="text-neutral-400" />
+            <Settings size={16} className="text-paper-400" />
             Settings
           </Link>
 
-          <div className="h-px bg-neutral-800 my-1" />
+          <div className="h-px bg-geodude-800 my-1" />
 
           <button
             onClick={() => {
               setIsOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-paper-400 hover:bg-geodude-800 transition-colors text-left"
           >
             <LogOut size={16} />
             Sign out

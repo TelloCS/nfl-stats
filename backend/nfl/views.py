@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.core.cache import cache
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page, never_cache
 from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
@@ -262,6 +262,7 @@ class ETLVersionView(KeyBasedCacheMixin, APIView):
     Direct access to the 'Version Billboard' in Redis.
     No internal caching allowed—this must always be fresh.
     """
+    @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         version = cache.get("etl_version_ts", 0)
 

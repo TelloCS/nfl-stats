@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerSearchQueryOptions from "../queryOptions/createPlayerSearchQueryOptions";
@@ -27,49 +28,81 @@ export default function SearchBar({ onSearchComplete = null }) {
     setShowResults(true);
   };
 
-  const handleKeyDown = (e) => {
-    if (!showResults || displayResults.length === 0) return;
+  const handleSelect = (player) => {
+    if (!player) return;
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev < displayResults.length - 1 ? prev + 1 : prev));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (selectedIndex >= 0 && selectedIndex < displayResults.length) {
-        const selected = displayResults[selectedIndex];
-        setInput(selected.fullName);
+    setInput(player.fullName);
+    setShowResults(false);
+    setSelectedIndex(-1);
+    navigate(`/player/stats/id/${player.id}/${player.slug}`);
+    onSearchComplete?.();
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showResults || displayResults.length === 0) {
+      if (e.key === "Escape") setShowResults(false);
+      return;
+    }
+
+    const lastIndex = displayResults.length - 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev < lastIndex ? prev + 1 : 0));
+        break;
+
+      case "ArrowUp":
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : lastIndex));
+        break;
+
+      case "Enter":
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex <= lastIndex) {
+          handleSelect(displayResults[selectedIndex]);
+        }
+        break;
+
+      case "Escape":
+        e.preventDefault();
         setShowResults(false);
-        navigate(`/player/stats/id/${selected.id}/${selected.slug}`);
-        onSearchComplete?.();
-      }
-    } else if (e.key === "Escape") {
-      setShowResults(false);
-      setSelectedIndex(-1);
+        setSelectedIndex(-1);
+        break;
+
+      default:
+        break;
     }
   };
 
   return (
-    <div className="relative w-full sm:w-64">
-      <input
-        className="bg-neutral-900 block w-full p-2.5 pl-4 text-sm rounded-lg border-1 border-neutral-800
-        focus:outline-none"
-        type="text"
-        placeholder="Search player name..."
-        value={input}
-        onChange={handleInputChange}
-        onFocus={() => { if (input.length > 0) setShowResults(true); }}
-        onBlur={() => setShowResults(false)}
-        onKeyDown={handleKeyDown}
-        role="combobox"
-        aria-expanded={showResults}
-      />
+    <div className="w-full relative lg:w-[320px]">
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Search size={18} className="text-paper-400" />
+        </div>
+        <input
+          className="block w-full p-4 pl-10 lg:p-2.5 lg:pl-10 text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200"
+          type="text"
+          placeholder="Search player name..."
+          value={input}
+          onChange={handleInputChange}
+          onFocus={() => { if (input.length > 0) setShowResults(true); }}
+          onBlur={() => setShowResults(false)}
+          onKeyDown={handleKeyDown}
+          role="combobox"
+          aria-expanded={showResults}
+        />
+        <div className="lg:hidden absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <kbd className="text-paper-400 text-sm border border-geodude-800 px-2 py-1 rounded-md">
+            esc
+          </kbd>
+        </div>
+      </div>
 
       {showResults && displayResults.length > 0 && (
         <div
-          className="absolute z-10 w-full mt-1 overflow-hidden border-1 border-neutral-800 rounded-lg"
+          className="absolute z-10 w-full mt-1 overflow-hidden border-1 border-geodude-800 rounded-lg"
           role="listbox"
         >
           {displayResults.map((r, index) => (
@@ -84,10 +117,24 @@ export default function SearchBar({ onSearchComplete = null }) {
               }}
               role="option"
               aria-selected={index === selectedIndex}
-              className={`bg-neutral-800 block p-3 text-sm border-b last:border-0 border-neutral-800 transition-colors ${index === selectedIndex ? "bg-hover:bg-neutral-800" : "bg-neutral-900 hover:hover:bg-neutral-800"
+              className={`block p-3 text-sm border-b last:border-0 border-geodude-800 transition-colors ${index === selectedIndex
+                ? "bg-geodude-800 text-foreground"
+                : "bg-geodude-900 text-paper-200 hover:bg-geodude-800 hover:text-foreground"
                 }`}
             >
-              {r.fullName}
+              <div className="flex flex-col">
+                <div className="justify-between items-center">
+                  <span className={`font-semibold ${index === selectedIndex ? "text-foreground" : "text-paper-100"}`}>
+                    {r.fullName}
+                  </span>
+                </div>
+
+                {r.team?.full_name && (
+                  <span className="text-xs text-paper-400 mt-0.5">
+                    {r.team.full_name}
+                  </span>
+                )}
+              </div>
             </Link>
           ))}
         </div>

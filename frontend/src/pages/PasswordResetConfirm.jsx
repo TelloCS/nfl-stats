@@ -57,27 +57,27 @@ const PasswordResetConfirm = () => {
     }
   };
 
-  const inputClasses = "block w-full p-2.5 pl-10 text-sm text-white border border-neutral-800 rounded-lg bg-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-700 focus:border-transparent transition-all duration-200";
+  const inputClasses = "block w-full p-2.5 pl-10 text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#000000] sm:p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background sm:p-6">
       <CSRFToken />
       <div className='w-full min-h-screen sm:min-h-0 sm:max-w-[450px] 
-                      bg-neutral-900 border-none sm:border border-neutral-800 sm:rounded-3xl 
+                      bg-geodude-900 sm:border border-geodude-800 sm:rounded-3xl 
                       flex flex-col items-center justify-center p-12 sm:p-10'>
 
         <div className='w-full flex flex-col items-center text-center mb-8'>
-          <div className='bg-neutral-900 p-3 rounded-2xl mb-4 border border-neutral-800'>
-            <RotateCcwKey size={28} className="text-neutral-400" />
+          <div className='bg-geodude-900 p-3 rounded-2xl mb-4 border border-geodude-800'>
+            <RotateCcwKey size={28} className="text-paper-400" />
           </div>
-          <h2 className='text-2xl font-bold text-white'>Reset your Password</h2>
-          <p className='mt-3 text-xs text-neutral-300'>Please set your new password</p>
+          <h2 className='text-2xl font-bold text-foreground'>Reset your Password</h2>
+          <p className='mt-3 text-xs text-paper-300'>Please set your new password</p>
         </div>
 
         <form onSubmit={handleSubmit} className='w-full space-y-4'>
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Lock size={18} className="text-neutral-400" />
+              <Lock size={18} className="text-paper-400" />
             </div>
             <input
               className={inputClasses}
@@ -94,7 +94,7 @@ const PasswordResetConfirm = () => {
 
           <div className='relative'>
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Lock size={18} className="text-neutral-400" />
+              <Lock size={18} className="text-paper-400" />
             </div>
             <input
               className={inputClasses}
@@ -109,14 +109,14 @@ const PasswordResetConfirm = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-white transition-colors"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-paper-400 hover:text-foreground transition-colors"
             >
             </button>
           </div>
 
           <button
-            className='w-full py-2.5 px-4 text-sm font-medium text-white bg-emerald-600 border border-emerald-600 rounded-lg
-            hover:bg-emerald-500 hover:border-emerald-500 transition-colors mt-2'
+            className='w-full py-2.5 px-4 text-sm font-medium text-foreground bg-secondary border border-secondary rounded-lg
+            hover:bg-primary hover:border-primary transition-colors mt-2'
             type="submit"
             disabled={isLoading}
             style={{ padding: '10px', cursor: 'pointer' }}
@@ -124,22 +124,22 @@ const PasswordResetConfirm = () => {
             {isLoading ? 'Resetting...' : 'Reset Password'}
           </button>
           {status.type === "error" ? (
-            <p className='mt-3 text-center text-sm text-red-500'>
+            <p className='mt-3 text-center text-sm text-status-error'>
               {status.msg}
             </p>
           ) : status.type === "success" && (
-            <p className='mt-3 text-center text-sm text-green-500'>
+            <p className='mt-3 text-center text-sm text-status-success'>
               {status.msg}
             </p>
           )}
           {status.type === "expired" && (
             <>
-              <p className='mt-3 text-center text-sm text-red-500'>
+              <p className='mt-3 text-center text-sm text-status-error'>
                 {status.msg}
               </p>
-              <div className='text-center text-sm text-neutral-500'>
+              <div className='text-center text-sm text-paper-500'>
                 Go back to {' '}
-                <Link to='/login' className='font-semibold text-neutral-300 hover:text-white hover:underline transition-colors'>
+                <Link to='/login' className='font-semibold text-paper-300 hover:text-foreground hover:underline transition-colors'>
                   Log in
                 </Link>
               </div>

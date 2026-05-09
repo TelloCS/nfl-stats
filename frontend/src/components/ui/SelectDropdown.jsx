@@ -20,15 +20,15 @@ export default function SelectDropdown({ value, onChange, options = [], minWidth
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-neutral-900 border border-neutral-800 text-sm
-        rounded-md px-3 py-2 text-neutral-200 hover:border-neutral-700 focus:outline-none"
+        className="w-full flex items-center justify-between bg-geodude-900 border border-geodude-800 text-sm
+        rounded-md px-3 py-2 text-paper-200 hover:border-geodude-700 focus:outline-none"
       >
         <span className="truncate">{selectedLabel}</span>
-        <ChevronDown className={`ml-2 h-4 w-4 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`ml-2 h-4 w-4 text-paper-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-md max-h-60 overflow-auto hide-scrollbar">
+        <div className="absolute z-50 mt-1 w-full bg-geodude-800 border border-geodude-700 rounded-md max-h-60 overflow-auto hide-scrollbar">
           <ul className="">
             {options?.map((opt) => (
               <li key={opt.value}>
@@ -38,10 +38,10 @@ export default function SelectDropdown({ value, onChange, options = [], minWidth
                     onChange(opt.value);
                     setIsOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors border-b border-neutral-700
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors border-b border-geodude-700
                     ${String(value) === String(opt.value)
-                      ? 'bg-neutral-700 text-emerald-400 font-medium'
-                      : 'text-neutral-300 hover:bg-neutral-700 hover:text-white'
+                      ? 'bg-geodude-800 text-status-success font-medium'
+                      : 'bg-geodude-900 text-paper-400 hover:bg-geodude-800 hover:text-paper-200'
                     }`}
                 >
                   {opt.label || opt.value}

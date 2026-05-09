@@ -124,3 +124,39 @@ class Table(object):
             return value
         else:
             return value
+
+def parse_competitor(competitor: dict) -> dict:
+    """Helper to safely extract team and competitor data."""
+    team_data = competitor.get("team", {})
+    return {
+        "homeAway": competitor.get("homeAway"),
+        "winner": competitor.get("winner"),
+        "score": competitor.get("score"),
+        "team": {
+            "name": team_data.get("name"),
+            "abbreviation": team_data.get("abbreviation"),
+            "displayName": team_data.get("displayName"),
+            "shortDisplayName": team_data.get("shortDisplayName"),
+            "color": team_data.get("color")
+        }
+    }
+
+def parse_event(event: dict) -> dict:
+    """Helper to extract event details and iterate through competitions."""
+    return {
+        "date": event.get("date"),
+        "name": event.get("name"),
+        "shortName": event.get("shortName"),
+        "season": event.get("season"),
+        "week": event.get("week"),
+        "status": event.get("status"),
+
+        "competitions": [
+            {
+                "competitors": [
+                    parse_competitor(c) for c in comp.get("competitors", [])
+                ]
+            }
+            for comp in event.get("competitions", [])
+        ]
+    }

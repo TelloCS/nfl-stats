@@ -155,8 +155,7 @@ class TeamStatsSerializer(serializers.ModelSerializer):
                 stats.pop('id', None)
                 stats.pop('team', None)
                 data[key] = stats
-            else:
-                data[key] = None
+                data[key] = {k: v for k, v in stats.items() if v is not None}
         return data
 
 #######################################################################################################################
@@ -166,6 +165,10 @@ class TeamRankSnapshotSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamRankSnapshot
         exclude = ['id', 'team', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return {k: v for k, v in data.items() if v != 0}
 
 
 class TeamRanksSerializer(serializers.ModelSerializer):

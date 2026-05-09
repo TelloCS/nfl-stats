@@ -13,7 +13,7 @@ export default function CustomizedAxisTick({ x, y, payload, stats }) {
             dy="1.2em"
             style={{
               fontSize: '11px',
-              fill: word === '@' ? '#666' : '#a1a1a1',
+              fill: word === '@' ? 'var(--app-paper-500)' : 'var(--app-paper-400)',
               fontWeight: 500
             }}
           >
@@ -22,8 +22,8 @@ export default function CustomizedAxisTick({ x, y, payload, stats }) {
         ))}
         <tspan
           x="0"
-          dy="1.2em"
-          style={{ fontSize: '11px', fill: '#a1a1a1', fontWeight: 500 }}
+          dy="1.4em"
+          style={{ fontSize: '11px', fill: 'var(--app-paper-400)', fontWeight: 500 }}
         >
           {payload.value}
         </tspan>
