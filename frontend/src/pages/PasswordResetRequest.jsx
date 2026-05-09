@@ -60,7 +60,7 @@ const PasswordResetRequest = () => {
 
           <div className='text-center text-sm text-paper-500 mt-8'>
             Return to{' '}
-            <Link to='/signup' className='font-semibold text-paper-300 hover:text-foreground hover:underline transition-colors'>
+            <Link to='/login' className='font-semibold text-paper-300 hover:text-foreground hover:underline transition-colors'>
               Login
             </Link>
           </div>
