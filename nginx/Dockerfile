@@ -18,7 +18,7 @@ USER node
 RUN npm run build
 
 #######################################################################
-FROM nginx:1.25-alpine AS prod
+FROM nginx:1.31.0-alpine AS prod
 
 RUN rm -rf /usr/share/nginx/html/*
 
