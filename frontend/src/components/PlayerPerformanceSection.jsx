@@ -11,7 +11,6 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
   const [activeStat, setActiveStat] = useState("");
 
   const currentSeason = filters?.season_year || data?.active_season;
-  console.log(currentSeason)
   const seasonOptions = useMemo(() =>
     data?.available_seasons?.map(year => ({
       label: String(year),
