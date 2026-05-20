@@ -59,7 +59,7 @@ class GameSerializer(serializers.ModelSerializer):
 class PlayerTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ['id', 'slug', 'full_name', 'nickname', 'abbreviation', 'conference', 'division']
+        fields = ['id', 'full_name', 'nickname', 'abbreviation', 'conference', 'division']
 
 
 class PlayerGameSerializer(serializers.ModelSerializer):
@@ -85,9 +85,10 @@ class PlayerGameStatsSerializer(serializers.ModelSerializer):
 
 class PlayerStatsSerializer(serializers.ModelSerializer):
     fullName = serializers.CharField(source='full_name')
-    team = PlayerTeamSerializer(read_only=True)
+    team = serializers.SerializerMethodField()
+    jersey = serializers.SerializerMethodField()
     stats = PlayerGameStatsSerializer(many=True, read_only=True)
-    available_seasons = serializers.SerializerMethodField()
+    available_seasons = serializers.ReadOnlyField()
     active_season = serializers.SerializerMethodField()
 
     class Meta:
@@ -97,19 +98,27 @@ class PlayerStatsSerializer(serializers.ModelSerializer):
             'team', 'available_seasons', 'active_season', 'stats',
         ]
 
-    def get_available_seasons(self, obj):
-        return (
-            PlayerGameStats.objects.filter(player=obj)
-            .values_list('game__season_year', flat=True)
-            .distinct()
-            .order_by('-game__season_year')
-        )
+    def get_team(self, obj):
+        if obj.team:
+            return PlayerTeamSerializer(obj.team, context=self.context).data
+
+        return {
+            "id": None,
+            "slug": "free-agent",
+            "full_name": "Free Agent",
+            "nickname": "Free Agent",
+            "abbreviation": "FA",
+            "conference": None,
+            "division": None
+        }
+
+    def get_jersey(self, obj):
+        if not obj.team:
+            return None
+        return obj.jersey
 
     def get_active_season(self, obj):
-        prefetched_stats = list(obj.stats.all())
-        if prefetched_stats:
-            return prefetched_stats[0].game.season_year
-        return None
+        return getattr(obj, 'active_season_value', None)
 
 #######################################################################################################################
 
@@ -147,15 +156,18 @@ class TeamStatsSerializer(serializers.ModelSerializer):
         ]
 
         for key in stat_keys:
-            attr_name = f"prefetched_{key}"
-            prefetched_list = getattr(instance, attr_name, [])
+            prefetched_data = getattr(instance, f"prefetched_{key}", None)
 
-            if prefetched_list:
-                stats = model_to_dict(prefetched_list[0])
-                stats.pop('id', None)
-                stats.pop('team', None)
-                data[key] = stats
-                data[key] = {k: v for k, v in stats.items() if v is not None}
+            if prefetched_data:
+                stats_obj = prefetched_data[0]
+                stats_dict = model_to_dict(stats_obj)
+                data[key] = {
+                    k: v for k, v in stats_dict.items()
+                    if v is not None and k not in ('id', 'team')
+                }
+
+            else:
+                data[key] = None
         return data
 
 #######################################################################################################################
@@ -214,6 +226,7 @@ class PlayerOnlySerializer(serializers.ModelSerializer):
 class GameSlimSerializer(serializers.ModelSerializer):
     homeTeam = TeamSlimSerializer(read_only=True)
     awayTeam = TeamSlimSerializer(read_only=True)
+    date = serializers.DateTimeField(format="%m-%d")
 
     class Meta:
         model = Game
@@ -239,23 +252,49 @@ class TeamSerializer(serializers.Serializer):
     name = serializers.CharField()
     abbreviation = serializers.CharField()
     displayName = serializers.CharField()
+    shortDisplayName = serializers.CharField()
     color = serializers.CharField(required=False, allow_null=True)
 
 
 class CompetitorSerializer(serializers.Serializer):
     homeAway = serializers.CharField()
-    score = serializers.CharField()
+    score = serializers.CharField(required=False, allow_null=True)
     winner = serializers.BooleanField(required=False, allow_null=True)
     team = TeamSerializer()
 
 
+class VenueSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False, allow_null=True)
+    fullName = serializers.CharField()
+    city = serializers.CharField(required=False, allow_null=True)
+    state = serializers.CharField(required=False, allow_null=True)
+    indoor = serializers.BooleanField(required=False, allow_null=True)
+
+
+class OddsProviderSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False, allow_null=True)
+    name = serializers.CharField()
+
+
+class OddsSerializer(serializers.Serializer):
+    provider = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    details = serializers.CharField(required=False, allow_null=True)
+    overUnder = serializers.FloatField(required=False, allow_null=True)
+    spread = serializers.FloatField(required=False, allow_null=True)
+
+
 class CompetitionSerializer(serializers.Serializer):
+    venue = VenueSerializer(required=False, allow_null=True)
+    odds = OddsSerializer(many=True, required=False)
     competitors = CompetitorSerializer(many=True)
 
 
 class EventSerializer(serializers.Serializer):
     date = serializers.DateTimeField()
     name = serializers.CharField()
+    shortName = serializers.CharField()
+    season = serializers.DictField()
+    week = serializers.DictField()
     status = serializers.DictField()
     competitions = CompetitionSerializer(many=True)
 

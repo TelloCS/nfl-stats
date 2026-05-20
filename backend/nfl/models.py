@@ -2,6 +2,18 @@ from django.db import models
 from django.contrib.postgres.indexes import GinIndex
 
 
+class GlobalMetadata(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=255)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Global Metadata"
+
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+
+
 class Team(models.Model):
     slug = models.SlugField(max_length=255, unique=True, help_text="URL-friendly identifier")
 
@@ -12,7 +24,6 @@ class Team(models.Model):
         unique=True,
         blank=True,
         null=True,
-        db_index=True,
         help_text="e.g., KC, SF",
     )
 
@@ -38,7 +49,7 @@ class Player(models.Model):
     jersey = models.CharField(max_length=3, blank=True, default="")
     experience = models.IntegerField(default=0)
 
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team', null=False)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, related_name='team', null=True, blank=True)
 
     def __str__(self):
         return f"{self.full_name} ({self.position})"
