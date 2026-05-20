@@ -1,7 +1,8 @@
-import requests
+from asyncio import run
+from aiohttp import ClientError
 from celery import shared_task
-from .services.services import main
-from .services.nfl_service import weekly_schedule
+from .services.pipeline import main
+from .services.nfl_service import get_and_cache_weekly_schedule_async
 from celery.utils.log import get_task_logger
 from django.db import transaction
 from django.db.models import F, Window
@@ -14,8 +15,7 @@ from .models import (
     TeamAdvanceOffenseStats, TeamAdvanceDefenseStats, TeamCoverageSchemeStats,
     TeamOffensePlayCallingStats, TeamCoverageStatsByPosition
 )
-from nfl.services.services import get_pipeline_context
-from nfl.services.utils import PIPELINE_CONFIG
+from nfl.services.utils import PIPELINE_CONFIG, get_pipeline_context
 
 logger = get_task_logger(__name__)
 
@@ -55,42 +55,42 @@ def update_team_rank_snapshots():
         return Window(expression=DenseRank(), order_by=F(field).asc())
 
     # Offense Passing
-    off_pass = TeamOffensePassingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    off_pass = TeamOffensePassingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         off_pass_yards_rank=rank_desc('pass_yards'),
         off_pass_tds_rank=rank_desc('pass_touchdowns'),
         off_pass_rating_rank=rank_desc('pass_rating')
     ).values('team_id', 'off_pass_yards_rank', 'off_pass_tds_rank', 'off_pass_rating_rank')
 
     # Offense Rushing
-    off_rush = TeamOffenseRushingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    off_rush = TeamOffenseRushingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         off_rush_yards_rank=rank_desc('rush_yards'),
         off_rush_tds_rank=rank_desc('rush_touchdowns'),
         off_rush_attempts_rank=rank_desc('rush_attempts')
     ).values('team_id', 'off_rush_yards_rank', 'off_rush_tds_rank', 'off_rush_attempts_rank')
 
     # Offense Receiving
-    off_rec = TeamOffenseReceivingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    off_rec = TeamOffenseReceivingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         off_receptions_rank=rank_desc('receptions'),
         off_rec_yards_rank=rank_desc('rec_yards'),
         off_rec_tds_rank=rank_desc('rec_touchdowns')
     ).values('team_id', 'off_receptions_rank', 'off_rec_yards_rank', 'off_rec_tds_rank')
 
     # Defense Passing
-    def_pass = TeamDefensePassingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    def_pass = TeamDefensePassingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         def_pass_yards_rank=rank_asc('pass_yards'),
         def_pass_tds_rank=rank_asc('pass_touchdowns'),
         def_pass_rating_rank=rank_asc('pass_rating')
     ).values('team_id', 'def_pass_yards_rank', 'def_pass_tds_rank', 'def_pass_rating_rank')
 
     # Defense Rushing
-    def_rush = TeamDefenseRushingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    def_rush = TeamDefenseRushingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         def_rush_yards_rank=rank_asc('rush_yards'),
         def_rush_tds_rank=rank_asc('rush_touchdowns'),
         def_rush_attempts_rank=rank_asc('rush_attempts')
     ).values('team_id', 'def_rush_yards_rank', 'def_rush_tds_rank', 'def_rush_attempts_rank')
 
     # Defense Receiving
-    def_rec = TeamDefenseReceivingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    def_rec = TeamDefenseReceivingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         def_receptions_rank=rank_asc('receptions'),
         def_rec_yards_rank=rank_asc('rec_yards'),
         def_rec_tds_rank=rank_asc('rec_touchdowns'),
@@ -98,7 +98,7 @@ def update_team_rank_snapshots():
     ).values('team_id', 'def_receptions_rank', 'def_rec_yards_rank', 'def_rec_tds_rank', 'def_pass_defended_rank')
 
     # Advanced Offense
-    adv_off = TeamAdvanceOffenseStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    adv_off = TeamAdvanceOffenseStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         off_expected_points_added_per_play_rank=rank_desc('expected_points_added_per_play'),
         off_expected_points_added_per_pass_rank=rank_desc('expected_points_added_per_pass'),
         off_expected_points_added_per_rush_rank=rank_desc('expected_points_added_per_rush')
@@ -108,7 +108,7 @@ def update_team_rank_snapshots():
     )
 
     # Advanced Defense
-    adv_def = TeamAdvanceDefenseStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    adv_def = TeamAdvanceDefenseStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         def_expected_points_added_per_play_rank=rank_asc('expected_points_added_per_play'),
         def_expected_points_added_allowed_per_pass_rank=rank_asc('expected_points_added_allowed_per_pass'),
         def_expected_points_added_allowed_per_rush_rank=rank_asc('expected_points_added_allowed_per_rush')
@@ -118,7 +118,7 @@ def update_team_rank_snapshots():
     )
 
     # Coverage Scheme
-    cov_scheme = TeamCoverageSchemeStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    cov_scheme = TeamCoverageSchemeStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         man_rate_rank=rank_desc('man_rate'),
         zone_rate_rank=rank_desc('zone_rate'),
         middle_closed_rate_rank=rank_desc('middle_closed_rate'),
@@ -126,7 +126,7 @@ def update_team_rank_snapshots():
     ).values('team_id', 'man_rate_rank', 'zone_rate_rank', 'middle_closed_rate_rank', 'middle_open_rate_rank')
 
     # Play Calling
-    play_call = TeamOffensePlayCallingStats.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    play_call = TeamOffensePlayCallingStats.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         motion_rate_rank=rank_desc('motion_rate'),
         play_action_rate_rank=rank_desc('play_action_rate'),
         shotgun_rate_rank=rank_desc('shotgun_rate'),
@@ -134,7 +134,7 @@ def update_team_rank_snapshots():
     ).values('team_id', 'motion_rate_rank', 'play_action_rate_rank', 'shotgun_rate_rank', 'nohuddle_rate_rank')
 
     # Coverage by Position
-    pos_cov = TeamCoverageStatsByPosition.objects.filter(season_year=PIPELINE_CONFIG['year']).annotate(
+    pos_cov = TeamCoverageStatsByPosition.objects.filter(season_year=PIPELINE_CONFIG['dates']).annotate(
         yards_allowed_wr_rank=rank_asc('yards_allowed_wr'),
         yards_allowed_te_rank=rank_asc('yards_allowed_te'),
         yards_allowed_rb_rank=rank_asc('yards_allowed_rb'),
@@ -172,7 +172,7 @@ def update_team_rank_snapshots():
             for tid, stats in master_data.items():
                 TeamRankSnapshot.objects.update_or_create(
                     team_id=tid,
-                    season_year=PIPELINE_CONFIG['year'],
+                    season_year=PIPELINE_CONFIG['dates'],
                     defaults=stats
                 )
 
@@ -192,14 +192,14 @@ def finalize_rank_updates():
 
 @shared_task(
     name="nfl.tasks.update_nfl_cache_task",
-    autoretry_for=(requests.exceptions.RequestException, ValueError),
+    autoretry_for=(ClientError, ValueError),
     retry_kwargs={'max_retries': 3},
     retry_backoff=True,
     retry_backoff_max=30
 )
 def update_nfl_cache_task():
     try:
-        data = weekly_schedule(force_refresh=True)
+        data = run(get_and_cache_weekly_schedule_async(force_refresh=True))
         if not data or not data.get("events"):
             raise ValueError("Empty events list from NFL API")
 

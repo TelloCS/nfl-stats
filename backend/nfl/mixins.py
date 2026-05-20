@@ -3,7 +3,7 @@ from django.utils.cache import patch_cache_control
 
 
 class KeyBasedCacheMixin:
-    cache_timeout = 60 * 60
+    cache_timeout = 60 * 60 * 24
 
     def get_cache_key(self, request):
         raise NotImplementedError("View must implement get_cache_key(request)")
@@ -20,5 +20,5 @@ class KeyBasedCacheMixin:
         response = super().finalize_response(request, response, *args, **kwargs)
 
         if request.method == 'GET' and response.status_code == 200:
-            patch_cache_control(response, public=True, max_age=self.cache_timeout)
+            patch_cache_control(response, no_cache=True, must_revalidate=True, max_age=0)
         return response
