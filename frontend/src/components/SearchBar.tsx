@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVersionedQuery } from "../hooks/useVersionedQuery";
-import createPlayerSearchQueryOptions from "../queryOptions/createPlayerSearchQueryOptions";
+import { Player, createPlayerSearchQueryOptions } from "../queryOptions/createPlayerSearchQueryOptions";
 
-export default function SearchBar({ onSearchComplete = null }) {
+type SearchBarProp = {
+  onSearchComplete?: () => void;
+}
+
+export default function SearchBar({ onSearchComplete }: SearchBarProp) {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [debouncedInput, setDebouncedInput] = useState("");
@@ -15,20 +19,21 @@ export default function SearchBar({ onSearchComplete = null }) {
     createPlayerSearchQueryOptions,
     debouncedInput
   );
-  const displayResults = searchResults ? searchResults.slice(0, 5) : [];
+
+  const displayResults: Player[] = searchResults ? searchResults.slice(0, 5) : [];
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedInput(input), 300);
     return () => clearTimeout(timer);
   }, [input]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
     setSelectedIndex(-1);
     setShowResults(true);
   };
 
-  const handleSelect = (player) => {
+  const handleSelect = (player: Player) => {
     if (!player) return;
 
     setInput(player.fullName);
@@ -38,7 +43,7 @@ export default function SearchBar({ onSearchComplete = null }) {
     onSearchComplete?.();
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showResults || displayResults.length === 0) {
       if (e.key === "Escape") setShowResults(false);
       return;

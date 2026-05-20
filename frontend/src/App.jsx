@@ -1,6 +1,6 @@
 import './App.css';
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, defaultShouldDehydrateQuery } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { AuthProvider } from './context/AuthProvider';
@@ -26,8 +26,8 @@ const queryClient = new QueryClient({
       staleTime: Infinity,
       retry: 1,
       retryDelay: (attempt) => Math.min(attempt * 1000, 5000),
-      refetchOnWindowFocus: true,
-      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      refetchIntervalInBackground: true,
       refetchOnReconnect: true,
     },
   },
@@ -40,6 +40,14 @@ const sessionStoragePersister = createSyncStoragePersister({
 persistQueryClient({
   queryClient,
   persister: sessionStoragePersister,
+  dehydrateOptions: {
+        shouldDehydrateQuery: (query) => {
+            if (query.meta?.persist === false) {
+                return false;
+            }
+            return defaultShouldDehydrateQuery(query);
+        },
+    },
 });
 
 const router = createBrowserRouter([

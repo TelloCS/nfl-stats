@@ -5,6 +5,7 @@ import UpcomingGames from '../components/UpcomingGames';
 export default function Home() {
   return (
     <>
+      <UpcomingGames />
       <div className="bg-background flex flex-col justify-center overflow-hidden font-poppins">
         <div className="container mx-auto p-6 md:p-10 relative z-10 my-12 flex flex-col">
           <div className="mx-auto justify-center flex flex-col">
