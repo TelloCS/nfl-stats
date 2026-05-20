@@ -38,7 +38,7 @@ async def get_and_cache_weekly_schedule_async(force_refresh: bool = False) -> di
     
     logger.info(f"Cache Miss: Fetching search term {cache_key} from NFL")
     
-    schedule_url = os.getenv("WEEKLY_SCHEDULE_URL")
+    schedule_url = os.getenv("WEEKLY_SCHEDULE_URL", "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
     if not schedule_url:
         logger.error("WEEKLY_SCHEDULE_URL environment variable is missing.")
         return None
