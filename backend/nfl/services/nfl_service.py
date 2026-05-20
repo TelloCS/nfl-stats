@@ -1,11 +1,13 @@
 import os
 import logging
+from dotenv import load_dotenv
 from aiohttp import ClientSession, ClientTimeout, ClientResponseError, ClientError
 from requests import Response
 from typing import Optional
 from django.core.cache import cache
 from nfl.services.utils import DEFAULT_HEADERS, parse_event
 
+load_dotenv()
 logger = logging.getLogger(__name__)
 
 async def fetch_nfl_schedule_raw_async(session: ClientSession, url: str) -> Optional[Response]:
