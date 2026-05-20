@@ -7,6 +7,9 @@ export default function createUpcomingGamesQueryOptions(version){
         queryFn : () => getUpcomingGames(),
         staleTime: Infinity,
         placeholderData: keepPreviousData,
+        meta: {
+            persist: false,
+        }
     })
 }
 

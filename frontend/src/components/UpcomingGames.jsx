@@ -23,7 +23,7 @@ export default function UpcomingGames() {
 
         <div
           ref={scrollRef}
-          className={`flex overflow-x-auto gap-3 md:gap-4 scrollbar-hide scroll-smooth px-1 ${!canScroll ? "justify-center" : "justify-start"
+          className={`flex overflow-x-auto gap-3 md:gap-4 scrollbar-hide scroll-smooth ${!canScroll ? "justify-center" : "justify-start"
             }`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
@@ -41,9 +41,9 @@ const ScrollButton = ({ direction, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`absolute ${isLeft ? "left-2 md:left-6" : "right-2 md:right-6"} 
+      className={`absolute ${isLeft ? "left-2 md:left-2" : "right-2 md:right-2"} 
       top-1/2 -translate-y-1/2 z-10 bg-geodude-800 border border-geodude-800
-      rounded-full p-1.5 text-paper-400 hover:text-foreground transition-all hidden md:flex`}
+      rounded-full p-1.5 text-paper-400 hover:text-foreground transition-all hidden sm:flex`}
     >
       {isLeft ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
     </button>

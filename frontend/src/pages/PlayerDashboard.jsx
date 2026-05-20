@@ -1,4 +1,4 @@
-import { useParams, useNavigate  } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import CustomLoader from "../components/CustomLoader";
 import UpcomingGames from "../components/UpcomingGames";
@@ -13,7 +13,7 @@ import createTeamStatsRanksQueryOptions from "../queryOptions/createTeamStatsRan
 
 export default function PlayerDashboard() {
   const { player_id, player_slug } = useParams();
-  const { filters, setFilter } = useUrlFilters({ season_year: FilterConfig.season_year[0].value, season_type: "2" });
+  const { filters, setFilter } = useUrlFilters({ season_year: "", season_type: "2" });
   const navigate = useNavigate();
 
   const {
@@ -37,9 +37,10 @@ export default function PlayerDashboard() {
     filters
   );
 
-  const isPending = isPlayerPending || isRankingPending;
-  const isError = isPlayerError || isRankingError;
-  const hasRankings = rankingData && rankingData.length > 0;
+  const isPending = Boolean(isPlayerPending || isRankingPending);
+  const isError = Boolean(isPlayerError || isRankingError);
+  const hasRankings = Boolean(rankingData && rankingData?.length > 0);
+  const showMatchup = Boolean(playerData?.stats?.length > 0 && hasRankings);
 
   return (
     <>
@@ -66,7 +67,7 @@ export default function PlayerDashboard() {
         ) : (
           <div className="container mx-auto p-4 md:p-8 relative">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className={playerData?.stats.length > 0 && hasRankings ? "col-span-1 lg:col-span-2" : "col-span-1 lg:col-span-3"}>
+              <div className={showMatchup ? "lg:col-span-2" : "lg:col-span-3"}>
                 <PlayerPerformanceSection
                   data={playerData}
                   onFilterChange={setFilter}
@@ -74,7 +75,7 @@ export default function PlayerDashboard() {
                   className="h-full"
                 />
               </div>
-              {hasRankings && !!playerData?.stats.length && (
+              {showMatchup && (
                 <div className="col-span-1">
                   <MatchupAnalysisSection
                     games={playerData?.stats}

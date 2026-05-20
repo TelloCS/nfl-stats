@@ -1,11 +1,16 @@
 export const GameCard = ({ event }) => {
-  const competitors = event.competitions?.[0]?.competitors || [];
+  const competition = event.competitions?.[0] || {};
+  const competitors = competition.competitors || [];
+  
   const home = competitors.find(c => c.homeAway === "home");
   const away = competitors.find(c => c.homeAway === "away");
 
   const status = event.status?.type?.name; // e.g., "STATUS_SCHEDULED", "STATUS_IN_PROGRESS", "STATUS_FINAL"
   const isCompleted = event.status?.type?.completed;
   const isUpcoming = status === "STATUS_SCHEDULED";
+
+  const venue = competition.venue || {};
+  const gameOdds = competition.odds?.[0] || null;
 
   // Format Date: "Oct 24"
   const dateLabel = new Date(event?.date).toLocaleDateString(undefined, {
@@ -37,13 +42,15 @@ export const GameCard = ({ event }) => {
   );
 
   return (
-    <div className="flex-none w-[320px] font-poppins">
+    <div className="flex-none w-[255px] font-poppins">
       <div className="bg-geodude-900 border border-geodude-800 rounded-lg p-4 hover:border-geodude-700 transition-all duration-200">
 
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-geodude-800 text-xs uppercase tracking-widest">
-          <span className="text-paper-400">{dateLabel}</span>
-          <span className={isCompleted ? "text-paper-400" : "text-primary font-bold"}>
-            {isUpcoming ? timeLabel : (event.status?.type?.detail || "Final")}
+          <span className="text-paper-400">
+            {dateLabel} {venue.indoor && <span className="text-primary-400 ml-1">(Dome)</span>}
+          </span>
+          <span className={`font-semibold ${isCompleted ? "text-paper-500" : "text-accent"}`}>
+            {isUpcoming ? timeLabel : event.status?.type?.detail}
           </span>
         </div>
 
@@ -51,6 +58,14 @@ export const GameCard = ({ event }) => {
           <TeamRow team={away} />
           <TeamRow team={home} />
         </div>
+
+        {isUpcoming && gameOdds && (
+          <div className="mt-2 pt-2 border-t border-geodude-800 flex justify-between text-xs text-paper-400 font-mono">
+            <span>Line: <span className="text-paper-200">{gameOdds.details || "N/A"}</span></span>
+            <span>O/U: <span className="text-paper-200">{gameOdds.overUnder || "N/A"}</span></span>
+          </div>
+        )}
+
       </div>
     </div>
   );

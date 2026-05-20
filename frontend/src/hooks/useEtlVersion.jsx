@@ -5,16 +5,23 @@ export function useEtlVersion() {
   return useQuery({
     queryKey: ["version"],
     queryFn: () => apiFetch("/nfl/sync-status/"),
-    refetchInterval: (query) => {
-      const data = query.state?.data;
-    
-      if (data && data.in_season === false) {
+    staleTime: 0,
+    refetchInterval: (data) => {
+      if (data === undefined) {
+        return 5000;
+      }
+
+      if (data?.in_season === false) {
         return false;
       }
-      
+
       return 60000;
     },
-    staleTime: 0, 
-    refetchOnWindowFocus: true,
+
+    refetchOnWindowFocus: (query) => {
+      const data = query.state.data;
+      if (data === undefined) return true;
+      return data?.in_season !== false;
+    },
   });
 }

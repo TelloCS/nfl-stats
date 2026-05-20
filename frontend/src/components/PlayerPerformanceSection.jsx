@@ -11,6 +11,7 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
   const [activeStat, setActiveStat] = useState("");
 
   const currentSeason = filters?.season_year || data?.active_season;
+  console.log(currentSeason)
   const seasonOptions = useMemo(() =>
     data?.available_seasons?.map(year => ({
       label: String(year),
@@ -23,7 +24,7 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
   const seasonTypeOptions = FilterConfig.season_type
 
   const availableStats = useMemo(() =>
-    data?.position ? (PositionStatMap[data.position] || []) : [],
+    data?.position ? (PositionStatMap[data?.position] || []) : [],
     [data?.position]
   );
 
@@ -47,6 +48,8 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  const isFreeAgent = !data?.team || data?.team === "FA" || data?.team?.full_name === "Free Agent";
+
   return (
     <div className="bg-geodude-900 h-full p-4 sm:p-6 rounded-md border border-geodude-800 flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
@@ -54,8 +57,16 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
           <div className="font-semibold text-lg sm:text-xl flex text-foreground items-center">
             {data?.fullName} <Dot className="text-foreground" /> {activeStatLabel}
           </div>
-          <div className="text-sm font-normal flex items-center">
-            {data?.team?.full_name} <Dot /> #{data?.jersey} <Dot /> {data?.position}
+          <div className="text-sm font-normal flex items-center gap-1.5">
+            {isFreeAgent ? (
+              <>
+                <span>{data?.position}</span>
+              </>
+            ) : (
+              <>
+                {data?.team?.full_name} <Dot /> #{data?.jersey} <Dot /> {data?.position}
+              </>
+            )}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -74,7 +85,7 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
         </div>
       </div>
 
-      {data?.active_season ? (
+      {data?.stats?.length > 0 ? (
         <>
           <StatToggle
             options={availableStats}
