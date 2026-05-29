@@ -1,4 +1,6 @@
-export default function StatToggle({ options, activeKey, activeKeys, onSelect }) {
+import { memo } from "react";
+
+function StatToggle({ options, activeKey, activeKeys, onSelect }) {
   if (!options || options.length === 0) return null;
 
   const getIsActive = (key) => {
@@ -30,3 +32,5 @@ export default function StatToggle({ options, activeKey, activeKeys, onSelect })
     </div>
   );
 }
+
+export default memo(StatToggle);

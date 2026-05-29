@@ -8,7 +8,7 @@ import { ThemeProvider } from './theme';
 import PublicRoute from "./components/PublicRoute";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
-import PositionOpponent from './pages/PositionOpponent';
+import PositionOpponent from './components/PositionOpponent';
 import TeamStats from './pages/TeamStats';
 import PlayerDashboard from './pages/PlayerDashboard';
 import Register from './pages/Register';

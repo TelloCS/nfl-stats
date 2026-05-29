@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export const sortParams = (params) => {
   const ORDER = ["season_year", "tab"];
@@ -22,11 +22,13 @@ export const sortParams = (params) => {
 
 export default function useUrlFilters(initialDefaults) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const defaultsString = JSON.stringify(initialDefaults);
 
   const filters = useMemo(() => {
-    const currentFilters = { ...initialDefaults };
+    const defaults = JSON.parse(defaultsString);
+    const currentFilters = { ...defaults };
 
-    Object.keys(initialDefaults).forEach((key) => {
+    Object.keys(defaults).forEach((key) => {
       const urlValue = searchParams.get(key);
       if (urlValue) {
         currentFilters[key] = urlValue;
@@ -34,26 +36,28 @@ export default function useUrlFilters(initialDefaults) {
     });
 
     return currentFilters;
-  }, [searchParams, initialDefaults]);
+  }, [searchParams, defaultsString]);
 
-  const setFilter = (key, value) => {
-    const newParams = new URLSearchParams(searchParams);
+  const setFilter = useCallback((key, value) => {
+    setSearchParams((prevParams) => {
+      const newParams = new URLSearchParams(prevParams);
 
-    if (value) {
-      newParams.set(key, value);
-    } else {
-      newParams.delete(key);
-    }
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
 
-    newParams.delete("sortKey");
-    newParams.delete("sortDir");
+      newParams.delete("sortKey");
+      newParams.delete("sortDir");
 
-    setSearchParams(sortParams(newParams));
-  };
+      return sortParams(newParams);
+    });
+  }, [setSearchParams]);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearchParams(new URLSearchParams());
-  };
+  }, [setSearchParams]);
 
   return { filters, setFilter, resetFilters };
 }

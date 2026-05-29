@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function SelectDropdown({ value, onChange, options = [], minWidth = "120px" }) {
+function SelectDropdown({ value, onChange, options = [], minWidth = "120px" }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -54,3 +54,5 @@ export default function SelectDropdown({ value, onChange, options = [], minWidth
     </div>
   );
 }
+
+export default memo(SelectDropdown);

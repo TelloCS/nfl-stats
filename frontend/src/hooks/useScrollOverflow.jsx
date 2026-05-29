@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export function useScrollOverflow(dependency) {
   const scrollRef = useRef(null);
@@ -17,13 +17,13 @@ export function useScrollOverflow(dependency) {
     return () => window.removeEventListener("resize", checkOverflow);
   }, [dependency]);
 
-  const scroll = (direction) => {
+  const scroll = useCallback((direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 300;
+      const scrollAmount = 270;
       const move = direction === "left" ? -scrollAmount : scrollAmount;
       scrollRef.current.scrollBy({ left: move, behavior: "smooth" });
     }
-  };
+  }, []);
 
   return { scrollRef, canScroll, scroll };
 }

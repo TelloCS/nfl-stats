@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { House, Menu, X, Search } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
 import { useAuth } from "../hooks/useAuth";
 import ThemeToggle from "../components/ThemeToggle";
+import { useIsDesktop } from "../hooks/useMediaQueries";
 
 const NAV_LINKS = [
   { to: "/", label: "Home", icon: House },
@@ -17,45 +18,30 @@ export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const closeAllMenus = () => {
+  const isDesktop = useIsDesktop();
+
+  if (isDesktop && (isMenuOpen || isSearchOpen)) {
     setIsMenuOpen(false);
     setIsSearchOpen(false);
-  };
+  }
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) closeAllMenus();
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+  const closeAllMenus = useCallback(() => {
+    setIsMenuOpen(false);
+    setIsSearchOpen(false);
   }, []);
 
   useEffect(() => {
+    if (!isSearchOpen && !isMenuOpen) return;
+
     const handleKeyDown = (e) => {
       if (e.key === "Escape") closeAllMenus();
     };
 
-    if (isSearchOpen || isMenuOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
+    window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen, isMenuOpen]);
+  }, [closeAllMenus, isSearchOpen, isMenuOpen]);
 
   if (isLoading) return <div className="h-[80px] bg-geodude-950 border-b border-geodude-800" />;
-
-  const AuthActions = ({ className = "" }) => (
-    <div className={`flex items-center gap-4 ${className}`}>
-      <ThemeToggle />
-      {isLoggedIn ? (
-        <UserDropdown user={user} onLogout={() => logoutMutation.mutate()} />
-      ) : (
-        <>
-          <Link to="/signup" className="text-sm text-foreground hover:text-paper-200 hover:underline font-bold transition-colors hidden sm:block md:block">Sign up</Link>
-          <Link to="/login" className="bg-inverted-bg text-inverted-text rounded-full text-sm py-2.5 px-5 hover:opacity-80 font-bold transition-opacity">Log in</Link>
-        </>
-      )}
-    </div>
-  );
 
   return (
     <>
@@ -95,7 +81,7 @@ export default function Layout() {
               >
                 <Search size={24} />
               </button>
-              <AuthActions />
+              <AuthActions isLoggedIn={isLoggedIn} user={user} logoutMutation={logoutMutation} />
             </div>
           </nav>
         </div>
@@ -133,3 +119,17 @@ export default function Layout() {
     </>
   );
 }
+
+const AuthActions = ({ isLoggedIn, user, logoutMutation }) => (
+  <div className="flex items-center gap-4">
+    <ThemeToggle />
+    {isLoggedIn ? (
+      <UserDropdown user={user} onLogout={() => logoutMutation.mutate()} />
+    ) : (
+      <>
+        <Link to="/signup" className="text-sm text-foreground hover:text-paper-200 hover:underline font-bold transition-colors hidden sm:block md:block">Sign up</Link>
+        <Link to="/login" className="bg-inverted-bg text-inverted-text rounded-full text-sm py-2.5 px-5 hover:opacity-80 font-bold transition-opacity">Log in</Link>
+      </>
+    )}
+  </div>
+);

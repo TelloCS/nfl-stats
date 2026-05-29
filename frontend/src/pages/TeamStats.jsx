@@ -11,7 +11,7 @@ import createTeamStatsQueryOptions from '../queryOptions/createTeamStatsQueryOpt
 
 import { FilterConfig } from "../components/Config";
 import useUrlFilters, { sortParams } from "../hooks/useUrlFilters";
-import SelectDropdown from "../components/ui/SelectDropdown";
+import SelectDropdown from "../components/SelectDropdown";
 
 export default function TeamStats() {
   const { filters, setFilter } = useUrlFilters({
@@ -24,9 +24,7 @@ export default function TeamStats() {
     if (!teamData || teamData.length === 0) return [];
     const firstTeam = teamData[0];
 
-    return TeamStatMap.filter(tab =>
-      Object.prototype.hasOwnProperty.call(firstTeam, tab.key)
-    );
+    return TeamStatMap.filter(tab => firstTeam?.[tab.key] != null);
   }, [teamData]);
 
   const activeTabKey = searchParams.get("tab");

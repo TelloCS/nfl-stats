@@ -1,34 +1,36 @@
-import { useState, useMemo, useEffect } from 'react';
+import { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import { Loader2, Search, Lock } from 'lucide-react';
-import { PositionStatMap, FilterConfig } from '../components/Config';
-import UpcomingGames from '../components/UpcomingGames';
-import FilterSection from '../components/FilterSection';
-import ResultsTable from '../components/ResultsTable';
+import { PositionStatMap, FilterConfig } from '../Config';
+import UpcomingGames from '../UpcomingGames';
+import FilterSection from './FilterSection';
+import Table from './Table';
 
-import useUrlTableSort from '../hooks/useUrlTableSort';
-import useUrlFilters from '../hooks/useUrlFilters';
-import usePositionOpponentData from '../hooks/usePositionOpponentData';
-import PvOChart from '../components/PositionOpponentChart';
+import useUrlTableSort from '../../hooks/useUrlTableSort';
+import useUrlFilters from '../../hooks/useUrlFilters';
+import usePositionOpponentData from '../../hooks/usePositionOpponentData';
+import TrendSection from './TrendSection';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
-export default function PositionOpponent() {
+const EMPTY_STATS = [];
+const DEFAULTS = {
+  position: 'QB',
+  opponent: 'ARI',
+  season_year: FilterConfig.season_year[0].value,
+  season_type: FilterConfig.season_type[0].value,
+  location: FilterConfig.location[0].value,
+  view: 'table'
+};
+
+function PositionOpponent() {
   const { user } = useAuth();
-
-  const defaults = {
-    position: 'QB',
-    opponent: 'ARI',
-    season_year: FilterConfig.season_year[0].value,
-    season_type: FilterConfig.season_type[0].value,
-    location: FilterConfig.location[0].value,
-    view: 'table'
-  };
-
-  const { filters, setFilter } = useUrlFilters(defaults);
-  const statsToShow = PositionStatMap[filters.position] || [];
+  const { filters, setFilter } = useUrlFilters(DEFAULTS);
+  const statsToShow = PositionStatMap[filters.position] || EMPTY_STATS;
 
   const viewMode = filters.view || 'table';
-  const setViewMode = (mode) => setFilter('view', mode);
+  const setViewMode = useCallback((mode) => {
+    setFilter('view', mode);
+  }, [setFilter]);
 
   const [chartSelections, setChartSelections] = useState(() => {
     const saved = localStorage.getItem('trend_chart_preferences');
@@ -39,7 +41,7 @@ export default function PositionOpponent() {
     localStorage.setItem('trend_chart_preferences', JSON.stringify(chartSelections));
   }, [chartSelections]);
 
-  const handleStatToggle = (statKey) => {
+  const handleStatToggle = useCallback((statKey) => {
     setChartSelections(prev => {
       const currentPos = filters.position;
       const currentSelections = prev[currentPos] || [statsToShow[0]?.key];
@@ -50,7 +52,7 @@ export default function PositionOpponent() {
 
       return { ...prev, [currentPos]: newSelections };
     });
-  };
+  }, [filters.position, statsToShow]);
 
   const {
     flatData,
@@ -86,7 +88,7 @@ export default function PositionOpponent() {
 
         <div className="container mx-auto p-4 md:px-8 relative">
           {viewMode === 'table' ? (
-            <ResultsTable
+            <Table
               isLoading={isLoading}
               data={sortedGameLogs}
               statsToShow={statsToShow}
@@ -94,12 +96,12 @@ export default function PositionOpponent() {
               onHeaderClick={handleHeaderClick}
             />
           ) : user ? (
-            <PvOChart
+            <TrendSection
               key={filters.position}
               sortedGameLogs={sortedGameLogs}
               statsToShow={statsToShow}
               filters={filters}
-              selectedKeys={chartSelections[filters.position]}
+              selectedKeys={chartSelections[filters.position] || EMPTY_STATS}
               onToggleStat={handleStatToggle}
             />
           ) : (
@@ -152,3 +154,5 @@ const LoadMoreButton = ({ hasNextPage, isFetchingNextPage, fetchNextPage }) => {
     </div>
   );
 };
+
+export default memo(PositionOpponent);

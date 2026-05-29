@@ -1,48 +1,37 @@
-export const GameCard = ({ event }) => {
+import { memo } from "react";
+
+const GameCard = ({ event }) => {
   const competition = event.competitions?.[0] || {};
   const competitors = competition.competitors || [];
-  
+
   const home = competitors.find(c => c.homeAway === "home");
   const away = competitors.find(c => c.homeAway === "away");
 
-  const status = event.status?.type?.name; // e.g., "STATUS_SCHEDULED", "STATUS_IN_PROGRESS", "STATUS_FINAL"
+  const status = event.status?.type?.name;
   const isCompleted = event.status?.type?.completed;
   const isUpcoming = status === "STATUS_SCHEDULED";
 
   const venue = competition.venue || {};
   const gameOdds = competition.odds?.[0] || null;
 
-  // Format Date: "Oct 24"
-  const dateLabel = new Date(event?.date).toLocaleDateString(undefined, {
+  const gameDate = new Date(event?.date);
+
+  const dateLabel = gameDate.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric'
   });
 
-  // Format Time: "7:30 PM"
-  const timeLabel = new Date(event?.date).toLocaleTimeString(undefined, {
+  const timeLabel = gameDate.toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
   });
 
-  const isWinner = (team) => isCompleted && team?.winner;
-
-  const TeamRow = ({ team }) => (
-    <div className="flex items-center justify-between w-full py-1 text-sm">
-      <span className={`font-medium truncate ${isWinner(team) ? "text-foreground" : "text-paper-300"}`}>
-        {team?.team?.displayName}
-      </span>
-
-      {/* Only show score if the game is NOT upcoming */}
-      {!isUpcoming && (
-        <span className={`font-mono ${isWinner(team) ? "text-primary font-bold" : "text-paper-500"}`}>
-          {team?.score || "0"}
-        </span>
-      )}
-    </div>
-  );
+  const checkIsWinner = (team) => {
+    return isCompleted && team?.winner
+  };
 
   return (
-    <div className="flex-none w-[255px] font-poppins">
+    <div className="flex-none w-[259px] font-poppins">
       <div className="bg-geodude-900 border border-geodude-800 rounded-lg p-4 hover:border-geodude-700 transition-all duration-200">
 
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-geodude-800 text-xs uppercase tracking-widest">
@@ -55,8 +44,16 @@ export const GameCard = ({ event }) => {
         </div>
 
         <div className="flex flex-col gap-1 relative">
-          <TeamRow team={away} />
-          <TeamRow team={home} />
+          <TeamRow
+            team={away}
+            isWinner={checkIsWinner(away)}
+            isUpcoming={isUpcoming}
+          />
+          <TeamRow
+            team={home}
+            isWinner={checkIsWinner(home)}
+            isUpcoming={isUpcoming}
+          />
         </div>
 
         {isUpcoming && gameOdds && (
@@ -70,3 +67,19 @@ export const GameCard = ({ event }) => {
     </div>
   );
 };
+
+const TeamRow = memo(({ team, isWinner, isUpcoming }) => (
+  <div className="flex items-center justify-between w-full py-1 text-sm">
+    <span className={`font-medium truncate ${isWinner ? "text-foreground" : "text-paper-300"}`}>
+      {team?.team?.displayName}
+    </span>
+
+    {!isUpcoming && (
+      <span className={`font-mono ${isWinner ? "text-primary font-bold" : "text-paper-500"}`}>
+        {team?.score || "0"}
+      </span>
+    )}
+  </div>
+));
+
+export default memo(GameCard);
