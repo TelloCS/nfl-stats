@@ -3,7 +3,7 @@ export const PositionStatMap = {
         { key: 'completions', label: 'Cmp' },
         { key: 'pass_attempts', label: 'Pass Att' },
         { key: 'pass_yards', label: 'Pass Yds' },
-        { key: 'yards_per_pass_attempt', label: 'YPA' },
+        { key: 'yards_per_pass_attempt', label: 'Yds/Pass' },
         { key: 'completion_pct', label: 'Cmp %' },
         { key: 'interceptions', label: 'Int' },
         { key: 'pass_touchdowns', label: 'Pass TD' },
@@ -15,19 +15,19 @@ export const PositionStatMap = {
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
-        { key: 'yards_per_rush_attempt', label: 'YPC' },
+        { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
     ],
     'RB': [
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
-        { key: 'yards_per_rush_attempt', label: 'YPC' },
+        { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
         { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
         { key: 'rec_yards', label: 'Receiving Yards' },
-        { key: 'yards_per_reception', label: 'YPR' },
+        { key: 'yards_per_reception', label: 'Yds/Rec' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
     ],
@@ -40,7 +40,7 @@ export const PositionStatMap = {
         { key: 'rec_touchdowns', label: 'Rec TD' },
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
-        { key: 'yards_per_rush_attempt', label: 'YPC' },
+        { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
     ],
@@ -48,13 +48,13 @@ export const PositionStatMap = {
         { key: 'receptions', label: 'Receptions' },
         { key: 'rec_targets', label: 'Targets' },
         { key: 'rec_yards', label: 'Rec Yds' },
-        { key: 'yards_per_reception', label: 'YPR' },
+        { key: 'yards_per_reception', label: 'Yds/Rec' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
 
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
-        { key: 'yards_per_rush_attempt', label: 'YPC' },
+        { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
     ],
@@ -360,5 +360,21 @@ export const FilterConfig = {
     { label: "All", value: "" },
     { label: "Home", value: "home" },
     { label: "Away", value: "away" }
+  ]
+};
+
+export const STAT_TYPES = {
+  VOLUME: [
+    'completions', 'pass_attempts', 'pass_yards', 'pass_touchdowns',
+    'interceptions', 'sacks', 'fumbles', 'fumbles_lost',
+    'rush_attempts', 'rush_yards', 'rush_touchdowns',
+    'receptions', 'rec_targets', 'rec_yards', 'rec_touchdowns'
+  ],
+  DERIVED: [
+    'completion_pct', 'yards_per_pass_attempt', 'pass_rating', 'adjusted_qbr',
+    'yards_per_rush_attempt', 'yards_per_reception'
+  ],
+  MAX: [
+    'long_rushing', 'long_reception'
   ]
 };

@@ -1,12 +1,16 @@
+import { memo, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useScrollOverflow } from "../hooks/useScrollOverflow";
-import { GameCard } from "./GameCard";
-import { useVersionedQuery } from "../hooks/useVersionedQuery";
-import createUpcomingGamesQueryOptions from "../queryOptions/createUpcomingGamesQueryOptions";
+import { useScrollOverflow } from "../../hooks/useScrollOverflow";
+import GameCard from "../GameCard";
+import { useVersionedQuery } from "../../hooks/useVersionedQuery";
+import createUpcomingGamesQueryOptions from "../../queryOptions/createUpcomingGamesQueryOptions";
 
-export default function UpcomingGames() {
+function UpcomingGames() {
   const { data, isPending } = useVersionedQuery(createUpcomingGamesQueryOptions);
   const { scrollRef, canScroll, scroll } = useScrollOverflow(data);
+
+  const handleScrollLeft = useCallback(() => scroll("left"), [scroll]);
+  const handleScrollRight = useCallback(() => scroll("right"), [scroll]);
 
   if (isPending || !data?.events?.length) return null;
 
@@ -16,14 +20,14 @@ export default function UpcomingGames() {
 
         {canScroll && (
           <>
-            <ScrollButton direction="left" onClick={() => scroll("left")} />
-            <ScrollButton direction="right" onClick={() => scroll("right")} />
+            <ScrollButton direction="left" onClick={handleScrollLeft} />
+            <ScrollButton direction="right" onClick={handleScrollRight} />
           </>
         )}
 
         <div
           ref={scrollRef}
-          className={`flex overflow-x-auto gap-3 md:gap-4 scrollbar-hide scroll-smooth ${!canScroll ? "justify-center" : "justify-start"
+          className={`flex overflow-x-auto gap-3 scrollbar-hide scroll-smooth ${!canScroll ? "justify-center" : "justify-start"
             }`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
@@ -36,16 +40,18 @@ export default function UpcomingGames() {
   );
 }
 
-const ScrollButton = ({ direction, onClick }) => {
+const ScrollButton = memo(({ direction, onClick }) => {
   const isLeft = direction === "left";
   return (
     <button
       onClick={onClick}
-      className={`absolute ${isLeft ? "left-2 md:left-2" : "right-2 md:right-2"} 
+      className={`absolute ${isLeft ? "left-0 md:left-2" : "right-0 md:right-2"}
       top-1/2 -translate-y-1/2 z-10 bg-geodude-800 border border-geodude-800
-      rounded-full p-1.5 text-paper-400 hover:text-foreground transition-all hidden sm:flex`}
+      rounded-full p-1 text-paper-400 hover:text-foreground transition-all hidden md:flex`}
     >
       {isLeft ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
     </button>
   );
-};
+});
+
+export default memo(UpcomingGames);

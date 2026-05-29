@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import { FilterConfig, Positions, TeamAbbreviations } from './Config';
+import { FilterConfig, Positions, TeamAbbreviations } from '../Config';
 import { LayoutList, LineChart as ChartIcon, Loader2, Search } from 'lucide-react';
 import { Hash, Files } from 'lucide-react';
-import SelectDropdown from './ui/SelectDropdown';
+import SelectDropdown from '../SelectDropdown';
 
 const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMode, setViewMode }) => (
   <div className="bg-background border-b border-geodude-800">
@@ -82,7 +82,7 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
   </div>
 ));
 
-const StatsSummary = ({ stats }) => (
+const StatsSummary = memo(({ stats }) => (
   <div className="text-sm font-medium text-paper-500 pt-3 border-t border-geodude-800 mt-2">
 
     <div className='flex gap-4'>
@@ -99,7 +99,7 @@ const StatsSummary = ({ stats }) => (
       </div>
     </div>
   </div>
-);
+));
 
 const ToggleButton = ({ active, onClick, icon, label }) => (
   <button

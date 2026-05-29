@@ -1,15 +1,4 @@
-import { PositionStatMap, TeamRankingStatMap } from "../components/Config";
-
-export const getAvailableStats = (position) => {
-    return position ? (PositionStatMap[position] || []) : [];
-};
-
-export const getStatDetails = (availableStats, activeStatKey) => {
-    const currentStatKey = activeStatKey || (availableStats[0]?.key ?? "");
-    const activeStatLabel = availableStats.find(s => s.key === currentStatKey)?.label || "";
-
-    return { currentStatKey, activeStatLabel };
-};
+import { PositionStatMap, TeamRankingStatMap } from "../Config"
 
 export const getMatchupTeams = (selectedGameLog) => {
     const teamOne = selectedGameLog?.game?.homeTeam?.abbreviation || "";
@@ -54,7 +43,7 @@ export const getFilteredTeamRankingStatMap = (config, rankingData, team) => {
 
 export const getGameOptions = (games) => {
     if (!games) return [];
-    
+
     return games.map((stat, index) => ({
         value: index,
         label: `Week ${stat.game.week} - ${stat.game.short_name}`

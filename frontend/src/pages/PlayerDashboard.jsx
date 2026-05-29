@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import CustomLoader from "../components/CustomLoader";
 import UpcomingGames from "../components/UpcomingGames";
-import PlayerPerformanceSection from "../components/PlayerPerformanceSection";
-import MatchupAnalysisSection from "../components/MatchupAnalysisSection";
+import PlayerPerformanceSection from "../components/PlayerPerformance";
+import MatchupAnalysisSection from "../components/MatchupAnalysis";
 import useUrlFilters from "../hooks/useUrlFilters"
 
 import { FilterConfig } from "../components/Config";
@@ -11,9 +12,11 @@ import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerStatsQueryOptions from '../queryOptions/createPlayerStatsQueryOptions';
 import createTeamStatsRanksQueryOptions from "../queryOptions/createTeamStatsRanksQueryOptions";
 
-export default function PlayerDashboard() {
+const DEFAULTS = { season_year: "", season_type: "2" }
+
+function PlayerDashboard() {
   const { player_id, player_slug } = useParams();
-  const { filters, setFilter } = useUrlFilters({ season_year: "", season_type: "2" });
+  const { filters, setFilter } = useUrlFilters(DEFAULTS);
   const navigate = useNavigate();
 
   const {
@@ -65,8 +68,8 @@ export default function PlayerDashboard() {
             </button>
           </div>
         ) : (
-          <div className="container mx-auto p-4 md:p-8 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="container mx-auto p-4 md:px-8 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
               <div className={showMatchup ? "lg:col-span-2" : "lg:col-span-3"}>
                 <PlayerPerformanceSection
                   data={playerData}
@@ -91,3 +94,5 @@ export default function PlayerDashboard() {
     </>
   );
 }
+
+export default memo(PlayerDashboard);

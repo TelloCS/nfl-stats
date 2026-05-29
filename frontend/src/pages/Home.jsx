@@ -1,8 +1,9 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { ChartColumn, Shield, Users } from 'lucide-react';
 import UpcomingGames from '../components/UpcomingGames';
 
-export default function Home() {
+function Home() {
   return (
     <>
       <UpcomingGames />
@@ -56,10 +57,12 @@ export default function Home() {
   );
 }
 
-const Feature = ({ icon, title, desc }) => (
+const Feature = memo(({ icon, title, desc }) => (
   <div className="flex flex-col gap-2">
     <div className="mb-2 p-3 bg-geodude-900 rounded-md w-fit border border-geodude-800">{icon}</div>
     <h3 className="font-bold text-lg text-foreground">{title}</h3>
     <p className="text-geodude-200 text-sm">{desc}</p>
   </div>
-);
+));
+
+export default memo(Home);

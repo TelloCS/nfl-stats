@@ -1,54 +1,27 @@
-import { useState, useMemo, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { memo } from "react";
 import { Dot } from 'lucide-react';
-import { PositionStatMap, FilterConfig } from "./Config";
-import StatToggle from "./ui/StatToggle";
-import SelectDropdown from "./ui/SelectDropdown";
-import CustomizedAxisTick from "./charts/CustomizedAxisTick";
-import CustomTooltip from "./charts/CustomTooltip";
+import SelectDropdown from "../SelectDropdown";
+import StatToggle from "../StatToggle";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import CustomizedAxisTick from "../CustomizedAxisTick";
+import CustomTooltip from "../CustomTooltip";
 
-export default function PlayerPerformanceSection({ data, onFilterChange, filters }) {
-  const [activeStat, setActiveStat] = useState("");
-
-  const currentSeason = filters?.season_year || data?.active_season;
-  const seasonOptions = useMemo(() =>
-    data?.available_seasons?.map(year => ({
-      label: String(year),
-      value: String(year)
-    })) || [],
-    [data?.available_seasons]
-  );
-
-  const currentSeasonType = filters?.season_type || FilterConfig.season_type[0].value;
-  const seasonTypeOptions = FilterConfig.season_type
-
-  const availableStats = useMemo(() =>
-    data?.position ? (PositionStatMap[data?.position] || []) : [],
-    [data?.position]
-  );
-
-  const currentStatKey = activeStat || (availableStats[0]?.key ?? "");
-  const activeStatLabel = availableStats.find(s => s.key === currentStatKey)?.label;
-
-  const chartData = useMemo(() => {
-    if (!data?.stats) return [];
-
-    return data?.stats;
-  }, [data?.stats]);
-
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 640px)');
-
-    const handleChange = (e) => setIsMobile(e.matches);
-    setIsMobile(mediaQuery.matches);
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  const isFreeAgent = !data?.team || data?.team === "FA" || data?.team?.full_name === "Free Agent";
-
+const PlayerPerformanceChart = ({
+  data,
+  activeStatLabel,
+  currentSeason,
+  handleSeasonChange,
+  seasonOptions,
+  currentSeasonType,
+  handleSeasonTypeChange,
+  seasonTypeOptions,
+  availableStats,
+  currentStatKey,
+  setActiveStat,
+  chartData,
+  isMobile,
+  isFreeAgent
+}) => {
   return (
     <div className="bg-geodude-900 h-full p-4 sm:p-6 rounded-md border border-geodude-800 flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
@@ -71,20 +44,20 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
         <div className="flex flex-col sm:flex-row gap-3">
           <SelectDropdown
             value={currentSeason}
-            onChange={(v) => onFilterChange('season_year', v)}
+            onChange={handleSeasonChange}
             options={seasonOptions}
             minWidth="120px"
           />
           <SelectDropdown
             value={currentSeasonType}
-            onChange={(t) => onFilterChange('season_type', t)}
+            onChange={handleSeasonTypeChange}
             options={seasonTypeOptions}
             minWidth="140px"
           />
         </div>
       </div>
 
-      {data?.stats?.length > 0 ? (
+      {chartData.length > 0 ? (
         <>
           <StatToggle
             options={availableStats}
@@ -93,8 +66,12 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
           />
 
           <div className="flex-1 min-h-0 mt-2">
-            <ResponsiveContainer width="100%" height="350">
-              <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 40 }}>
+            <ResponsiveContainer width="100%" height="350" debounce={100}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 0, left: -20, bottom: isMobile ? 20 : 40 }}
+                syncId="playerPerfSync"
+              >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--app-geodude-800)" />
                 <XAxis
                   dataKey="game.date"
@@ -104,8 +81,13 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
                   tickLine={false}
                   height={isMobile ? 0 : 30}
                 />
-                <YAxis tick={{ fontSize: 12, fill: 'var(--app-paper-400)' }} axisLine={false} tickLine={false} width={50} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--app-geodude-800)" }} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--app-paper-400)' }} axisLine={false} tickLine={false} width={50} />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "var(--app-geodude-800)" }}
+                  useTranslate3d={true}
+                  isAnimationActive={false}
+                />
                 <Bar
                   dataKey={currentStatKey}
                   fill="var(--app-primary)"
@@ -134,4 +116,6 @@ export default function PlayerPerformanceSection({ data, onFilterChange, filters
       )}
     </div >
   );
-}
+};
+
+export default memo(PlayerPerformanceChart);

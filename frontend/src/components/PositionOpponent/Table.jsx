@@ -80,4 +80,4 @@ const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
   </th>
 );
 
-export default ResultsTable;
+export default memo(ResultsTable);

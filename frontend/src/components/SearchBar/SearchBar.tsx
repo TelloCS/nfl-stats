@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useVersionedQuery } from "../hooks/useVersionedQuery";
-import { Player, createPlayerSearchQueryOptions } from "../queryOptions/createPlayerSearchQueryOptions";
+import { useVersionedQuery } from "../../hooks/useVersionedQuery";
+import { Player, createPlayerSearchQueryOptions } from "../../queryOptions/createPlayerSearchQueryOptions";
 
 type SearchBarProp = {
   onSearchComplete?: () => void;

@@ -1,18 +1,4 @@
-export const STAT_TYPES = {
-  VOLUME: [
-    'completions', 'pass_attempts', 'pass_yards', 'pass_touchdowns',
-    'interceptions', 'sacks', 'fumbles', 'fumbles_lost',
-    'rush_attempts', 'rush_yards', 'rush_touchdowns',
-    'receptions', 'rec_targets', 'rec_yards', 'rec_touchdowns'
-  ],
-  DERIVED: [
-    'completion_pct', 'yards_per_pass_attempt', 'pass_rating', 'adjusted_qbr',
-    'yards_per_rush_attempt', 'yards_per_reception'
-  ],
-  MAX: [
-    'long_rushing', 'long_reception'
-  ]
-};
+import { STAT_TYPES } from "../Config";
 
 export const calculateWeeklyStats = (data, position) => {
   const safeDiv = (num, den) => (den > 0 ? Number((num / den).toFixed(2)) : 0);
