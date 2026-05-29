@@ -74,8 +74,6 @@ const TrendSection = ({ sortedGameLogs = [], statsToShow = [], filters, selected
     return result
   }, [sortedGameLogs, activeKeys, filters?.position]);
 
-  console.log(statsToShow)
-
   const seasonType = filters?.season_type !== "3" ? "Regular Season" : "Playoffs";
 
   if (!sortedGameLogs || sortedGameLogs.length === 0) {
