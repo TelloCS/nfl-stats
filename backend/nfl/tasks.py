@@ -5,7 +5,7 @@ from .services.pipeline import main
 from .services.nfl_service import get_and_cache_weekly_schedule_async
 from celery.utils.log import get_task_logger
 from django.db import transaction
-from django.db.models import F, Window
+from django.db.models import F, Window, Sum, Max, Count
 from django.db.models.functions import DenseRank
 from nfl.utils import refresh_application_cache
 from .models import (
@@ -13,7 +13,8 @@ from .models import (
     TeamOffensePassingStats, TeamOffenseRushingStats, TeamOffenseReceivingStats,
     TeamDefensePassingStats, TeamDefenseRushingStats, TeamDefenseReceivingStats,
     TeamAdvanceOffenseStats, TeamAdvanceDefenseStats, TeamCoverageSchemeStats,
-    TeamOffensePlayCallingStats, TeamCoverageStatsByPosition
+    TeamOffensePlayCallingStats, TeamCoverageStatsByPosition,
+    PlayerGameStats, PlayerSeasonStats
 )
 from nfl.services.utils import PIPELINE_CONFIG, get_pipeline_context
 
@@ -35,8 +36,16 @@ def weekly_nfl_sync():
             main(context=context)
             logger.info("Main pipeline finished successfully")
 
+            season_year = PIPELINE_CONFIG['dates']
+            season_type = PIPELINE_CONFIG['seasontype']
+
             logger.info("Triggered follow-up rank update task")
             transaction.on_commit(lambda: update_team_rank_snapshots.delay())
+
+            transaction.on_commit(lambda: update_player_season_stats_and_ranks.delay(
+                season_year=season_year,
+                season_type=season_type
+            ))
     except Exception as e:
         logger.exception(f"Scheduled task failed: {e}")
 
@@ -180,6 +189,165 @@ def update_team_rank_snapshots():
             transaction.on_commit(finalize_rank_updates)
     except Exception as e:
         logger.exception(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
+
+
+@shared_task
+def update_player_season_stats_and_ranks(season_year: int, season_type: int):
+    """
+    Aggregates game stats into season totals and computes league-wide
+    and positional ranks isolated by season_year and season_type (2=Reg, 3=Post).
+    """
+    def rank_desc(field):
+        return Window(expression=DenseRank(), order_by=F(field).desc())
+
+    # Partitions rank logic strictly within the player's position group
+    def rank_pos_desc(field):
+        return Window(
+            expression=DenseRank(),
+            partition_by=[F('player__position')],
+            order_by=F(field).desc()
+        )
+
+    # Filter by BOTH season parameters before grouping
+    season_aggregates = PlayerGameStats.objects.filter(
+        game__season_year=season_year,
+        game__season_type=season_type  # Ensure Game model maps to your integer types (2 or 3)
+    ).values(
+        'player_id',
+        'player__position'
+    ).annotate(
+        total_games=Count('game_id', distinct=True),
+
+        # Volume Sums
+        sum_pass_att=Sum('pass_attempts'),
+        sum_comp=Sum('completions'),
+        sum_pass_yds=Sum('pass_yards'),
+        sum_pass_tds=Sum('pass_touchdowns'),
+        sum_ints=Sum('interceptions'),
+        sum_sacks=Sum('sacks'),
+        max_long_pass=Max('long_passing'),
+
+        sum_rush_att=Sum('rush_attempts'),
+        sum_rush_yds=Sum('rush_yards'),
+        sum_rush_tds=Sum('rush_touchdowns'),
+        max_long_rush=Max('long_rushing'),
+
+        sum_rec=Sum('receptions'),
+        sum_targets=Sum('rec_targets'),
+        sum_rec_yds=Sum('rec_yards'),
+        sum_rec_tds=Sum('rec_touchdowns'),
+        max_long_rec=Max('long_reception'),
+
+        sum_fumb=Sum('fumbles'),
+        sum_fumb_lost=Sum('fumbles_lost'),
+        sum_two_pt=Sum('two_pt_conversions'),
+        sum_off_fum_td=Sum('off_fum_rec_tds'),
+        sum_kick_td=Sum('kick_return_tds'),
+        sum_punt_td=Sum('punt_return_tds'),
+
+        sum_ppr=Sum('ppr_points'),
+        sum_half_ppr=Sum('half_ppr_points'),
+        sum_non_ppr=Sum('non_ppr_points'),
+        sum_yahoo=Sum('yahoo_points'),
+        sum_dk=Sum('draftkings_points'),
+        sum_fd=Sum('fanduel_points')
+    ).annotate(
+        # Ranks (Automatically scoped since the queryset is pre-filtered by season_type)
+        r_p_yds=rank_desc('sum_pass_yds'),
+        r_p_tds=rank_desc('sum_pass_tds'),
+        r_r_yds=rank_desc('sum_rush_yds'),
+        r_r_tds=rank_desc('sum_rush_tds'),
+        r_rc_yds=rank_desc('sum_rec_yds'),
+        r_rc_tds=rank_desc('sum_rec_tds'),
+        r_f_ppr=rank_desc('sum_ppr'),
+        r_f_half=rank_desc('sum_half_ppr'),
+        r_f_dk=rank_desc('sum_dk'),
+        r_f_fd=rank_desc('sum_fd'),
+        r_f_non_ppr=rank_desc('sum_non_ppr'),
+        r_f_yahoo=rank_desc('sum_yahoo'),
+
+        # Positional Base Ranks
+        pr_p_yds=rank_pos_desc('sum_pass_yds'),
+        pr_p_tds=rank_pos_desc('sum_pass_tds'),
+        pr_r_yds=rank_pos_desc('sum_rush_yds'),
+        pr_r_tds=rank_pos_desc('sum_rush_tds'),
+        pr_rc_yds=rank_pos_desc('sum_rec_yds'),
+        pr_rc_tds=rank_pos_desc('sum_rec_tds'),
+        pr_f_ppr=rank_pos_desc('sum_ppr'),
+        pr_f_half=rank_pos_desc('sum_half_ppr'),
+        pr_f_dk=rank_pos_desc('sum_dk'),
+        pr_f_fd=rank_pos_desc('sum_fd'),
+        pr_f_non_ppr=rank_pos_desc('sum_non_ppr'),
+        pr_f_yahoo=rank_pos_desc('sum_yahoo'),
+    )
+
+    # Write atomic updates using the updated composite unique key
+    with transaction.atomic():
+        for row in season_aggregates:
+            PlayerSeasonStats.objects.update_or_create(
+                player_id=row['player_id'],
+                season_year=season_year,
+                season_type=season_type,
+                defaults={
+                    'games_played': row['total_games'],
+                    'pass_attempts': row['sum_pass_att'],
+                    'completions': row['sum_comp'],
+                    'pass_yards': row['sum_pass_yds'],
+                    'pass_touchdowns': row['sum_pass_tds'],
+                    'interceptions': row['sum_ints'],
+                    'sacks': row['sum_sacks'],
+                    'long_passing': row['max_long_pass'],
+                    'rush_attempts': row['sum_rush_att'],
+                    'rush_yards': row['sum_rush_yds'],
+                    'rush_touchdowns': row['sum_rush_tds'],
+                    'long_rushing': row['max_long_rush'],
+                    'receptions': row['sum_rec'],
+                    'rec_targets': row['sum_targets'],
+                    'rec_yards': row['sum_rec_yds'],
+                    'rec_touchdowns': row['sum_rec_tds'],
+                    'long_reception': row['max_long_rec'],
+                    'fumbles': row['sum_fumb'],
+                    'fumbles_lost': row['sum_fumb_lost'],
+                    'two_pt_conversions': row['sum_two_pt'],
+                    'off_fum_rec_tds': row['sum_off_fum_td'],
+                    'kick_return_tds': row['sum_kick_td'],
+                    'punt_return_tds': row['sum_punt_td'],
+                    'ppr_points': row['sum_ppr'],
+                    'half_ppr_points': row['sum_half_ppr'],
+                    'non_ppr_points': row['sum_non_ppr'],
+                    'yahoo_points': row['sum_yahoo'],
+                    'draftkings_points': row['sum_dk'],
+                    'fanduel_points': row['sum_fd'],
+
+                    # Overall Rank Mappings
+                    'rank_pass_yards': row['r_p_yds'],
+                    'rank_pass_tds': row['r_p_tds'],
+                    'rank_rush_yards': row['r_r_yds'],
+                    'rank_rush_tds': row['r_r_tds'],
+                    'rank_rec_yards': row['r_rc_yds'],
+                    'rank_rec_tds': row['r_rc_tds'],
+                    'rank_ppr': row['r_f_ppr'],
+                    'rank_half_ppr': row['r_f_half'],
+                    'rank_draftkings': row['r_f_dk'],
+                    'rank_fanduel': row['r_f_fd'],
+                    'rank_non_ppr': row['r_f_non_ppr'],
+                    'rank_yahoo': row['r_f_yahoo'],
+
+                    # Positional Rank Mappings
+                    'pos_rank_pass_yards': row['pr_p_yds'],
+                    'pos_rank_pass_tds': row['pr_p_tds'],
+                    'pos_rank_rush_yards': row['pr_r_yds'],
+                    'pos_rank_rush_tds': row['pr_r_tds'],
+                    'pos_rank_rec_yards': row['pr_rc_yds'],
+                    'pos_rank_rec_tds': row['pr_rc_tds'],
+                    'pos_rank_ppr': row['pr_f_ppr'],
+                    'pos_rank_half_ppr': row['pr_f_half'],
+                    'pos_rank_draftkings': row['pr_f_dk'],
+                    'pos_rank_fanduel': row['pr_f_fd'],
+                    'pos_rank_non_ppr': row['pr_f_non_ppr'],
+                    'pos_rank_yahoo': row['pr_f_yahoo'],
+                }
+            )
 
 
 def finalize_rank_updates():

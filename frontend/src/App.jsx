@@ -18,6 +18,7 @@ import UserProfile from './pages/UserProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
+import FantasyRankings from './components/FantasyRankings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,7 @@ const router = createBrowserRouter([
           { index: true, element: <Home /> },
           { path: '/player/stats/id/:player_id/:player_slug', element: <PlayerDashboard /> },
           { path: '/position-vs-opponent/', element: <PositionOpponent /> },
+          { path: '/fantasy-rankings', element: <FantasyRankings />},
           { path: '/team/stats/', element: <TeamStats /> },
           { path: '*', element: <ErrorPage /> }
         ]

@@ -66,7 +66,7 @@ const PlayerPerformanceChart = ({
           />
 
           <div className="flex-1 min-h-0 mt-2">
-            <ResponsiveContainer width="100%" height="350" debounce={100}>
+            <ResponsiveContainer width="100%" height="290" debounce={100}>
               <BarChart
                 data={chartData}
                 margin={{ top: 20, right: 0, left: -20, bottom: isMobile ? 20 : 40 }}

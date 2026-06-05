@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderClick }) => {
   if (isLoading) {
@@ -46,7 +47,14 @@ const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderC
             <tr key={log.id} className="hover:bg-geodude-800/50 transition duration-150 h-[48px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
               <td className="text-nowrap text-paper-500">{log.game.week}</td>
               <td className="text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800">
-                {log.player.fullName}
+                <Link
+                  key={log.player.id}
+                  to={`/player/stats/id/${log.player.id}/${log.player.slug}`}
+                >
+                  <span className='cursor-pointer hover:text-status-info'>
+                    {log.player.fullName}
+                  </span>
+                </Link>
               </td>
               <td className="text-nowrap text-paper-400">{log.player.position}</td>
               <td className="text-nowrap">{log.team.abbreviation}</td>

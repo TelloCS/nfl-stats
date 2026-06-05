@@ -1,6 +1,6 @@
 from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter
 from django.db.models import Q, F
-from .models import Team, Player, PlayerGameStats
+from .models import Team, Player, PlayerGameStats, PlayerSeasonStats
 
 
 class PlayerFilter(FilterSet):
@@ -69,3 +69,22 @@ class PlayerMatchupsFilter(FilterSet):
         elif value == 'away':
             return queryset.filter(team_id=F('game__awayTeam'))
         return queryset
+
+
+class PlayerSeasonStatsFilter(FilterSet):
+    position = CharFilter(field_name='player__position', lookup_expr='iexact')
+    team = CharFilter(method='filter_by_season_team')
+
+    class Meta:
+        model = PlayerSeasonStats
+        fields = ['position', 'team']
+
+    def filter_by_season_team(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        return queryset.filter(
+            player__stats__team__abbreviation__iexact=value,
+            player__stats__game__season_year=F('season_year'),
+            player__stats__game__season_type=F('season_type')
+        ).distinct()

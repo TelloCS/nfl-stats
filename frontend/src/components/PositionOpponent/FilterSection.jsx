@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { FilterConfig, Positions, TeamAbbreviations } from '../Config';
-import { LayoutList, LineChart as ChartIcon, Loader2, Search } from 'lucide-react';
 import { Hash, Files } from 'lucide-react';
 import SelectDropdown from '../SelectDropdown';
 
@@ -63,13 +62,13 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
           <ToggleButton
             active={viewMode === 'table'}
             onClick={() => setViewMode('table')}
-            icon={<LayoutList size={14} />}
+            // icon={<LayoutList size={14} />}
             label="Table"
           />
           <ToggleButton
             active={viewMode === 'chart'}
             onClick={() => setViewMode('chart')}
-            icon={<ChartIcon size={14} />}
+            // icon={<ChartIcon size={14} />}
             label="Trend Chart"
           />
         </div>

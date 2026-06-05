@@ -357,7 +357,7 @@ export const FilterConfig = {
     { label: "Playoffs", value: 3 }
   ],
   location: [
-    { label: "All", value: "" },
+    { label: "All Locations", value: "" },
     { label: "Home", value: "home" },
     { label: "Away", value: "away" }
   ]
