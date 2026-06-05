@@ -15,6 +15,7 @@ from .models import (
     Team,
     Player,
     PlayerGameStats,
+    PlayerSeasonStats,
     TeamRankSnapshot,
     TeamOffensePassingStats,
     GlobalMetadata
@@ -24,6 +25,7 @@ from .serializers import (
     TeamSerializerV1,
     PlayerSerializer,
     PlayerStatsSerializer,
+    PlayerSeasonStatsSerializer,
     TeamStatsSerializer,
     TeamRanksSerializer,
     PlayerGameStatsMatchupsSerializer,
@@ -34,7 +36,8 @@ from .filters import (
     PlayerGameLogFilter,
     PlayerMatchupsFilter,
     TeamRankFilter,
-    TeamStatsFilter
+    TeamStatsFilter,
+    PlayerSeasonStatsFilter
 )
 from .mixins import KeyBasedCacheMixin
 from nfl.utils import is_nfl_in_season, get_current_etl_version
@@ -277,6 +280,54 @@ class PlayerGameStatsMatchupsListView(KeyBasedCacheMixin, generics.ListAPIView):
             return Response(cached_data)
 
         response = super().list(request, *args, **kwargs)
+        self.store_in_cache(request, response.data)
+        return Response(response.data)
+
+
+class PlayerSeasonStatsListView(KeyBasedCacheMixin, generics.ListAPIView):
+    serializer_class = PlayerSeasonStatsSerializer
+    pagination_class = PlayerGameStatsMatchupsPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PlayerSeasonStatsFilter
+
+    def get_queryset(self):
+        season_year = self.request.query_params.get('season_year')
+        season_type = self.request.query_params.get('season_type')
+        ordering = self.request.query_params.get('ordering')
+
+        game_stats_prefetch = Prefetch(
+            'player__stats',
+            queryset=PlayerGameStats.objects.filter(
+                game__season_year=season_year,
+                game__season_type=season_type
+            ).select_related('team', 'game').order_by('-game__date')
+        )
+
+        queryset = PlayerSeasonStats.objects.select_related(
+            'player'
+        ).prefetch_related(
+            game_stats_prefetch
+        ).filter(
+            season_year=season_year,
+            season_type=season_type
+        )
+
+        if ordering:
+            queryset = queryset.order_by(ordering)
+
+        return queryset
+
+    def get_cache_key(self, request):
+        v = get_current_etl_version()
+        return f"player_season_stats:v{v}:{request.get_full_path()}"
+
+    @method_decorator(ratelimit(key='ip', rate='20/m', method='GET', block=True))
+    def get(self, request, *args, **kwargs):
+        cached_data = self.retrieve_from_cache(request)
+        if cached_data:
+            return Response(cached_data)
+
+        response = super().get(request, *args, **kwargs)
         self.store_in_cache(request, response.data)
         return Response(response.data)
 

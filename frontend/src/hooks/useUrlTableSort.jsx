@@ -32,9 +32,9 @@ export default function useUrlTableSort(data, customGetters = {}) {
   }, [data, sortConfig, customGetters]);
 
   const handleHeaderClick = useCallback((key) => {
-    let newDirection = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      newDirection = 'desc';
+    let newDirection = 'desc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+      newDirection = 'asc';
     }
 
     setSearchParams((prev) => {

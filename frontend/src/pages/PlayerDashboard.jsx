@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import CustomLoader from "../components/CustomLoader";
 import UpcomingGames from "../components/UpcomingGames";
 import PlayerPerformanceSection from "../components/PlayerPerformance";
+import UpcomingMatchup from "../components/UpcomingMatchup";
 import MatchupAnalysisSection from "../components/MatchupAnalysis";
 import useUrlFilters from "../hooks/useUrlFilters"
 
@@ -47,7 +48,6 @@ function PlayerDashboard() {
 
   return (
     <>
-      <UpcomingGames />
       <div className="bg-background">
         {isPending ? (
           <div className="flex justify-center items-center h-[500px]">
@@ -68,8 +68,9 @@ function PlayerDashboard() {
             </button>
           </div>
         ) : (
-          <div className="container mx-auto p-4 md:px-8 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+          <div className="container mx-auto p-4 md:px-8">
+            <UpcomingMatchup playerData={playerData} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
               <div className={showMatchup ? "lg:col-span-2" : "lg:col-span-3"}>
                 <PlayerPerformanceSection
                   data={playerData}

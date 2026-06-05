@@ -2,11 +2,10 @@ import { memo, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useScrollOverflow } from "../../hooks/useScrollOverflow";
 import GameCard from "../GameCard";
-import { useVersionedQuery } from "../../hooks/useVersionedQuery";
-import createUpcomingGamesQueryOptions from "../../queryOptions/createUpcomingGamesQueryOptions";
+import useUpcomingGames from "../../hooks/useUpcomingGames";
 
 function UpcomingGames() {
-  const { data, isPending } = useVersionedQuery(createUpcomingGamesQueryOptions);
+  const { data, isPending } = useUpcomingGames();
   const { scrollRef, canScroll, scroll } = useScrollOverflow(data);
 
   const handleScrollLeft = useCallback(() => scroll("left"), [scroll]);

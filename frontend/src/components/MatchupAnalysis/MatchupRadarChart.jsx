@@ -15,31 +15,29 @@ const MatchupRadarChart = ({
   teamTwo
 }) => {
   return (
-    <div className="bg-geodude-900 h-full rounded-md border border-geodude-800 flex flex-col">
-      <div className="pt-6 px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
-          <div className="min-w-0">
-            <span className="font-semibold text-foreground text-lg">Matchups</span>
-          </div>
-
-          <SelectDropdown
-            value={selectedGameIndex}
-            onChange={setSelectedGameIndex}
-            options={gameOptions}
-            minWidth="120px"
-          />
+    <div className="bg-geodude-900 p-4 sm:p-6 h-full rounded-md border border-geodude-800 flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
+        <div className="min-w-0">
+          <span className="font-semibold text-foreground text-lg">Matchups</span>
         </div>
 
-        <StatToggle
-          options={availableStats}
-          activeKey={activeTabKey}
-          onSelect={setActiveTabKey}
+        <SelectDropdown
+          value={selectedGameIndex}
+          onChange={setSelectedGameIndex}
+          options={gameOptions}
+          minWidth="120px"
         />
       </div>
 
+      <StatToggle
+        options={availableStats}
+        activeKey={activeTabKey}
+        onSelect={setActiveTabKey}
+      />
+
       <div className="flex-1 min-h-0 mt-2">
-        <ResponsiveContainer width="100%" height="350">
-          <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+        <ResponsiveContainer width="100%" height="290">
+          <RadarChart data={radarData} margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
             <PolarGrid stroke="var(--app-paper-400)" opacity={0.3} />
             <PolarAngleAxis
               dataKey="subject"

@@ -68,7 +68,6 @@ class PlayerGameStatsFactory(factory.django.DjangoModelFactory):
     game = factory.SubFactory(GameFactory)
     team = factory.SubFactory(TeamFactory)
 
-    games_played = 1
     is_starter = factory.Faker('boolean')
     pass_attempts = factory.Faker('random_int', min=20, max=50)
     completions = factory.LazyAttribute(lambda o: random.randint(0, o.pass_attempts))

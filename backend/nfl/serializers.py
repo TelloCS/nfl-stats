@@ -6,6 +6,7 @@ from .models import (
     Team,
     Game,
     PlayerGameStats,
+    PlayerSeasonStats,
     Player,
     TeamRankSnapshot
 )
@@ -303,3 +304,64 @@ class NFLScheduleSerializer(serializers.Serializer):
     season = serializers.DictField(required=False)
     week = serializers.DictField(required=False)
     events = EventSerializer(many=True)
+
+#######################################################################################################################
+
+
+class HistoricTeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = '__all__'
+
+
+class PlayerSerializerV2(serializers.ModelSerializer):
+    fullName = serializers.CharField(source='full_name')
+
+    class Meta:
+        model = Player
+        fields = ['id', 'slug', 'fullName', 'position']
+
+
+class PlayerSeasonStatsSerializer(serializers.ModelSerializer):
+    player = PlayerSerializerV2()
+
+    class Meta:
+        model = PlayerSeasonStats
+        fields = [
+            'id', 'player', 'season_year', 'season_type', 'games_played',
+
+            'ppr_points', 'half_ppr_points', 'non_ppr_points',
+            'yahoo_points', 'draftkings_points', 'fanduel_points',
+
+            'rank_ppr', 'rank_half_ppr', 'rank_draftkings',
+            'rank_fanduel', 'rank_non_ppr', 'rank_yahoo',
+
+            'pass_yards', 'pass_touchdowns', 'interceptions', 'sacks',
+            'rush_yards', 'rush_touchdowns',
+            'receptions', 'rec_yards', 'rec_touchdowns',
+
+            'fumbles', 'fumbles_lost', 'two_pt_conversions', 'off_fum_rec_tds',
+            'kick_return_tds', 'punt_return_tds',
+
+            'pos_rank_ppr', 'pos_rank_half_ppr', 'pos_rank_draftkings',
+            'pos_rank_fanduel', 'pos_rank_non_ppr', 'pos_rank_yahoo'
+        ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        matching_stats = [
+            stat for stat in instance.player.stats.all()
+            if stat.game.season_year == instance.season_year
+            and stat.game.season_type == instance.season_type
+        ]
+
+        latest_team = None
+        if matching_stats:
+            latest_team = matching_stats[0].team
+
+        if representation.get('player'):
+            representation['player']['historic_team'] = (
+                HistoricTeamSerializer(latest_team).data if latest_team else None
+            )
+
+        return representation

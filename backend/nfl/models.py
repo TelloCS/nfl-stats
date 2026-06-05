@@ -111,7 +111,6 @@ class PlayerGameStats(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='game', null=False)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players', null=False)
 
-    games_played = models.IntegerField(default=0)
     is_starter = models.BooleanField(default=False)
 
     pass_attempts = models.IntegerField(default=0)
@@ -145,6 +144,18 @@ class PlayerGameStats(models.Model):
     fumbles = models.IntegerField(default=0)
     fumbles_lost = models.IntegerField(default=0)
 
+    two_pt_conversions = models.IntegerField(default=0)
+    off_fum_rec_tds = models.IntegerField(default=0)
+    kick_return_tds = models.IntegerField(default=0)
+    punt_return_tds = models.IntegerField(default=0)
+
+    ppr_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    half_ppr_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    non_ppr_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    yahoo_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    draftkings_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    fanduel_points = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+
     def __str__(self):
         return f"{self.player.full_name} Stats for Game {self.game.id}"
 
@@ -152,6 +163,103 @@ class PlayerGameStats(models.Model):
         unique_together = ('player', 'game')
         verbose_name_plural = 'Player Game Stats'
         ordering = ['-game__week', 'id']
+
+
+class PlayerSeasonStats(models.Model):
+    player = models.ForeignKey('Player', on_delete=models.CASCADE, related_name='season_stats')
+    season_year = models.IntegerField()
+    season_type = models.IntegerField()
+    games_played = models.IntegerField(default=0)
+
+    # --- COUNTING SUMS & VALUE FIELDS ---
+    # Passing
+    pass_attempts = models.IntegerField(default=0)
+    completions = models.IntegerField(default=0)
+    pass_yards = models.IntegerField(default=0)
+    pass_touchdowns = models.IntegerField(default=0)
+    interceptions = models.IntegerField(default=0)
+    sacks = models.IntegerField(default=0)
+    long_passing = models.IntegerField(default=0)  # Stores season-long max
+
+    # Rushing
+    rush_attempts = models.IntegerField(default=0)
+    rush_yards = models.IntegerField(default=0)
+    rush_touchdowns = models.IntegerField(default=0)
+    long_rushing = models.IntegerField(default=0)  # Stores season-long max
+
+    # Receiving
+    receptions = models.IntegerField(default=0)
+    rec_targets = models.IntegerField(default=0)
+    rec_yards = models.IntegerField(default=0)
+    rec_touchdowns = models.IntegerField(default=0)
+    long_reception = models.IntegerField(default=0)  # Stores season-long max
+
+    # Miscellaneous/Edge
+    fumbles = models.IntegerField(default=0)
+    fumbles_lost = models.IntegerField(default=0)
+    two_pt_conversions = models.IntegerField(default=0)
+    off_fum_rec_tds = models.IntegerField(default=0)
+    kick_return_tds = models.IntegerField(default=0)
+    punt_return_tds = models.IntegerField(default=0)
+
+    # Fantasy Points Accumulated
+    ppr_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    half_ppr_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    non_ppr_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    yahoo_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    draftkings_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    fanduel_points = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+
+    # --- OVERALL RANKS (League Wide) ---
+    rank_pass_yards = models.IntegerField(null=True, blank=True)
+    rank_pass_tds = models.IntegerField(null=True, blank=True)
+    rank_rush_yards = models.IntegerField(null=True, blank=True)
+    rank_rush_tds = models.IntegerField(null=True, blank=True)
+    rank_rec_yards = models.IntegerField(null=True, blank=True)
+    rank_rec_tds = models.IntegerField(null=True, blank=True)
+
+    rank_ppr = models.IntegerField(null=True, blank=True)
+    rank_half_ppr = models.IntegerField(null=True, blank=True)
+    rank_draftkings = models.IntegerField(null=True, blank=True)
+    rank_fanduel = models.IntegerField(null=True, blank=True)
+    rank_non_ppr = models.IntegerField(null=True, blank=True)
+    rank_yahoo = models.IntegerField(null=True, blank=True)
+
+    # --- POSITIONAL RANKS (Partitioned by Position) ---
+    pos_rank_pass_yards = models.IntegerField(null=True, blank=True)
+    pos_rank_pass_tds = models.IntegerField(null=True, blank=True)
+    pos_rank_rush_yards = models.IntegerField(null=True, blank=True)
+    pos_rank_rush_tds = models.IntegerField(null=True, blank=True)
+    pos_rank_rec_yards = models.IntegerField(null=True, blank=True)
+    pos_rank_rec_tds = models.IntegerField(null=True, blank=True)
+
+    pos_rank_ppr = models.IntegerField(null=True, blank=True)
+    pos_rank_half_ppr = models.IntegerField(null=True, blank=True)
+    pos_rank_draftkings = models.IntegerField(null=True, blank=True)
+    pos_rank_fanduel = models.IntegerField(null=True, blank=True)
+    pos_rank_non_ppr = models.IntegerField(null=True, blank=True)
+    pos_rank_yahoo = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('player', 'season_year', 'season_type')
+        verbose_name_plural = "Player Season Stats"
+
+    # --- DYNAMIC SEASONAL EFFICIENCY PROPERTIES ---
+    @property
+    def completion_pct(self):
+        return round((self.completions / self.pass_attempts) * 100, 2) if self.pass_attempts > 0 else 0.0
+
+    @property
+    def yards_per_pass_attempt(self):
+        return round(self.pass_yards / self.pass_attempts, 2) if self.pass_attempts > 0 else 0.0
+
+    @property
+    def yards_per_rush_attempt(self):
+        return round(self.rush_yards / self.rush_attempts, 2) if self.rush_attempts > 0 else 0.0
+
+    @property
+    def yards_per_reception(self):
+        return round(self.rec_yards / self.receptions, 2) if self.receptions > 0 else 0.0
 
 
 class TeamOffensePassingStats(models.Model):

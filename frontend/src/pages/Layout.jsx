@@ -10,7 +10,8 @@ import { useIsDesktop } from "../hooks/useMediaQueries";
 const NAV_LINKS = [
   { to: "/", label: "Home", icon: House },
   { to: "/position-vs-opponent", label: "Position vs Opponent" },
-  { to: "/team/stats", label: "Team Stats" },
+  { to: "/fantasy-rankings", label: "Fantasy Rankings"},
+  { to: "/team/stats", label: "Team Stats" }
 ];
 
 export default function Layout() {

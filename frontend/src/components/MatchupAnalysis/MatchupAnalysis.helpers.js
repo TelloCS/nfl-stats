@@ -49,3 +49,11 @@ export const getGameOptions = (games) => {
         label: `Week ${stat.game.week} - ${stat.game.short_name}`
     }));
 }
+
+export const formatOrdinal = (num) => {
+    if (num === undefined || num === null || num === "") return "--";
+    const pr = new Intl.PluralRules("en-US", { type: "ordinal" });
+    const rule = pr.select(num);
+    const suffix = rule === "one" ? "st" : rule === "two" ? "nd" : rule === "few" ? "rd" : "th";
+    return `${num}${suffix}`;
+};
