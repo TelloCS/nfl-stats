@@ -5,7 +5,7 @@ from .services.pipeline import main
 from .services.nfl_service import get_and_cache_weekly_schedule_async
 from celery.utils.log import get_task_logger
 from django.db import transaction
-from django.db.models import F, Window, Sum, Max, Count
+from django.db.models import F, Window, Sum, Max, Count, OuterRef, Subquery
 from django.db.models.functions import DenseRank
 from nfl.utils import refresh_application_cache
 from .models import (
@@ -208,6 +208,12 @@ def update_player_season_stats_and_ranks(season_year: int, season_type: int):
             order_by=F(field).desc()
         )
 
+    latest_team_sq = PlayerGameStats.objects.filter(
+        player_id=OuterRef('player_id'),
+        game__season_year=season_year,
+        game__season_type=season_type
+    ).order_by('-game__date').values('team_id')[:1]
+
     # Filter by BOTH season parameters before grouping
     season_aggregates = PlayerGameStats.objects.filter(
         game__season_year=season_year,
@@ -216,6 +222,7 @@ def update_player_season_stats_and_ranks(season_year: int, season_type: int):
         'player_id',
         'player__position'
     ).annotate(
+        historic_team_id=Subquery(latest_team_sq),
         total_games=Count('game_id', distinct=True),
 
         # Volume Sums
@@ -289,6 +296,7 @@ def update_player_season_stats_and_ranks(season_year: int, season_type: int):
                 season_year=season_year,
                 season_type=season_type,
                 defaults={
+                    'historic_team_id': row['historic_team_id'],
                     'games_played': row['total_games'],
                     'pass_attempts': row['sum_pass_att'],
                     'completions': row['sum_comp'],

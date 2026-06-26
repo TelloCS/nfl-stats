@@ -2,8 +2,13 @@ import { memo, useState, useMemo, useEffect } from "react";
 import { TeamRankingStatMap } from "../Config";
 import { getMatchupTeams, generateRadarData, getFilteredTeamRankingStatMap, getGameOptions } from "./MatchupAnalysis.helpers";
 import MatchupRadarChart from "./MatchupRadarChart";
+import Table from "./Table";
+import StatToggle from "../StatToggle";
+import SelectDropdown from "../SelectDropdown";
 
-function MatchupAnalysisSection({ games, rankingData }) {
+function MatchupAnalysisSection({ data, rankingData }) {
+  const games = data?.stats;
+
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
 
   const { teamOne, teamTwo } = useMemo(() => getMatchupTeams(games?.[selectedGameIndex]),
@@ -33,21 +38,46 @@ function MatchupAnalysisSection({ games, rankingData }) {
     [games]
   );
 
+  const statLabel = TeamRankingStatMap.find(stat => stat.key === activeTabKey)?.label;
+
   if (!games || games.length === 0) return null;
 
   return (
-    <MatchupRadarChart
-      selectedGameIndex={selectedGameIndex}
-      setSelectedGameIndex={setSelectedGameIndex}
-      gameOptions={gameOptions}
-      availableStats={availableStats}
-      activeTabKey={activeTabKey}
-      setActiveTabKey={setActiveTabKey}
-      radarData={radarData}
-      teamOne={teamOne}
-      teamTwo={teamTwo}
-    />
-  );
+    <div className="bg-geodude-900 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
+        <div className="min-w-0">
+          <span className="font-semibold text-foreground text-lg">Previous Matchups</span>
+        </div>
+
+        <SelectDropdown
+          value={selectedGameIndex}
+          onChange={setSelectedGameIndex}
+          options={gameOptions}
+          minWidth="120px"
+        />
+      </div>
+      <div className="w-full">
+        <StatToggle
+          options={availableStats}
+          activeKey={activeTabKey}
+          onSelect={setActiveTabKey}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
+          <Table
+            data={radarData}
+            teamOne={teamOne}
+            teamTwo={teamTwo}
+            statLabel={statLabel}
+          />
+          <MatchupRadarChart
+            radarData={radarData}
+            teamOne={teamOne}
+            teamTwo={teamTwo}
+          />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default memo(MatchupAnalysisSection);

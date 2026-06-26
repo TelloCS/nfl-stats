@@ -14,7 +14,7 @@ function CustomTooltip({ active, payload, showStatPrefixes = false }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-geodude-800 p-3 border border-geodude-800 rounded-lg text-center min-w-[150px]">
+      <div className="bg-geodude-900 p-3 border border-geodude-800 rounded-lg text-center min-w-[150px]">
         <p className="text-paper-400 text-sm mb-2 font-semibold">{data.game?.date}</p>
         {data.game?.short_name && (
           <p className="text-paper-400 text-[12px] mb-2 font-bold">{data.game.short_name}</p>

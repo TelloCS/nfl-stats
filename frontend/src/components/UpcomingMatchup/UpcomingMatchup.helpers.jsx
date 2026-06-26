@@ -21,3 +21,23 @@ export const getRankBadgeClass = (rank) => {
 
     return `${baseShape} bg-status-aware/20 text-status-aware border-status-aware/20`;
 };
+
+export const getMatchupData = (scheduleData, rankData, playerTeam) => {
+    if (!scheduleData?.events || !rankData || !playerTeam) return null;
+
+    const nextGame = scheduleData.events.find((event) =>
+        event.competitions?.[0]?.competitors?.some((c) => c.team?.abbreviation === playerTeam)
+    );
+
+    if (!nextGame) return null;
+
+    const competitors = nextGame.competitions[0].competitors;
+    const opponent = competitors.find((c) => c.team?.abbreviation !== playerTeam);
+    const opponentAbbreviation = opponent?.team?.abbreviation;
+
+    return {
+        nextGame,
+        playerRanks: rankData.find((t) => t.abbreviation === playerTeam),
+        opponentRanks: rankData.find((t) => t.abbreviation === opponentAbbreviation),
+    };
+};

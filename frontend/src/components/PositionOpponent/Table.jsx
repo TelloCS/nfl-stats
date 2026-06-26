@@ -1,8 +1,9 @@
 import { memo } from 'react';
 import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
 import { Link } from "react-router-dom";
+import { SortableTh } from '../../helpers/table';
 
-const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderClick }) => {
+const ResultsTable = ({ isLoading, data, statsToShow, sortConfig, onHeaderClick }) => {
   if (isLoading) {
     return (
       <div className="w-full p-12 text-center text-paper-500 border border-geodude-800 rounded-lg bg-geodude-900 font-mono">
@@ -71,21 +72,6 @@ const ResultsTable = memo(({ isLoading, data, statsToShow, sortConfig, onHeaderC
       </table>
     </div>
   );
-});
-
-const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
-  <th onClick={onClick} className="cursor-pointer hover:text-foreground transition-colors group">
-    <div className="flex gap-1">
-      <span>{label}</span>
-      <div className="w-3 flex items-center justify-center text-geodude-700 group-hover:text-primary transition-colors">
-        {activeSort?.key === sortKey ? (
-          activeSort.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-        ) : (
-          <ChevronUp size={14} className="opacity-0 group-hover:opacity-50" />
-        )}
-      </div>
-    </div>
-  </th>
-);
+};
 
 export default memo(ResultsTable);
