@@ -62,36 +62,48 @@ export const formatOrdinal = (num) => {
 export const SCORING_FORMATS = {
   ppr_points: { 
     label: 'PPR', 
+    posRankLabel: 'Pos RK', 
+    points: 'PPR Pts', 
     value: 'ppr_points', 
     rankKey: 'rank_ppr', 
     posRankKey: 'pos_rank_ppr' 
   },
   half_ppr_points: { 
     label: 'Half PPR', 
+    posRankLabel: 'Pos RK', 
+    points: 'Half PPR Pts',
     value: 'half_ppr_points', 
     rankKey: 'rank_half_ppr', 
     posRankKey: 'pos_rank_half_ppr' 
   },
   non_ppr_points: { 
     label: 'Non-PPR', 
+    posRankLabel: 'Pos RK', 
+    points: 'Std Pts', 
     value: 'non_ppr_points', 
     rankKey: 'rank_non_ppr', 
     posRankKey: 'pos_rank_non_ppr' 
   },
   yahoo_points: { 
     label: 'Yahoo', 
+    posRankLabel: 'Pos RK', 
+    points: 'Yahoo Pts', 
     value: 'yahoo_points', 
     rankKey: 'rank_yahoo', 
     posRankKey: 'pos_rank_yahoo' 
   },
   draftkings_points: { 
     label: 'DraftKings', 
+    posRankLabel: 'Pos RK', 
+    points: 'DK Pts', 
     value: 'draftkings_points', 
     rankKey: 'rank_draftkings', 
     posRankKey: 'pos_rank_draftkings' 
   },
   fanduel_points: { 
     label: 'FanDuel', 
+    posRankLabel: 'Pos RK', 
+    points: 'FD Pts', 
     value: 'fanduel_points', 
     rankKey: 'rank_fanduel', 
     posRankKey: 'pos_rank_fanduel' 

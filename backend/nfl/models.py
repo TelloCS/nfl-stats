@@ -167,6 +167,13 @@ class PlayerGameStats(models.Model):
 
 class PlayerSeasonStats(models.Model):
     player = models.ForeignKey('Player', on_delete=models.CASCADE, related_name='season_stats')
+    historic_team = models.ForeignKey(
+        Team,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="The last team the player played for during this specific season."
+    )
     season_year = models.IntegerField()
     season_type = models.IntegerField()
     games_played = models.IntegerField(default=0)

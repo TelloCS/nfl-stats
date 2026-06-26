@@ -51,7 +51,7 @@ const YardsAllowedPosition = memo(({ playerAbbreviation, opponentAbbreviation, p
             {positionMetrics.map(({ key, label }) => (
               <StatRow
                 key={key}
-                label={label.replace('Yards Allowed', '').trim()}
+                label={label}
                 playerVal={playerRanks?.[key] || '--'}
                 opponentVal={opponentRanks?.[key] || '--'}
               />

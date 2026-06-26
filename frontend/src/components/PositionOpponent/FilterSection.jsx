@@ -62,13 +62,11 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
           <ToggleButton
             active={viewMode === 'table'}
             onClick={() => setViewMode('table')}
-            // icon={<LayoutList size={14} />}
             label="Table"
           />
           <ToggleButton
             active={viewMode === 'chart'}
             onClick={() => setViewMode('chart')}
-            // icon={<ChartIcon size={14} />}
             label="Trend Chart"
           />
         </div>
@@ -100,7 +98,7 @@ const StatsSummary = memo(({ stats }) => (
   </div>
 ));
 
-const ToggleButton = ({ active, onClick, icon, label }) => (
+const ToggleButton = ({ active, onClick, label }) => (
   <button
     onClick={onClick}
     className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-full text-xs font-bold
@@ -108,7 +106,6 @@ const ToggleButton = ({ active, onClick, icon, label }) => (
         ? 'bg-geodude-800 text-primary border border-geodude-700'
         : 'text-paper-500 hover:text-paper-200'}`}
   >
-    {icon}
     {label}
   </button>
 );

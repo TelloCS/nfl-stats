@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import CustomLoader from "../components/CustomLoader";
 import UpcomingGames from "../components/UpcomingGames";
 import PlayerPerformanceSection from "../components/PlayerPerformance";
+import PlayerCareerStats from "../components/PlayerPerformance/PlayerCareerStats";
 import UpcomingMatchup from "../components/UpcomingMatchup";
 import MatchupAnalysisSection from "../components/MatchupAnalysis";
 import useUrlFilters from "../hooks/useUrlFilters"
@@ -32,19 +33,29 @@ function PlayerDashboard() {
     filters
   );
 
+  const effectiveSeasonYear = filters.season_year || playerData?.active_season;
+  const rankingFilters = {
+    ...filters,
+    season_year: effectiveSeasonYear
+  };
+
   const {
     data: rankingData,
     isPending: isRankingPending,
     isError: isRankingError
   } = useVersionedQuery(
     createTeamStatsRanksQueryOptions,
-    filters
+    rankingFilters,
+    { 
+      enabled: !!effectiveSeasonYear 
+    }
   );
 
   const isPending = Boolean(isPlayerPending || isRankingPending);
   const isError = Boolean(isPlayerError || isRankingError);
   const hasRankings = Boolean(rankingData && rankingData?.length > 0);
   const showMatchup = Boolean(playerData?.stats?.length > 0 && hasRankings);
+  const nextMatchup = Boolean(playerData?.team?.full_name === "Free Agent");
 
   return (
     <>
@@ -68,26 +79,27 @@ function PlayerDashboard() {
             </button>
           </div>
         ) : (
-          <div className="container mx-auto p-4 md:px-8">
-            <UpcomingMatchup playerData={playerData} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-              <div className={showMatchup ? "lg:col-span-2" : "lg:col-span-3"}>
+          <div className="container mx-auto sm:p-4 md:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0.5 sm:gap-4">
+
+              <div className={`flex flex-col gap-0.5 sm:gap-4 ${nextMatchup ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
                 <PlayerPerformanceSection
                   data={playerData}
                   onFilterChange={setFilter}
                   filters={filters}
-                  className="h-full"
                 />
-              </div>
-              {showMatchup && (
-                <div className="col-span-1">
+                {showMatchup && (
                   <MatchupAnalysisSection
-                    games={playerData?.stats}
+                    data={playerData}
                     rankingData={rankingData}
-                    className="h-full"
                   />
-                </div>
-              )}
+                )}
+              </div>
+
+              <div className="lg:col-span-1">
+                <UpcomingMatchup playerData={playerData} />
+              </div>
+
             </div>
           </div>
         )}

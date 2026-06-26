@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import { ChevronUp, ChevronDown, SearchX } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { formatOrdinal } from "./FantasyRankings.helpers";
+import { SortableTh } from '../../helpers/table';
 
 
-const Table = memo(({ isPositionFiltered, isLoading, data, currentFormat, sortConfig, onHeaderClick }) => {
+const Table = ({ isPositionFiltered, isLoading, data, currentFormat, sortConfig, onHeaderClick }) => {
   if (isLoading) {
     return (
       <div className="w-full p-12 text-center text-paper-500 border border-geodude-800 rounded-lg bg-geodude-900 font-mono">
@@ -49,9 +50,9 @@ const Table = memo(({ isPositionFiltered, isLoading, data, currentFormat, sortCo
             <SortableTh label="Fum" sortKey="fumbles" activeSort={sortConfig} onClick={() => onHeaderClick('fumbles')} />
             <SortableTh label="Lost" sortKey="fumbles_lost" activeSort={sortConfig} onClick={() => onHeaderClick('fumbles_lost')} />
             <SortableTh label="Two PT" sortKey="two_pt_conversions" activeSort={sortConfig} onClick={() => onHeaderClick('two_pt_conversions')} />
-            <SortableTh label="Off Fum Rec TD" sortKey="off_fum_rec_tds" activeSort={sortConfig} onClick={() => onHeaderClick('off_fum_rec_tds')} />
-            <SortableTh label="Kick Ret TD" sortKey="kick_return_tds" activeSort={sortConfig} onClick={() => onHeaderClick('kick_return_tds')} />
-            <SortableTh label="Punt Ret TD" sortKey="punt_return_tds" activeSort={sortConfig} onClick={() => onHeaderClick('punt_return_tds')} />
+            <SortableTh label="OFR TD" sortKey="off_fum_rec_tds" activeSort={sortConfig} onClick={() => onHeaderClick('off_fum_rec_tds')} />
+            <SortableTh label="KRet TD" sortKey="kick_return_tds" activeSort={sortConfig} onClick={() => onHeaderClick('kick_return_tds')} />
+            <SortableTh label="PRet TD" sortKey="punt_return_tds" activeSort={sortConfig} onClick={() => onHeaderClick('punt_return_tds')} />
             <SortableTh
               label={`${currentFormat.label} Pts`}
               sortKey={currentFormat.value}
@@ -79,7 +80,7 @@ const Table = memo(({ isPositionFiltered, isLoading, data, currentFormat, sortCo
                 </Link>
               </td>
               <td className='text-nowrap text-paper-400'>{stat.player.position}</td>
-              <td className='text-nowrap'>{stat.player.historic_team.abbreviation}</td>
+              <td className='text-nowrap'>{stat?.historic_team?.abbreviation}</td>
               <td className='text-nowrap'>{stat.games_played}</td>
               <td className="text-nowrap text-paper-200">{stat.pass_yards}</td>
               <td className="text-nowrap text-paper-200">{stat.pass_touchdowns}</td>
@@ -105,21 +106,6 @@ const Table = memo(({ isPositionFiltered, isLoading, data, currentFormat, sortCo
       </table>
     </div>
   )
-});
-
-const SortableTh = ({ label, sortKey, activeSort, onClick }) => (
-  <th onClick={onClick} className="cursor-pointer hover:text-foreground transition-colors group">
-    <div className="flex gap-1">
-      <span>{label}</span>
-      <div className="w-3 flex items-center justify-center text-geodude-700 group-hover:text-primary transition-colors">
-        {activeSort?.key === sortKey ? (
-          activeSort.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-        ) : (
-          <ChevronUp size={14} className="opacity-0 group-hover:opacity-50" />
-        )}
-      </div>
-    </div>
-  </th>
-);
+};
 
 export default memo(Table);

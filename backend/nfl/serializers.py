@@ -324,11 +324,12 @@ class PlayerSerializerV2(serializers.ModelSerializer):
 
 class PlayerSeasonStatsSerializer(serializers.ModelSerializer):
     player = PlayerSerializerV2()
+    historic_team = HistoricTeamSerializer()
 
     class Meta:
         model = PlayerSeasonStats
         fields = [
-            'id', 'player', 'season_year', 'season_type', 'games_played',
+            'id', 'player', 'historic_team', 'season_year', 'season_type', 'games_played',
 
             'ppr_points', 'half_ppr_points', 'non_ppr_points',
             'yahoo_points', 'draftkings_points', 'fanduel_points',
@@ -347,21 +348,18 @@ class PlayerSeasonStatsSerializer(serializers.ModelSerializer):
             'pos_rank_fanduel', 'pos_rank_non_ppr', 'pos_rank_yahoo'
         ]
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        matching_stats = [
-            stat for stat in instance.player.stats.all()
-            if stat.game.season_year == instance.season_year
-            and stat.game.season_type == instance.season_type
-        ]
+#######################################################################################################################
 
-        latest_team = None
-        if matching_stats:
-            latest_team = matching_stats[0].team
 
-        if representation.get('player'):
-            representation['player']['historic_team'] = (
-                HistoricTeamSerializer(latest_team).data if latest_team else None
-            )
+class PlayerCareerStatsSerializer(serializers.ModelSerializer):
+    player = PlayerSerializerV2()
+    historic_team = HistoricTeamSerializer()
 
-        return representation
+    completion_pct = serializers.ReadOnlyField()
+    yards_per_pass_attempt = serializers.ReadOnlyField()
+    yards_per_rush_attempt = serializers.ReadOnlyField()
+    yards_per_reception = serializers.ReadOnlyField()
+
+    class Meta:
+        model = PlayerSeasonStats
+        fields = '__all__'
