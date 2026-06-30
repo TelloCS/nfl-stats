@@ -81,7 +81,7 @@ export default function SearchBar({ onSearchComplete }: SearchBarProp) {
   };
 
   return (
-    <div className="w-full relative lg:w-[320px]">
+    <div className="w-full relative lg:w-[280px]">
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <Search size={18} className="text-paper-400" />

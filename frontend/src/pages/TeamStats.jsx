@@ -104,7 +104,7 @@ export default function TeamStats() {
 
 const FilterSection = memo(({ tabs, activeTabKey, onTabChange, filters, setFilter }) => (
   <div className="border-b border-geodude-800">
-    <div className="container mx-auto px-4 md:px-8 py-4 bg-background flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="container mx-auto px-4 md:px-8 py-4 bg-background flex flex-col md:flex-row items-start justify-between gap-4">
 
       <div className="w-full md:w-auto overflow-x-auto hide-scrollbar">
         <div className="flex gap-1.5 pb-2 flex-nowrap">
@@ -176,7 +176,7 @@ const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfi
         </thead>
         <tbody className="divide-y divide-geodude-800/50">
           {data.map((team, index) => (
-            <tr key={team.id || index} className="group hover:bg-geodude-800/50 transition duration-150 h-[48px] text-xs text-paper-300">
+            <tr key={team.id || index} className="group hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300">
               <td className="px-2 text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800 transition-colors">
                 {team.full_name}
               </td>

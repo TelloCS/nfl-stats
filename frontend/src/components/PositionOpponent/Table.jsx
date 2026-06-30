@@ -45,7 +45,7 @@ const ResultsTable = ({ isLoading, data, statsToShow, sortConfig, onHeaderClick 
         </thead>
         <tbody className="divide-y divide-geodude-800/50">
           {data.map((log) => (
-            <tr key={log.id} className="hover:bg-geodude-800/50 transition duration-150 h-[48px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
+            <tr key={log.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
               <td className="text-nowrap text-paper-500">{log.game.week}</td>
               <td className="text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800">
                 <Link

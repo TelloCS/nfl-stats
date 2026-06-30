@@ -17,6 +17,8 @@ export const PositionStatMap = {
         { key: 'rush_touchdowns', label: 'Rush TD' },
         { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
+        { key: 'ppr_points', label: 'PPR' },
+        { key: 'non_ppr_points', label: 'Non-PPR' }
     ],
     'RB': [
         { key: 'rush_attempts', label: 'Rush Att' },
@@ -30,6 +32,8 @@ export const PositionStatMap = {
         { key: 'yards_per_reception', label: 'Yds/Rec' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
+        { key: 'ppr_points', label: 'PPR' },
+        { key: 'non_ppr_points', label: 'Non-PPR' }
     ],
     'WR': [
         { key: 'receptions', label: 'Rec' },
@@ -43,6 +47,8 @@ export const PositionStatMap = {
         { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
+        { key: 'ppr_points', label: 'PPR' },
+        { key: 'non_ppr_points', label: 'Non-PPR' }
     ],
     'TE': [
         { key: 'receptions', label: 'Rec' },
@@ -57,6 +63,8 @@ export const PositionStatMap = {
         { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
+        { key: 'ppr_points', label: 'PPR' },
+        { key: 'non_ppr_points', label: 'Non-PPR' }
     ],
     'DEFAULT': []
 };
