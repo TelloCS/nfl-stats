@@ -99,7 +99,7 @@ export default function Layout() {
                 <button onClick={() => setIsMenuOpen(false)} className="text-paper-400 hover:text-foreground focus:outline-none transition-colors hover:bg-geodude-800 hover:text-primary rounded-sm cursor-pointer p-1"><X size={24} /></button>
               </div>
               <div className="flex flex-col text-lg p-2 gap-1">
-                <Link to={"/"} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
+                <Link to={"/"} onClick={() => setIsMenuOpen(false)} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
                   Home
                 </Link>
                 {NAV_LINKS.map(({ to, label }) => (
