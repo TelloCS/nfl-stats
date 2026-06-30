@@ -48,7 +48,6 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                 <tr className="border-b border-geodude-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
                   <th className='text-nowrap'>Team</th>
                   <th className='text-nowrap'>Season</th>
-                  <th className='text-nowrap'>Type</th>
                   <th className='text-nowrap'>GP</th>
                   {availableStats.map((stat) => (
                     <th key={stat.key} className='text-nowrap'>{stat.label}</th>
@@ -60,7 +59,6 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                   <tr key={row.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
                     <td className="text-nowrap text-paper-500">{row.historic_team.abbreviation}</td>
                     <td className="text-nowrap text-paper-500">{row.season_year}</td>
-                    <td className="text-nowrap text-paper-500">{row.season_type}</td>
                     <td className="text-nowrap text-paper-500">{row.games_played}</td>
                     {availableStats.map((statConfig) => (
                       <td key={statConfig.key} className="text-nowrap text-paper-200">
@@ -80,9 +78,8 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                 <tr className="border-b border-geodude-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
                   <th className='text-nowrap'>Team</th>
                   <th className='text-nowrap'>Season</th>
-                  <th className='text-nowrap'>Type</th>
                   <th className='text-nowrap'>GP</th>
-                  <th className='text-nowrap'>{currentFormat.label}</th>
+                  <th className='text-nowrap'>{`${currentFormat.label} Rk`}</th>
                   <th className='text-nowrap'>{currentFormat.posRankLabel}</th>
                   <th className='text-nowrap'>{currentFormat.points}</th>
                 </tr>
@@ -92,7 +89,6 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                   <tr key={row.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
                     <td className="text-nowrap text-paper-500">{row.historic_team.abbreviation}</td>
                     <td className="text-nowrap text-paper-500">{row.season_year}</td>
-                    <td className="text-nowrap text-paper-500">{row.season_type}</td>
                     <td className="text-nowrap text-paper-500">{row.games_played}</td>
                     <td className="text-nowrap text-paper-200">
                       {formatOrdinal(row[currentFormat.rankKey] || '--')}

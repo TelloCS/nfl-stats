@@ -33,10 +33,10 @@ function PlayerDashboard() {
     filters
   );
 
-  const effectiveSeasonYear = filters.season_year || playerData?.active_season;
+  const effectiveSeasonYear = playerData?.active_season;
   const rankingFilters = {
     ...filters,
-    season_year: effectiveSeasonYear
+    ...(effectiveSeasonYear ? { season_year: effectiveSeasonYear } : {})
   };
 
   const {
@@ -47,7 +47,7 @@ function PlayerDashboard() {
     createTeamStatsRanksQueryOptions,
     rankingFilters,
     { 
-      enabled: !!effectiveSeasonYear 
+      enabled: Boolean(effectiveSeasonYear)
     }
   );
 

@@ -58,7 +58,7 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
           </div>
         </div>
 
-        <div className="flex bg-geodude-950 w-full sm:w-fit h-[38px] p-1 border border-geodude-800 shrink-0">
+        <div className="flex bg-geodude-900 h-[32px] p-1 border border-geodude-800 rounded-full gap-1 w-full sm:w-fit shrink-0">
           <ToggleButton
             active={viewMode === 'table'}
             onClick={() => setViewMode('table')}
@@ -101,10 +101,10 @@ const StatsSummary = memo(({ stats }) => (
 const ToggleButton = ({ active, onClick, label }) => (
   <button
     onClick={onClick}
-    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-full text-xs font-bold
+    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-full text-xs font-bold rounded-full
       ${active
-        ? 'bg-geodude-800 text-primary border border-geodude-700'
-        : 'text-paper-500 hover:text-paper-200'}`}
+        ? 'bg-geodude-700 text-foreground'
+        : 'text-paper-500 hover:text-paper-300'}`}
   >
     {label}
   </button>

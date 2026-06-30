@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { House, Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
 import { useAuth } from "../hooks/useAuth";
@@ -8,9 +8,8 @@ import ThemeToggle from "../components/ThemeToggle";
 import { useIsDesktop } from "../hooks/useMediaQueries";
 
 const NAV_LINKS = [
-  { to: "/", label: "Home", icon: House },
   { to: "/position-vs-opponent", label: "Position vs Opponent" },
-  { to: "/fantasy-rankings", label: "Fantasy Rankings"},
+  { to: "/fantasy-rankings", label: "Fantasy Rankings" },
   { to: "/team/stats", label: "Team Stats" }
 ];
 
@@ -60,11 +59,16 @@ export default function Layout() {
               </button>
 
               {/* Desktop Nav Links */}
-              <ul className="hidden lg:flex items-center justify-center gap-6 font-semibold">
-                {NAV_LINKS.map(({ to, label, icon: Icon }) => (
+              <ul className="hidden lg:flex items-center justify-center gap-6 font-semibold text-sm">
+                <li key={"/"} className="hover:text-primary transition-colors flex items-center hover:border rounded-md border-none">
+                  <Link to={"/"} className="hover:text-primary transition-colors flex items-center">
+                    <Logo />
+                  </Link>
+                </li>
+                {NAV_LINKS.map(({ to, label }) => (
                   <li key={to}>
                     <Link to={to} className="hover:text-primary transition-colors flex items-center">
-                      {Icon ? <Icon size={28} /> : label}
+                      {label}
                     </Link>
                   </li>
                 ))}
@@ -95,6 +99,9 @@ export default function Layout() {
                 <button onClick={() => setIsMenuOpen(false)} className="text-paper-400 hover:text-foreground focus:outline-none transition-colors hover:bg-geodude-800 hover:text-primary rounded-sm cursor-pointer p-1"><X size={24} /></button>
               </div>
               <div className="flex flex-col text-lg p-2 gap-1">
+                <Link to={"/"} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
+                  Home
+                </Link>
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link key={to} to={to} onClick={() => setIsMenuOpen(false)} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
                     {label}
@@ -134,3 +141,15 @@ const AuthActions = ({ isLoggedIn, user, logoutMutation }) => (
     )}
   </div>
 );
+
+function Logo() {
+  return (
+    <div className="flex text-3xl items-center font-mono gap-0.5 text-foreground hover:text-primary">
+      <span>FB</span>
+      <div className="flex flex-col text-[10px]">
+        <span>Foot</span>
+        <span>Ball</span>
+      </div>
+    </div>
+  )
+}
