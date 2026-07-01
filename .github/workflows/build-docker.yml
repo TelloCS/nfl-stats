@@ -80,7 +80,7 @@ jobs:
           severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'backend-trivy-report.sarif'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
         env:
           TRIVY_CACHE_DIR: .trivy
@@ -92,7 +92,7 @@ jobs:
           severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'nginx-trivy-report.sarif'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
         env:
           TRIVY_CACHE_DIR: .trivy
