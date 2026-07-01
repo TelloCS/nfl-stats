@@ -1,4 +1,4 @@
-FROM node:22-alpine AS node
+FROM node:24-alpine3.23 AS node
 
 WORKDIR /app/frontend
 
@@ -18,7 +18,7 @@ USER node
 RUN npm run build
 
 #######################################################################
-FROM nginx:1.31.0-alpine AS prod
+FROM nginx:1.31.2-alpine3.23 AS prod
 
 RUN rm -rf /usr/share/nginx/html/*
 

@@ -1,15 +1,30 @@
-name: Build Docker Images
+name: Build, Scan, and Publish Docker Images
 
 on:
   push:
-    branches: [ "main", "testing/pipeline" ]
+    branches:
+      - main
+      - 'testing/pipeline'
+      - 'fix/**'
+      - 'security/**'
     paths:
       - 'backend/**'
       - 'frontend/**'
       - 'nginx/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'nginx/**'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
 
 jobs:
   build-docker-images:
@@ -21,6 +36,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Cache Trivy Vulnerability Database
+        uses: actions/cache@v4
+        with:
+          path: .trivy
+          key: ${{ runner.os }}-trivy-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Backend
         uses: docker/build-push-action@v5
         with:
@@ -28,6 +58,9 @@ jobs:
           file: ./backend/Dockerfile
           push: false
           load: true
+          tags: nfl-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build Nginx
         uses: docker/build-push-action@v5
@@ -36,3 +69,70 @@ jobs:
           file: ./nginx/Dockerfile
           push: false
           load: true
+          tags: nfl-nginx:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Scan Backend with Trivy
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: 'nfl-backend:${{ github.sha }}'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'backend-trivy-report.sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+        env:
+          TRIVY_CACHE_DIR: .trivy
+
+      - name: Scan Nginx with Trivy
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: 'nfl-nginx:${{ github.sha }}'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'nginx-trivy-report.sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+        env:
+          TRIVY_CACHE_DIR: .trivy
+
+      - name: Upload Backend Security Results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'backend-trivy-report.sarif'
+          category: 'backend-analysis'
+
+      - name: Upload Nginx Security Results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'nginx-trivy-report.sarif'
+          category: 'nginx-analysis'
+
+      - name: Push Backend to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/nfl-backend:latest
+            ghcr.io/${{ github.repository_owner }}/nfl-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push Nginx to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: . 
+          file: ./nginx/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/nfl-nginx:latest
+            ghcr.io/${{ github.repository_owner }}/nfl-nginx:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
