@@ -404,8 +404,14 @@ class NFLScheduleView(APIView):
         if not data:
             return Response({'events': []}, status=200)
 
+        next_update = data.pop("next_update_at", None)
         serializer = NFLScheduleSerializer(data)
-        return Response(serializer.data)
+        response = Response(serializer.data)
+
+        if next_update:
+            response["X-Next-Update-At"] = next_update
+
+        return response
 
 
 class ETLVersionView(KeyBasedCacheMixin, APIView):

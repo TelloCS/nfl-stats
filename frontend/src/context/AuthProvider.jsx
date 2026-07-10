@@ -30,9 +30,6 @@ export const AuthProvider = ({ children }) => {
       queryClient.clear();
       navigate("/login");
     },
-    onError: (error) => {
-      console.error("Logout failed:", error)
-    }
   });
 
   const deleteMutation = useMutation({
@@ -44,11 +41,7 @@ export const AuthProvider = ({ children }) => {
     onError: (error) => {
       if (error.response?.status === 403 || error.response?.status === 404) {
         queryClient.clear();
-        navigate('/', { replace: true });
-        return;
       }
-
-      console.error("Deleting Account failed:", error);
     }
   });
 

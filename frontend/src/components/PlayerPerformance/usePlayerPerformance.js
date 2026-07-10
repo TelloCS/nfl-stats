@@ -18,7 +18,7 @@ export function usePlayerPerformance(data, filters, onFilterChange) {
     const [matchupSeasonType, setMatchupSeasonType] = useState(defaultSeasonType);
     const [careerSeasonType, setCareerSeasonType] = useState(defaultSeasonType);
 
-    const currentSeason = filters?.season_year || data?.active_season;
+    const currentSeason = filters?.season_year || data?.active_season || "N/A";
     const currentSeasonType = filters?.season_type || defaultSeasonType;
     const seasonTypeOptions = FilterConfig.season_type;
     const chartData = data?.stats || EMPTY_STATS;

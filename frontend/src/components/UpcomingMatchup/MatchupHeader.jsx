@@ -1,7 +1,7 @@
 import { memo } from "react";
 
 const MatchupHeader = memo(({ shortName, date }) => (
-  <div className="flex flex-row items-center justify-between mb-2 bg-geodude-950 p-2 rounded-lg border border-geodude-800">
+  <div className="flex flex-row items-center justify-between bg-geodude-950 p-2 rounded-lg border border-geodude-800">
     <div className="min-w-0">
       <p className="font-bold text-foreground text-lg truncate">
         {shortName?.replace(' @ ', ' vs ')}

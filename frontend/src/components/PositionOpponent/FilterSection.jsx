@@ -44,7 +44,7 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
               onChange={(v) => onFilterChange('opponent', v)}
               options={TeamAbbreviations}
               minWidth="100%"
-              className="lg:min-w-[160px]"
+              className="lg:min-w-[80px]"
             />
           </div>
           <div className="col-span-1">
@@ -53,7 +53,7 @@ const FilterSection = memo(({ filters, onFilterChange, stats, isLoading, viewMod
               onChange={(v) => onFilterChange('position', v)}
               options={Positions}
               minWidth="100%"
-              className="lg:min-w-[130px]"
+              className="lg:min-w-[80px]"
             />
           </div>
         </div>

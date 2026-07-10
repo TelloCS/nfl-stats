@@ -84,7 +84,7 @@ const LoadMoreButton = ({ hasNextPage, isFetchingNextPage, fetchNextPage }) => {
           </>
         ) : (
           <>
-            <span>Load More Games</span>
+            <span>Load More Players</span>
             <Search size={16} className="text-paper-500 group-hover:text-paper-300 transition-colors" />
           </>
         )}

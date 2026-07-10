@@ -13,7 +13,7 @@ function PlayerPerformanceSection({ data, onFilterChange, filters }) {
   const isMobile = useIsMobile();
   const { state, options, computed, actions } = usePlayerPerformance(data, filters, onFilterChange);
 
-  const getTabClass = (tabName) => `flex-1 text-center py-2 px-1 text-sm font-semibold transition-colors border-b-2 ${state.activeTab === tabName
+  const getTabClass = (tabName) => `flex-1 text-center py-2 px-1 text-xs sm:text-sm font-semibold transition-colors border-b-2 ${state.activeTab === tabName
       ? "border-foreground text-foreground"
       : "border-transparent text-paper-400 hover:text-foreground hover:border-geodude-700"
     }`;
@@ -44,7 +44,7 @@ function PlayerPerformanceSection({ data, onFilterChange, filters }) {
 
       {/* CONTENT SECTION */}
       <div className="w-full">
-        {state.activeTab === "gamelogs" && computed.chartData.length > 0 && (
+        {state.activeTab === "gamelogs" && (
           state.viewMode === "table" ? (
             <Table data={data} availableStats={options.availableStats} />
           ) : (

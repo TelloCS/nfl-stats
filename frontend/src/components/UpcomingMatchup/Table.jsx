@@ -6,6 +6,7 @@ const Table = ({ data, availableStats }) => {
   const stats = data?.stats || data || [];
   const customGetters = useMemo(() => ({
     week: (log) => log.game?.week ?? 0,
+    season: (log) => log.game?.season_year ?? 0,
   }), []);
 
   const { sortedItems, handleHeaderClick, sortConfig } = useUrlTableSort(stats, customGetters);
@@ -25,6 +26,13 @@ const Table = ({ data, availableStats }) => {
                   onClick={() => handleHeaderClick('week')}
                 />
                 <th className="text-nowrap">Date</th>
+                <SortableTh
+                  key="season"
+                  label="Season"
+                  sortKey="season"
+                  activeSort={sortConfig}
+                  onClick={() => handleHeaderClick('season')}
+                />
                 <th className="text-nowrap">Matchup</th>
                 <th className="text-nowrap">Score</th>
                 {availableStats.map((stat) => (
@@ -43,6 +51,7 @@ const Table = ({ data, availableStats }) => {
                 <tr key={log.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
                   <td className="text-nowrap text-paper-500">{log.game.week}</td>
                   <td className="text-nowrap text-paper-500">{log.game.date}</td>
+                  <td className="text-nowrap text-paper-500">{log.game.season_year}</td>
                   <td className="text-nowrap text-paper-400">{log.game.short_name}</td>
                   <td className="text-nowrap text-paper-500">{log.game.away_score} - {log.game.home_score}</td>
                   {availableStats.map((statConfig) => (
@@ -58,7 +67,7 @@ const Table = ({ data, availableStats }) => {
       ) : (
         <div className="p-4 bg-geodude-900 border border-geodude-800 rounded-lg">
           <p className="text-paper-400 text-sm text-center">
-            No game log stats found.
+            No upcoming matchup stats found.
           </p>
         </div>
       )}

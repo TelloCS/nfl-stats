@@ -37,10 +37,16 @@ class Extract:
             else:
                 request_params[key] = value
 
-        async with session.get(url=url, params=request_params) as response:
-            print(f"Request: {response.url} | Status: {response.status}")
-            response.raise_for_status()
-            self.raw = await self.process_response(response)
+        try:
+            async with session.get(url=url, params=request_params) as response:
+                logger.info(f"[CACHE MISS] Request: {response.url} | Status: {response.status}")
+                response.raise_for_status()
+                processed_json = await self.process_response(response)
+                self.raw = processed_json
+                return self.raw
+        except Exception as e:
+            logger.exception(f"[API ERROR] Request failed for {url}. Defaulting to empty state. Error: {e}")
+            self.raw = None
             return self.raw
 
     async def spawn_tasks(self, session: ClientSession, ids: list[Any], id_key: str):
@@ -61,50 +67,35 @@ class Extract:
 
 class Teams(Extract):
     BASE_URL: str = os.getenv('TEAMS_URL')
+    SOURCE: str = "espn"
 
     def __init__(self, params = None):
         super().__init__(params)
-        self.team_ids: list = []
 
-    async def process_response(self, response) -> None:
-        data = await response.json()
+    @property
+    def team_ids(self) -> list[str]:
+        if not self.raw:
+            return []
 
-        for conference in data["content"]["standings"]["groups"]:
+        extracted_ids = []
+        for conference in self.raw["content"]["standings"]["groups"]:
             for division in conference["groups"]:
                 for team in division["standings"]["entries"]:
-                    self.team_ids.append(team["team"]["id"])
-        return data
-    
+                    extracted_ids.append(team["team"]["id"])
+        return extracted_ids
+
 
 class Players(Extract):
     BASE_URL: str = os.getenv("PLAYERS_URL")
+    SOURCE: str = "espn"
 
     def __init__(self, params=None):
         super().__init__(params)
 
-    async def spawn_tasks(self, session: ClientSession, team_ids: list[str]) -> None:
-        async with TaskGroup() as tg:
-            tasks = [
-                tg.create_task(
-                    self.send_api_request(
-                        session=session,
-                        team_id=team_id,
-                    )
-                ) for team_id in team_ids
-            ]
-        self.raw = [t.result() for t in tasks]
-        return self.raw
-
-    async def send_api_request(self, session: ClientSession, team_id: str) -> None:
-        async with session.get(url=self.BASE_URL.format(team_id=team_id)) as response:
-            print(f"Request: {response.url} | Status: {response.status}")
-            response.raise_for_status()
-            self.raw = await self.process_response(response)
-            return self.raw
-
 
 class Events(Extract):
     BASE_URL: str = os.getenv('EVENTS_URL')
+    SOURCE: str = "espn"
 
     def __init__(self, params = None):
         super().__init__(params)
@@ -130,6 +121,7 @@ class Events(Extract):
 
 class Games(Extract):
     BASE_URL: str = os.getenv("BOXSCORE_URL")
+    SOURCE: str = "espn"
 
     def __init__(self, params = None):
         super().__init__(params)

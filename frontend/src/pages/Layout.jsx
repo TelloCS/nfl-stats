@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, AlertCircle } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
 import { useAuth } from "../hooks/useAuth";
 import ThemeToggle from "../components/ThemeToggle";
 import { useIsDesktop } from "../hooks/useMediaQueries";
+import StatusErrorModal from '../components/StatusErrorModal';
 
 const NAV_LINKS = [
   { to: "/position-vs-opponent", label: "Position vs Opponent" },
@@ -139,6 +140,13 @@ const AuthActions = ({ isLoggedIn, user, logoutMutation }) => (
         <Link to="/login" className="bg-inverted-bg text-inverted-text rounded-full text-sm py-2.5 px-5 hover:opacity-80 font-bold transition-opacity">Log in</Link>
       </>
     )}
+    <StatusErrorModal
+      isOpen={logoutMutation.isError}
+      onClose={() => logoutMutation.reset()}
+      title="Logout Failed"
+      message={logoutMutation.error?.response?.data?.detail}
+      fallback="An unexpected error occurred while logging out. Please try again."
+    />
   </div>
 );
 

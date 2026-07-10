@@ -35,42 +35,41 @@ async def run_extraction_pipeline(config: dict):
         players = Players()
         await players.spawn_tasks(
             session,
-            team_ids=teams.team_ids
+            ids=teams.team_ids,
+            id_key='team_id'
         )
 
-        # disabled currently
-        # offense_passing = await OffensePassing().send_api_request(session)
-        # offense_rushing = await OffenseRushing().send_api_request(session)
-        # offense_receiving = await OffenseReceiving().send_api_request(session)
-        # defense_passing = await DefensePassing().send_api_request(session)
-        # defense_rushing = await DefenseRushing().send_api_request(session)
-        # defense_receiving = await DefenseReceiving().send_api_request(session)
-        # advance_offense = await AdvanceOffense().send_api_request(session)
-        # advance_defense = await AdvanceDefense().send_api_request(session)
-        # coverage_schemes = await CoverageSchemes().send_api_request(session)
-        # offense_tendencies = await CoverageStatsByPosition().send_api_request(session)
-        # coverage_position = await OffenseTendencies().send_api_request(session)
+        offense_passing = await OffensePassing().send_api_request(session, season_year=config['dates'])
+        offense_rushing = await OffenseRushing().send_api_request(session, season_year=config['dates'])
+        offense_receiving = await OffenseReceiving().send_api_request(session, season_year=config['dates'])
+        defense_passing = await DefensePassing().send_api_request(session, season_year=config['dates'])
+        defense_rushing = await DefenseRushing().send_api_request(session, season_year=config['dates'])
+        defense_receiving = await DefenseReceiving().send_api_request(session, season_year=config['dates'])
+        advance_offense = await AdvanceOffense().send_api_request(session, season=config['dates'])
+        advance_defense = await AdvanceDefense().send_api_request(session, season=config['dates'])
+        coverage_schemes = await CoverageSchemes().send_api_request(session)
+        offense_tendencies = await CoverageStatsByPosition().send_api_request(session)
+        coverage_position = await OffenseTendencies().send_api_request(session)
 
     return {
         'teams': teams.raw,
         'events': events.raw,
         'games': games.raw,
         'players': players.raw,
-        # 'offense_passing': offense_passing,
-        # 'offense_rushing': offense_rushing,
-        # 'offense_receiving': offense_receiving,
-        # 'defense_passing': defense_passing,
-        # 'defense_rushing': defense_rushing,
-        # 'defense_receiving': defense_receiving,
-        # 'advance_offense': advance_offense,
-        # 'advance_defense': advance_defense,
-        # 'coverage_schemes': coverage_schemes,
-        # 'offense_tendencies': offense_tendencies,
-        # 'coverage_position': coverage_position
+        'offense_passing': offense_passing,
+        'offense_rushing': offense_rushing,
+        'offense_receiving': offense_receiving,
+        'defense_passing': defense_passing,
+        'defense_rushing': defense_rushing,
+        'defense_receiving': defense_receiving,
+        'advance_offense': advance_offense,
+        'advance_defense': advance_defense,
+        'coverage_schemes': coverage_schemes,
+        'offense_tendencies': offense_tendencies,
+        'coverage_position': coverage_position
     }
 
 
-def main(context: dict) -> None:
-    raw_payload = run(run_extraction_pipeline(config=context))
-    transform(raw_payload=raw_payload)
+def main(raw_payload, context: dict) -> None:
+    transform(raw_payload=raw_payload, config=context)
     return None
