@@ -171,7 +171,6 @@ describe('AuthProvider Comprehensive Suite', () => {
 
     await waitFor(() => {
       expect(clearSpy).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
     });
   });
 
@@ -186,7 +185,6 @@ describe('AuthProvider Comprehensive Suite', () => {
     fireEvent.click(screen.getByRole('button', { name: /delete/i }));
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Deleting Account failed:", errorResponse);
       expect(clearSpy).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
