@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import StatusErrorModal from '../components/StatusErrorModal';
 
 const UserProfile = () => {
   const { user, deleteMutation } = useAuth();
@@ -68,11 +69,13 @@ const UserProfile = () => {
             </div>
           )}
 
-          {deleteMutation.isError && (
-            <p className="mt-4 text-sm text-status-error bg-error-950/30 border border-error-900/50 p-3 rounded-xl font-medium">
-              Error deleting account. Please verify your session and try again.
-            </p>
-          )}
+          <StatusErrorModal
+            isOpen={deleteMutation.isError}
+            onClose={() => deleteMutation.reset()}
+            title="Account Deletion Failed"
+            message={deleteMutation.error?.response?.data?.detail}
+            fallback="An unexpected error occurred while deleting your account. Please try again."
+          />
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { apiFetch } from "../utils/apiFetch";
 
-export default function createUpcomingGamesQueryOptions(version){
+export default function createUpcomingGamesQueryOptions(){
     return queryOptions({
-        queryKey: ['upcomingGames', { v: version }],
+        queryKey: ['upcomingGames'],
         queryFn : () => getUpcomingGames(),
         staleTime: Infinity,
         placeholderData: keepPreviousData,

@@ -10,7 +10,7 @@ import TeamSideSelector from "./TeamSideSelector";
 import PlayerVsUpcomingMatchup from "./PlayerVsUpcomingMatchup";
 import { getMatchupData } from "./UpcomingMatchup.helpers";
 
-function UpcomingMatchup({ playerData }) {
+function UpcomingMatchup({ playerData, showMatchup }) {
   const [playerSide, setPlayerSide] = useState("off");
   const [opponentSide, setOpponentSide] = useState("def");
 
@@ -27,105 +27,103 @@ function UpcomingMatchup({ playerData }) {
 
   if (isSchedulePending || isRanksPending) {
     return null;
-  };
+  }
 
   if (!nextGame || !opponentRanks || !playerRanks) {
     return null;
-  };
+  }
 
   return (
     <div className="mb-2 h-full font-mono">
-      <div className="grid grid-cols-1 gap-0.5 sm:gap-4">
-        <div className="bg-geodude-900 sm:rounded-md border border-geodude-800 p-4">
-          <MatchupHeader shortName={nextGame.shortName} date={nextGame.date} />
-          <div className="grid grid-cols-1 gap-4">
+      <div className="bg-geodude-900 sm:rounded-md border border-geodude-800 p-4 flex flex-col gap-4">
+        <MatchupHeader shortName={nextGame.shortName} date={nextGame.date} />
+        <div className={`grid gap-4 grid-cols-1 ${!showMatchup ? 'lg:grid-cols-3' : ''}`}>
 
-            {/* Team Rankings Section */}
-            <div className="bg-geodude-950 border border-geodude-800 rounded-xl p-2 flex flex-col">
-              <p className="text-base font-bold text-foreground mb-2 text-center tracking-wide">
-                Team Rankings <span className="text-paper-400 font-normal">({displaySeason})</span>
-              </p>
+          {/* Play Calling Rate Section */}
+          <div className={`bg-geodude-950 border border-geodude-800 rounded-xl p-2 md:p-4 flex flex-col h-full ${showMatchup ? 'order-1' : 'order-2'}`}>
+            <p className="text-base font-bold text-foreground mb-4 text-center tracking-wide">
+              Play Calling Rate <span className="text-paper-400 font-normal">({displaySeason})</span>
+            </p>
 
-              <div className="grid grid-cols-3 gap-3 items-center border-b border-geodude-800 pb-4 mb-4">
-                <TeamSideSelector
-                  abbreviation={playerRanks.abbreviation}
-                  side={playerSide}
-                  setSide={setPlayerSide}
-                />
-                <span className="text-center text-xs font-black tracking-widest text-paper-500 mt-4">VS</span>
-                <TeamSideSelector
-                  abbreviation={opponentRanks.abbreviation}
-                  side={opponentSide}
-                  setSide={setOpponentSide}
-                  isOpponent
-                />
-              </div>
-
-              <div className="flex flex-col gap-1 text-sm">
-                <StatRow
-                  label="Pass Yds"
-                  playerVal={playerRanks.rank_snapshot?.[`${playerSide}_pass_yards_rank`]}
-                  opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_pass_yards_rank`]}
-                />
-                <StatRow
-                  label="Rush Yds"
-                  playerVal={playerRanks.rank_snapshot?.[`${playerSide}_rush_yards_rank`]}
-                  opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_rush_yards_rank`]}
-                />
-                <StatRow
-                  label="Pass EPA"
-                  playerVal={playerSide === "off"
-                    ? playerRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
-                    : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
-                  opponentVal={opponentSide === "off"
-                    ? opponentRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
-                    : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
-                />
-                <StatRow
-                  label="Rush EPA"
-                  playerVal={playerSide === "off"
-                    ? playerRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
-                    : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
-                  opponentVal={opponentSide === "off"
-                    ? opponentRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
-                    : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
-                />
-              </div>
-            </div>
-
-            {/* Play Calling Rate Section */}
-            <div className="flex flex-col">
-              <div className="bg-geodude-950 border border-geodude-800 rounded-xl p-2">
-                <p className="text-base font-bold text-foreground mb-4 text-center tracking-wide">
-                  Play Calling Rate <span className="text-paper-400 font-normal">({displaySeason})</span>
-                </p>
-
-                <div className="flex justify-between ">
-                  <TeamSchemes
-                    abbreviation={playerRanks.abbreviation}
-                    side={playerSide}
-                    ranks={playerRanks.rank_snapshot}
-                  />
-                  <TeamSchemes
-                    abbreviation={opponentRanks.abbreviation}
-                    side={opponentSide}
-                    ranks={opponentRanks.rank_snapshot}
-                    isOpponent
-                  />
-                </div>
-              </div>
+            <div className="flex justify-between h-full items-center">
+              <TeamSchemes
+                abbreviation={playerRanks.abbreviation}
+                side={playerSide}
+                ranks={playerRanks.rank_snapshot}
+              />
+              <TeamSchemes
+                abbreviation={opponentRanks.abbreviation}
+                side={opponentSide}
+                ranks={opponentRanks.rank_snapshot}
+                isOpponent
+              />
             </div>
           </div>
-        </div>
 
-        <div className="bg-geodude-900 p-4 h-full sm:rounded-md border border-geodude-800 flex flex-col">
-          <YardsAllowedPosition
-            playerAbbreviation={playerRanks?.abbreviation}
-            opponentAbbreviation={opponentRanks?.abbreviation}
-            playerRanks={playerRanks?.rank_snapshot}
-            opponentRanks={opponentRanks?.rank_snapshot}
-            displaySeason={displaySeason}
-          />
+          {/* Team Rankings Section */}
+          <div className={`bg-geodude-950 border border-geodude-800 rounded-xl p-2 md:p-4 flex flex-col h-full ${showMatchup ? 'order-2' : 'order-1'}`}>
+            <p className="text-base font-bold text-foreground mb-2 text-center tracking-wide">
+              Team Rankings <span className="text-paper-400 font-normal">({displaySeason})</span>
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 items-center border-b border-geodude-800 pb-4 mb-4">
+              <TeamSideSelector
+                abbreviation={playerRanks.abbreviation}
+                side={playerSide}
+                setSide={setPlayerSide}
+              />
+              <span className="text-center text-xs font-black tracking-widest text-paper-500 mt-4">VS</span>
+              <TeamSideSelector
+                abbreviation={opponentRanks.abbreviation}
+                side={opponentSide}
+                setSide={setOpponentSide}
+                isOpponent
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 text-sm justify-center grow">
+              <StatRow
+                label="Pass Yds"
+                playerVal={playerRanks.rank_snapshot?.[`${playerSide}_pass_yards_rank`]}
+                opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_pass_yards_rank`]}
+              />
+              <StatRow
+                label="Rush Yds"
+                playerVal={playerRanks.rank_snapshot?.[`${playerSide}_rush_yards_rank`]}
+                opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_rush_yards_rank`]}
+              />
+              <StatRow
+                label="Pass EPA"
+                playerVal={playerSide === "off"
+                  ? playerRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
+                  : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
+                opponentVal={opponentSide === "off"
+                  ? opponentRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
+                  : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
+              />
+              <StatRow
+                label="Rush EPA"
+                playerVal={playerSide === "off"
+                  ? playerRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
+                  : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
+                opponentVal={opponentSide === "off"
+                  ? opponentRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
+                  : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
+              />
+            </div>
+          </div>
+
+          {/* Yards Allowed Position Section */}
+          <div className="order-3 bg-geodude-950 p-2 md:p-4 h-full rounded-xl border border-geodude-800 flex flex-col justify-center">
+            <YardsAllowedPosition
+              playerAbbreviation={playerRanks?.abbreviation}
+              opponentAbbreviation={opponentRanks?.abbreviation}
+              playerRanks={playerRanks?.rank_snapshot}
+              opponentRanks={opponentRanks?.rank_snapshot}
+              displaySeason={displaySeason}
+            />
+          </div>
+
         </div>
       </div>
     </div>

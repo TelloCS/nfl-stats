@@ -46,65 +46,71 @@ function PlayerDashboard() {
   } = useVersionedQuery(
     createTeamStatsRanksQueryOptions,
     rankingFilters,
-    { 
+    {
       enabled: Boolean(effectiveSeasonYear)
     }
   );
 
-  const isPending = Boolean(isPlayerPending || isRankingPending);
-  const isError = Boolean(isPlayerError || isRankingError);
-  const hasRankings = Boolean(rankingData && rankingData?.length > 0);
-  const showMatchup = Boolean(playerData?.stats?.length > 0 && hasRankings);
-  const nextMatchup = Boolean(playerData?.team?.full_name === "Free Agent");
+  const hasStats = Boolean(playerData?.stats?.length > 0);
+  const hasRankings = Boolean(rankingData?.length > 0);
+  const isFreeAgent = Boolean(playerData?.team?.full_name === "Free Agent" || !playerData?.team);
+
+  const showMatchupAnalysis = hasStats && hasRankings;
+  const showUpcomingMatchup = !isFreeAgent;
+  const isSplitLayout = showMatchupAnalysis && showUpcomingMatchup;
+
+  if (isPlayerPending || isRankingPending) {
+    return (
+      <div className="flex justify-center items-center h-[500px]">
+        <CustomLoader />
+      </div>
+    )
+  } else if (isPlayerError || isRankingError) {
+    return (
+      <div className="flex flex-col justify-center items-center h-[500px] text-foreground">
+        <p className="text-paper-400 text-center max-w-md mb-8 px-2">
+          {playerError?.status === 404
+            ? "The requested NFL player stats could not be located."
+            : "An unexpected error occurred while fetching stats."}
+        </p>
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-geodude-900 mt-8 px-6 py-3 border border-geodude-800 rounded-md font-bold hover:bg-geodude-800 transition-colors"
+        >
+          Go Back
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <div className="bg-background">
-        {isPending ? (
-          <div className="flex justify-center items-center h-[500px]">
-            <CustomLoader />
-          </div>
-        ) : isError ? (
-          <div className="flex flex-col justify-center items-center h-[500px] text-foreground">
-            <p className="text-paper-400 text-center max-w-md mb-8 px-2">
-              {playerError?.status === 404
-                ? "The requested NFL player stats could not be located."
-                : "An unexpected error occurred while fetching stats."}
-            </p>
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-geodude-900 mt-8 px-6 py-3 border border-geodude-800 rounded-md font-bold hover:bg-geodude-800 transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-        ) : (
-          <div className="container mx-auto sm:p-4 md:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0.5 sm:gap-4">
+    <div className="container mx-auto sm:p-4 md:px-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0.5 sm:gap-4">
 
-              <div className={`flex flex-col gap-0.5 sm:gap-4 ${nextMatchup ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
-                <PlayerPerformanceSection
-                  data={playerData}
-                  onFilterChange={setFilter}
-                  filters={filters}
-                />
-                {showMatchup && (
-                  <MatchupAnalysisSection
-                    data={playerData}
-                    rankingData={rankingData}
-                  />
-                )}
-              </div>
+        <div className={`flex flex-col gap-0.5 sm:gap-4 ${isSplitLayout ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+          <PlayerPerformanceSection
+            data={playerData}
+            onFilterChange={setFilter}
+            filters={filters}
+          />
+          {showMatchupAnalysis && (
+            <MatchupAnalysisSection
+              data={playerData}
+              rankingData={rankingData}
+            />
+          )}
+        </div>
 
-              <div className="lg:col-span-1">
-                <UpcomingMatchup playerData={playerData} />
-              </div>
-
-            </div>
+        {showUpcomingMatchup && (
+          <div className={isSplitLayout ? 'lg:col-span-1' : 'lg:col-span-3'}>
+            <UpcomingMatchup
+              playerData={playerData}
+              showMatchup={isSplitLayout}
+            />
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

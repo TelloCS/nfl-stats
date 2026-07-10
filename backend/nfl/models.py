@@ -38,7 +38,7 @@ class Team(models.Model):
 
 
 class Player(models.Model):
-    slug = models.SlugField(max_length=255, unique=True, help_text="URL-friendly identifier")
+    slug = models.SlugField(max_length=255, help_text="URL-friendly identifier")
     espn_id = models.CharField(max_length=255, unique=True, help_text="Unique ID from ESPN API")
 
     first_name = models.CharField(max_length=50, blank=True, default="")
