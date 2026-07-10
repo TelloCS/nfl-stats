@@ -28,7 +28,7 @@ async def fetch_nfl_schedule_raw_async(session: ClientSession, url: str) -> Opti
         raise
 
 async def fetch_weekly_schedule_async() -> dict:
-    schedule_url = os.getenv("EVENTS_URL")
+    schedule_url = os.getenv("EVENTS_URL", "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
     if not schedule_url:
         logger.error("EVENTS_URL environment variable is missing.")
         return None
