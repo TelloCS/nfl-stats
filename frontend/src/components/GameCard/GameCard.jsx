@@ -1,65 +1,58 @@
 import { memo } from "react";
+import { useGameCardData, isWinningTeam } from "./GameCard.helpers";
 
 const GameCard = ({ event }) => {
-  const competition = event.competitions?.[0] || {};
-  const competitors = competition.competitors || [];
+  const data = useGameCardData(event);
 
-  const home = competitors.find(c => c.homeAway === "home");
-  const away = competitors.find(c => c.homeAway === "away");
+  if (!event) return null;
 
-  const status = event.status?.type?.name;
-  const isCompleted = event.status?.type?.completed;
-  const isUpcoming = status === "STATUS_SCHEDULED";
-
-  const venue = competition.venue || {};
-  const gameOdds = competition.odds?.[0] || null;
-
-  const gameDate = new Date(event?.date);
-
-  const dateLabel = gameDate.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric'
-  });
-
-  const timeLabel = gameDate.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-
-  const checkIsWinner = (team) => {
-    return isCompleted && team?.winner
-  };
+  const {
+    home,
+    away,
+    isCompleted,
+    isUpcoming,
+    venue,
+    gameOdds,
+    dateLabel,
+    statusLabel,
+  } = data;
 
   return (
-    <div className="flex-none w-[259px] font-poppins">
-      <div className="bg-geodude-900 border border-geodude-800 rounded-lg p-4 hover:border-geodude-700 transition-all duration-200">
+    <div className="flex-none w-[140px] sm:w-[259px] font-poppins">
+      <div className="bg-geodude-900 border border-geodude-800 rounded-lg p-1.5 sm:p-2.5 hover:border-geodude-700 transition-all duration-200">
 
-        <div className="flex justify-between items-center mb-3 pb-2 border-b border-geodude-800 text-xs uppercase tracking-widest">
-          <span className="text-paper-400">
-            {dateLabel} {venue.indoor && <span className="text-primary-400 ml-1">(Dome)</span>}
+        <div className="flex justify-between items-center mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-geodude-800 text-[10px] sm:text-xs uppercase tracking-widest">
+          <span className="text-paper-400 inline-flex items-center gap-1">
+            {dateLabel} {venue.indoor && <span className="text-primary-400 inline-block -rotate-90 text-xs sm:text-sm leading-none -translate-y-[1px]">D</span>}
           </span>
           <span className={`font-semibold ${isCompleted ? "text-paper-500" : "text-accent"}`}>
-            {isUpcoming ? timeLabel : event.status?.type?.detail}
+            {statusLabel}
           </span>
         </div>
 
-        <div className="flex flex-col gap-1 relative">
+        <div className="flex flex-col gap-2 relative">
           <TeamRow
             team={away}
-            isWinner={checkIsWinner(away)}
+            isWinner={isWinningTeam(away, isCompleted)}
             isUpcoming={isUpcoming}
           />
           <TeamRow
             team={home}
-            isWinner={checkIsWinner(home)}
+            isWinner={isWinningTeam(home, isCompleted)}
             isUpcoming={isUpcoming}
           />
         </div>
 
         {isUpcoming && gameOdds && (
-          <div className="mt-2 pt-2 border-t border-geodude-800 flex justify-between text-xs text-paper-400 font-mono">
-            <span>Line: <span className="text-paper-200">{gameOdds.details || "N/A"}</span></span>
-            <span>O/U: <span className="text-paper-200">{gameOdds.overUnder || "N/A"}</span></span>
+          <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-geodude-800 flex justify-between text-[10px] sm:text-xs text-paper-400 font-mono">
+            <span>
+              <span className="hidden sm:inline">Line: </span>
+              <span className="text-paper-200">{gameOdds.details ?? "N/A"}</span>
+            </span>
+            <span>
+              <span className="hidden sm:inline">O/U: </span>
+              <span className="text-paper-200">{gameOdds.overUnder ?? "N/A"}</span>
+            </span>
           </div>
         )}
 
@@ -69,14 +62,18 @@ const GameCard = ({ event }) => {
 };
 
 const TeamRow = memo(({ team, isWinner, isUpcoming }) => (
-  <div className="flex items-center justify-between w-full py-1 text-sm">
-    <span className={`font-medium truncate ${isWinner ? "text-foreground" : "text-paper-300"}`}>
-      {team?.team?.displayName}
+  <div
+    className="flex flex-row justify-between w-full text-xs sm:text-sm gap-0.5 sm:gap-0"
+    aria-label={isWinner ? `${team?.team?.displayName ?? "Team"} - winner` : undefined}
+  >
+    <span className={`font-bold truncate ${isWinner ? "text-foreground" : "text-paper-300"}`}>
+      <span className="sm:hidden">{team?.team?.abbreviation}</span>
+      <span className="hidden sm:inline">{team?.team?.displayName}</span>
     </span>
 
     {!isUpcoming && (
       <span className={`font-mono ${isWinner ? "text-primary font-bold" : "text-paper-500"}`}>
-        {team?.score || "0"}
+        {team?.score ?? "0"}
       </span>
     )}
   </div>
