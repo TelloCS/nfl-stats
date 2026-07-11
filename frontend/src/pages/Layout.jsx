@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { Menu, X, Search, AlertCircle } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import UserDropdown from '../components/UserDropdown';
 import SearchBar from '../components/SearchBar';
 import { useAuth } from "../hooks/useAuth";
 import ThemeToggle from "../components/ThemeToggle";
 import { useIsDesktop } from "../hooks/useMediaQueries";
 import StatusErrorModal from '../components/StatusErrorModal';
+import Dropdown from "../components/Dropdown";
 
 const NAV_LINKS = [
-  { to: "/position-vs-opponent", label: "Position vs Opponent" },
-  { to: "/fantasy-rankings", label: "Fantasy Rankings" },
   { to: "/team/stats", label: "Team Stats" }
 ];
 
@@ -60,11 +59,14 @@ export default function Layout() {
               </button>
 
               {/* Desktop Nav Links */}
-              <ul className="hidden lg:flex items-center justify-center gap-6 font-semibold text-sm">
+              <ul className="hidden lg:flex items-center justify-center gap-6 font-semibold text-xs uppercase tracking-widest">
                 <li key={"/"} className="hover:text-primary transition-colors flex items-center hover:border rounded-md border-none">
                   <Link to={"/"} className="hover:text-primary transition-colors flex items-center">
                     <Logo />
                   </Link>
+                </li>
+                <li>
+                  <Dropdown />
                 </li>
                 {NAV_LINKS.map(({ to, label }) => (
                   <li key={to}>
@@ -103,6 +105,10 @@ export default function Layout() {
                 <Link to={"/"} onClick={() => setIsMenuOpen(false)} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
                   Home
                 </Link>
+                <Dropdown
+                  isMobile={true}
+                  onLinkClick={() => setIsMenuOpen(false)}
+                />
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link key={to} to={to} onClick={() => setIsMenuOpen(false)} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
                     {label}
@@ -152,12 +158,18 @@ const AuthActions = ({ isLoggedIn, user, logoutMutation }) => (
 
 function Logo() {
   return (
-    <div className="flex text-3xl items-center font-mono gap-0.5 text-foreground hover:text-primary">
-      <span>FB</span>
-      <div className="flex flex-col text-[10px]">
-        <span>Foot</span>
-        <span>Ball</span>
-      </div>
+    <div className="text-foreground hover:text-primary transition-colors cursor-pointer">
+      <svg
+        viewBox="0 0 36 36"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-[44px] h-[44px]"
+      >
+        <path d="M9 7 L9 22 M27 7 L27 22 M9 22 L27 22 M18 22 L18 30" />
+      </svg>
     </div>
-  )
+  );
 }
