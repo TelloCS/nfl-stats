@@ -81,7 +81,15 @@ class PlayerGameStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlayerGameStats
-        fields = ('__all__')
+        fields = [
+            "pass_attempts", "completions", "pass_yards", "pass_touchdowns", "interceptions", "completion_pct",
+            "sacks", "pass_rating", "adjusted_qbr", "rush_attempts", "rush_yards", "rush_touchdowns",
+            "yards_per_rush_attempt", "long_rushing", "receptions", "rec_targets", "rec_yards", "rec_touchdowns",
+            "yards_per_reception", "long_reception", "fumbles", "fumbles_lost",
+            "two_pt_conversions", "off_fum_rec_tds",
+            "kick_return_tds", "punt_return_tds", "ppr_points", "half_ppr_points", "non_ppr_points", "yahoo_points",
+            "draftkings_points", "fanduel_points", "game"
+        ]
 
 
 class PlayerStatsSerializer(serializers.ModelSerializer):
@@ -90,7 +98,7 @@ class PlayerStatsSerializer(serializers.ModelSerializer):
     jersey = serializers.SerializerMethodField()
     stats = PlayerGameStatsSerializer(many=True, read_only=True)
     available_seasons = serializers.ReadOnlyField()
-    active_season = serializers.SerializerMethodField()
+    active_season = serializers.ReadOnlyField()
 
     class Meta:
         model = Player
@@ -117,9 +125,6 @@ class PlayerStatsSerializer(serializers.ModelSerializer):
         if not obj.team:
             return None
         return obj.jersey
-
-    def get_active_season(self, obj):
-        return getattr(obj, 'active_season_value', None)
 
 #######################################################################################################################
 
@@ -174,34 +179,34 @@ class TeamStatsSerializer(serializers.ModelSerializer):
 #######################################################################################################################
 
 
-class TeamRankSnapshotSerializer(serializers.ModelSerializer):
+class TeamRanksSerializer(serializers.ModelSerializer):
+    team = TeamSerializerV1(read_only=True)
+
     class Meta:
         model = TeamRankSnapshot
-        exclude = ['id', 'team', 'updated_at']
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return {k: v for k, v in data.items() if v != 0}
-
-
-class TeamRanksSerializer(serializers.ModelSerializer):
-    rank_snapshot = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Team
         fields = [
-            'id',
-            'slug',
-            'full_name',
-            'abbreviation',
-            'rank_snapshot'
-        ]
+            "id", "team", "season_year",
+            "off_pass_yards_rank", "off_pass_tds_rank", "off_pass_rating_rank",
+            "off_rush_yards_rank", "off_rush_tds_rank", "off_rush_attempts_rank",
+            "off_receptions_rank", "off_rec_yards_rank", "off_rec_tds_rank",
 
-    def get_rank_snapshot(self, obj):
-        snapshots = getattr(obj, 'prefetched_snapshots', [])
-        if snapshots:
-            return TeamRankSnapshotSerializer(snapshots[0]).data
-        return None
+            "def_pass_yards_rank", "def_pass_tds_rank", "def_pass_rating_rank",
+            "def_rush_yards_rank", "def_rush_tds_rank", "def_rush_attempts_rank",
+            "def_receptions_rank", "def_rec_yards_rank",
+            "def_rec_tds_rank", "def_pass_defended_rank",
+
+            "off_expected_points_added_per_play_rank",
+            "off_expected_points_added_per_pass_rank",
+            "off_expected_points_added_per_rush_rank",
+            "def_expected_points_added_per_play_rank",
+            "def_expected_points_added_allowed_per_pass_rank",
+            "def_expected_points_added_allowed_per_rush_rank",
+
+            "man_rate_rank", "zone_rate_rank", "middle_closed_rate_rank", "middle_open_rate_rank",
+            "motion_rate_rank", "play_action_rate_rank", "shotgun_rate_rank", "nohuddle_rate_rank",
+            "yards_allowed_wr_rank", "yards_allowed_te_rank", "yards_allowed_rb_rank",
+            "yards_allowed_outside_rank", "yards_allowed_slot_rank"
+        ]
 
 #######################################################################################################################
 
@@ -244,7 +249,15 @@ class PlayerGameStatsMatchupsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlayerGameStats
-        fields = ("__all__")
+        fields = [
+            "pass_attempts", "completions", "pass_yards", "pass_touchdowns", "interceptions", "completion_pct",
+            "sacks", "pass_rating", "adjusted_qbr", "rush_attempts", "rush_yards", "rush_touchdowns",
+            "yards_per_rush_attempt", "long_rushing", "receptions", "rec_targets", "rec_yards", "rec_touchdowns",
+            "yards_per_reception", "long_reception", "fumbles", "fumbles_lost",
+            "two_pt_conversions", "off_fum_rec_tds",
+            "kick_return_tds", "punt_return_tds", "ppr_points", "half_ppr_points", "non_ppr_points", "yahoo_points",
+            "draftkings_points", "fanduel_points", "player", "game", "team"
+        ]
 
 #######################################################################################################################
 
@@ -359,6 +372,7 @@ class PlayerCareerStatsSerializer(serializers.ModelSerializer):
     yards_per_pass_attempt = serializers.ReadOnlyField()
     yards_per_rush_attempt = serializers.ReadOnlyField()
     yards_per_reception = serializers.ReadOnlyField()
+    pass_rating = serializers.ReadOnlyField()
 
     class Meta:
         model = PlayerSeasonStats

@@ -19,6 +19,6 @@ export function useEtlVersion() {
 
       return 60000;
     },
-    refetchOnWindowFocus: "always"
+    refetchOnWindowFocus: false
   });
 }

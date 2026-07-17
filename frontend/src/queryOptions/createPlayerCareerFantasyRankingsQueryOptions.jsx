@@ -11,6 +11,6 @@ export default function createPlayerCareerFantasyRankingsQueryOptions(player_id,
 }
 
 const getPlayerCareerFantasyRankings = async (player_id, player_slug) => {
-    const json = await apiFetch(`/nfl/player/stats/id/${player_id}/${player_slug}/fantasy-rankings`)
+    const json = await apiFetch(`/nfl/players/${player_id}/${player_slug}/career`)
     return json
 }

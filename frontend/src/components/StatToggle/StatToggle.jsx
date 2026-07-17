@@ -19,7 +19,7 @@ function StatToggle({ options, activeKey, activeKeys, onSelect }) {
           <button
             key={opt.key}
             onClick={() => onSelect(opt.key)}
-            className={`whitespace-nowrap px-4 py-2 rounded-md text-xs font-bold transition-colors ${
+            className={`whitespace-nowrap px-4 py-2 rounded-md text-[10px] sm:text-xs font-bold transition-colors ${
               isActive
                 ? 'bg-geodude-800 text-foreground border border-geodude-800'
                 : 'bg-geodude-900 text-paper-400 border border-geodude-800 hover:bg-geodude-800 hover:text-paper-200'

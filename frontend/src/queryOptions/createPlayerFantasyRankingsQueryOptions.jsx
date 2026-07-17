@@ -36,6 +36,6 @@ const getFantasyRankings = async (position, team, seasonYear, seasonType, scorin
         params.append('page', pageParam);
     }
 
-    const json = await apiFetch(`/nfl/fantasy-rankings?${params.toString()}`);
+    const json = await apiFetch(`/nfl/players/fantasy-rankings?${params.toString()}`);
     return json;
 }

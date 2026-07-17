@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useVersionedQuery } from "../../hooks/useVersionedQuery";
 import { formatOrdinal } from "../FantasyRankings/FantasyRankings.helpers";
+import { removeStatByKey } from "./PlayerPerformance.helpers";
 import createPlayerCareerFantasyRankingsQueryOptions from "../../queryOptions/createPlayerCareerFantasyRankingsQueryOptions";
 
 function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
@@ -16,6 +17,8 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
     player_id,
     player_slug
   );
+
+  const availableStatsCopy = removeStatByKey(availableStats, 'adjusted_qbr');
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -49,7 +52,7 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                   <th className='text-nowrap'>Team</th>
                   <th className='text-nowrap'>Season</th>
                   <th className='text-nowrap'>GP</th>
-                  {availableStats.map((stat) => (
+                  {availableStatsCopy.map((stat) => (
                     <th key={stat.key} className='text-nowrap'>{stat.label}</th>
                   ))}
                 </tr>
@@ -60,7 +63,7 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
                     <td className="text-nowrap text-paper-500">{row.historic_team.abbreviation}</td>
                     <td className="text-nowrap text-paper-500">{row.season_year}</td>
                     <td className="text-nowrap text-paper-500">{row.games_played}</td>
-                    {availableStats.map((statConfig) => (
+                    {availableStatsCopy.map((statConfig) => (
                       <td key={statConfig.key} className="text-nowrap text-paper-200">
                         {row[statConfig.key] ?? 0}
                       </td>

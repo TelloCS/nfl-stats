@@ -38,6 +38,6 @@ const getPositionOpponent = async (position, opponent, seasonYear, seasonType, l
         params.append('page', pageParam.toString());
     }
 
-    const json = await apiFetch(`/nfl/player/stats/gamelogs?${params.toString()}`);
+    const json = await apiFetch(`/nfl/players/position-vs-opponent?${params.toString()}`);
     return json;
 }

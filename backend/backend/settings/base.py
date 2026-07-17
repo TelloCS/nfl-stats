@@ -147,8 +147,11 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
+        "drf_orjson_renderer.renderers.ORJSONRenderer",
     ],
+    "DEFAULT_PARSER_CLASSES": (
+        "drf_orjson_renderer.parsers.ORJSONParser",
+    ),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',

@@ -79,7 +79,7 @@ export const SCORING_FORMATS = {
   non_ppr_points: { 
     label: 'Non-PPR', 
     posRankLabel: 'Pos RK', 
-    points: 'Std Pts', 
+    points: 'Non-PPR Pts', 
     value: 'non_ppr_points', 
     rankKey: 'rank_non_ppr', 
     posRankKey: 'pos_rank_non_ppr' 

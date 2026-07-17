@@ -250,6 +250,9 @@ class PlayerSeasonStats(models.Model):
     class Meta:
         unique_together = ('player', 'season_year', 'season_type')
         verbose_name_plural = "Player Season Stats"
+        indexes = [
+            models.Index(fields=['historic_team', 'season_year', 'season_type']),
+        ]
 
     # --- DYNAMIC SEASONAL EFFICIENCY PROPERTIES ---
     @property
@@ -267,6 +270,24 @@ class PlayerSeasonStats(models.Model):
     @property
     def yards_per_reception(self):
         return round(self.rec_yards / self.receptions, 2) if self.receptions > 0 else 0.0
+
+    @property
+    def pass_rating(self):
+        if self.pass_attempts == 0:
+            return 0.0
+
+        a = ((self.completions / self.pass_attempts) - 0.3) * 5
+        b = ((self.pass_yards / self.pass_attempts) - 3) * 0.25
+        c = (self.pass_touchdowns / self.pass_attempts) * 20
+        d = 2.375 - ((self.interceptions / self.pass_attempts) * 25)
+
+        a = max(0.0, min(a, 2.375))
+        b = max(0.0, min(b, 2.375))
+        c = max(0.0, min(c, 2.375))
+        d = max(0.0, min(d, 2.375))
+        rating = ((a + b + c + d) / 6) * 100
+
+        return round(rating, 1)
 
 
 class TeamOffensePassingStats(models.Model):
@@ -290,6 +311,9 @@ class TeamOffensePassingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamOffenseRushingStats(models.Model):
@@ -308,6 +332,9 @@ class TeamOffenseRushingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamOffenseReceivingStats(models.Model):
@@ -326,6 +353,9 @@ class TeamOffenseReceivingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamDefensePassingStats(models.Model):
@@ -348,6 +378,9 @@ class TeamDefensePassingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamDefenseRushingStats(models.Model):
@@ -366,6 +399,9 @@ class TeamDefenseRushingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamDefenseReceivingStats(models.Model):
@@ -385,6 +421,9 @@ class TeamDefenseReceivingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamAdvanceOffenseStats(models.Model):
@@ -406,6 +445,9 @@ class TeamAdvanceOffenseStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamAdvanceDefenseStats(models.Model):
@@ -427,6 +469,9 @@ class TeamAdvanceDefenseStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamCoverageSchemeStats(models.Model):
@@ -444,6 +489,9 @@ class TeamCoverageSchemeStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamOffensePlayCallingStats(models.Model):
@@ -462,6 +510,9 @@ class TeamOffensePlayCallingStats(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class TeamCoverageStatsByPosition(models.Model):
@@ -480,6 +531,9 @@ class TeamCoverageStatsByPosition(models.Model):
 
     class Meta:
         unique_together = ('team', 'season_year')
+        indexes = [
+            models.Index(fields=['team', 'season_year']),
+        ]
 
 
 class PointSpread(models.Model):

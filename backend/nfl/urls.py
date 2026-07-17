@@ -9,6 +9,7 @@ from .views import (
     PlayerSeasonStatsListView,
     PlayerVsUpcomingMatchupStatsView,
     PlayerFantasyRankingsView,
+    HistoricNFLSchedulesListAPIView,
     NFLScheduleView,
     ETLVersionView,
 )
@@ -23,22 +24,27 @@ urlpatterns = [
     # Used for autocomplete search bar
     path('players/', PlayerListAPIView.as_view(), name='player-list-api-view'),
     path(
-        'player/stats/id/<int:pk>/<str:slug>',
+        'players/<int:pk>/<str:slug>/stats',
         PlayerGameStatsRetrieveAPIView.as_view(),
-        name='player-game-stats-view'
+        name='player-stats-view'
     ),
     path(
-        'player/stats/id/<int:pk>/<str:slug>/vs-upcoming-matchup',
+        'players/<int:pk>/<str:slug>/upcoming-matchup',
         PlayerVsUpcomingMatchupStatsView.as_view(),
-        name='player-vs-upcoming-matchup'
+        name='player-upcoming-matchup-view'
     ),
     path(
-        'player/stats/id/<int:pk>/<str:slug>/fantasy-rankings',
+        'players/<int:pk>/<str:slug>/career',
         PlayerFantasyRankingsView.as_view(),
-        name='player-fantasy-rankings'
+        name='player-career-view'
     ),
-    path('player/stats/gamelogs', PlayerGameStatsMatchupsListView.as_view(), name='player-stats-gamelogs-view'),
-    path('fantasy-rankings', PlayerSeasonStatsListView.as_view(), name='player-season-stats-view'),
+    path(
+        'players/position-vs-opponent',
+        PlayerGameStatsMatchupsListView.as_view(),
+        name='player-position-vs-opponent-view'
+    ),
+    path('players/fantasy-rankings', PlayerSeasonStatsListView.as_view(), name='player-fantasy-rankings-view'),
+    path('slates', HistoricNFLSchedulesListAPIView.as_view(), name='nfl-slates'),
 
     path('schedule/', NFLScheduleView.as_view(), name='schedule'),
     path('sync-status/', ETLVersionView.as_view(), name='sync-status'),

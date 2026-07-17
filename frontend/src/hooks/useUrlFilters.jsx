@@ -6,13 +6,15 @@ export const sortParams = (params) => {
   const newParams = new URLSearchParams();
 
   ORDER.forEach((key) => {
-    if (params.has(key)) {
-      newParams.set(key, params.get(key));
+    const value = params.get(key);
+
+    if (value) {
+      newParams.set(key, value);
     }
   });
 
   params.forEach((value, key) => {
-    if (!ORDER.includes(key)) {
+    if (!ORDER.includes(key) && value) {
       newParams.set(key, value);
     }
   });

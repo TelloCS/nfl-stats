@@ -53,7 +53,7 @@ const TrendSection = ({ sortedGameLogs = [], statsToShow = [], filters, selected
         STAT_TYPES.MAX.forEach(key => acc[week][key] = 0);
       }
 
-      const playerStats = { ...log, name: log.player?.fullName };
+      const playerStats = { ...log };
       activeKeys.forEach(k => {
         const val = log[k] || 0;
         playerStats[k] = typeof val === 'number' ? Number(val.toFixed(2)) : val;

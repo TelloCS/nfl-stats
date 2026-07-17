@@ -20,7 +20,7 @@ function PlayerVsUpcomingMatchup({ playerData, availableStats, seasonType }) {
     return getMatchupData(scheduleData, rankData, playerTeam) || {};
   }, [scheduleData, rankData, playerTeam]);
 
-  const opponent = opponentRanks?.abbreviation;
+  const opponent = opponentRanks?.team?.abbreviation;
 
   const filters = useMemo(() => ({
     team: opponent

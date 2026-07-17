@@ -1,16 +1,16 @@
 import { queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
 
-export default function createTeamStatsRanksQueryOptions(filters, version) {
+export default function createSlatesQueryOptions(filters, version) {
     return queryOptions({
-        queryKey: ['teamStatsRanks', filters, { v: version }],
-        queryFn : () => getTeamStatsRanks(filters),
+        queryKey: ['slates', filters, { v: version }],
+        queryFn: () => getSlates(filters),
         staleTime: Infinity,
         placeholderData: keepPreviousData,
     })
 }
 
-const getTeamStatsRanks = async (filters) => {
+const getSlates = async (filters) => {
     const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
             ([, value]) => value !== "" && value !== null && value !== undefined
@@ -18,6 +18,6 @@ const getTeamStatsRanks = async (filters) => {
     );
 
     const params = new URLSearchParams(cleanFilters).toString();
-    const json = await apiFetch(`/nfl/team/stats/ranks${params ? `?${params}` : ''}`);
+    const json = await apiFetch(`/nfl/slates${params ? `?${params}` : ''}`);
     return json;
 }

@@ -41,6 +41,7 @@ const PlayerPerformanceChart = ({
             radius={[5, 5, 0, 0]}
             name={activeStatLabel}
             maxBarSize={80}
+            isAnimationActive={false}
           >
             <LabelList
               dataKey={currentStatKey}
