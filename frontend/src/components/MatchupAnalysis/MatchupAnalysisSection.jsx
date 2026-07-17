@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useEffect } from "react";
+import { memo, useState, useMemo, useEffect, useRef } from "react";
 import { TeamRankingStatMap } from "../Config";
 import { getMatchupTeams, generateRadarData, getFilteredTeamRankingStatMap, getGameOptions } from "./MatchupAnalysis.helpers";
 import MatchupRadarChart from "./MatchupRadarChart";
@@ -21,13 +21,15 @@ function MatchupAnalysisSection({ data, rankingData }) {
 
   const [activeTabKey, setActiveTabKey] = useState(availableStats[0]?.key);
 
+  const isInitialized = useRef(false);
+
   useEffect(() => {
     const isValidTabKey = availableStats.some(s => s.key === activeTabKey);
 
     if (!isValidTabKey && availableStats.length > 0) {
       setActiveTabKey(availableStats[0].key);
+      isInitialized.current = true;
     }
-
   }, [availableStats, activeTabKey]);
 
   const radarData = useMemo(() => generateRadarData(activeTabKey, rankingData, teamOne, teamTwo),

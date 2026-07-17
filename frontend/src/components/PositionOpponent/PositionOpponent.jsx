@@ -86,7 +86,7 @@ function PositionOpponent() {
           setViewMode={setViewMode}
         />
 
-        <div className="container mx-auto p-4 md:px-8 relative">
+        <div className="container mx-auto p-2 sm:p-4 md:px-8 relative">
           {viewMode === 'table' ? (
             <Table
               isLoading={isLoading}

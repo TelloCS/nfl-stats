@@ -23,7 +23,7 @@ function UpcomingMatchup({ playerData, showMatchup }) {
     return getMatchupData(scheduleData, rankData, playerTeam) || {};
   }, [scheduleData, rankData, playerTeam]);
 
-  const displaySeason = opponentRanks?.rank_snapshot?.season_year;
+  const displaySeason = 2025;
 
   if (isSchedulePending || isRanksPending) {
     return null;
@@ -47,14 +47,14 @@ function UpcomingMatchup({ playerData, showMatchup }) {
 
             <div className="flex justify-between h-full items-center">
               <TeamSchemes
-                abbreviation={playerRanks.abbreviation}
+                abbreviation={playerRanks.team?.abbreviation}
                 side={playerSide}
-                ranks={playerRanks.rank_snapshot}
+                ranks={playerRanks}
               />
               <TeamSchemes
-                abbreviation={opponentRanks.abbreviation}
+                abbreviation={opponentRanks.team?.abbreviation}
                 side={opponentSide}
-                ranks={opponentRanks.rank_snapshot}
+                ranks={opponentRanks}
                 isOpponent
               />
             </div>
@@ -68,13 +68,13 @@ function UpcomingMatchup({ playerData, showMatchup }) {
 
             <div className="grid grid-cols-3 gap-3 items-center border-b border-geodude-800 pb-4 mb-4">
               <TeamSideSelector
-                abbreviation={playerRanks.abbreviation}
+                abbreviation={playerRanks.team?.abbreviation}
                 side={playerSide}
                 setSide={setPlayerSide}
               />
               <span className="text-center text-xs font-black tracking-widest text-paper-500 mt-4">VS</span>
               <TeamSideSelector
-                abbreviation={opponentRanks.abbreviation}
+                abbreviation={opponentRanks.team?.abbreviation}
                 side={opponentSide}
                 setSide={setOpponentSide}
                 isOpponent
@@ -84,31 +84,31 @@ function UpcomingMatchup({ playerData, showMatchup }) {
             <div className="flex flex-col gap-1 text-sm justify-center grow">
               <StatRow
                 label="Pass Yds"
-                playerVal={playerRanks.rank_snapshot?.[`${playerSide}_pass_yards_rank`]}
-                opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_pass_yards_rank`]}
+                playerVal={playerRanks[`${playerSide}_pass_yards_rank`]}
+                opponentVal={opponentRanks[`${opponentSide}_pass_yards_rank`]}
               />
               <StatRow
                 label="Rush Yds"
-                playerVal={playerRanks.rank_snapshot?.[`${playerSide}_rush_yards_rank`]}
-                opponentVal={opponentRanks.rank_snapshot?.[`${opponentSide}_rush_yards_rank`]}
+                playerVal={playerRanks[`${playerSide}_rush_yards_rank`]}
+                opponentVal={opponentRanks[`${opponentSide}_rush_yards_rank`]}
               />
               <StatRow
                 label="Pass EPA"
                 playerVal={playerSide === "off"
-                  ? playerRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
-                  : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
+                  ? playerRanks.off_expected_points_added_per_pass_rank
+                  : playerRanks.def_expected_points_added_allowed_per_pass_rank}
                 opponentVal={opponentSide === "off"
-                  ? opponentRanks.rank_snapshot?.off_expected_points_added_per_pass_rank
-                  : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_pass_rank}
+                  ? opponentRanks.off_expected_points_added_per_pass_rank
+                  : opponentRanks.def_expected_points_added_allowed_per_pass_rank}
               />
               <StatRow
                 label="Rush EPA"
                 playerVal={playerSide === "off"
-                  ? playerRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
-                  : playerRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
+                  ? playerRanks.off_expected_points_added_per_rush_rank
+                  : playerRanks.def_expected_points_added_allowed_per_rush_rank}
                 opponentVal={opponentSide === "off"
-                  ? opponentRanks.rank_snapshot?.off_expected_points_added_per_rush_rank
-                  : opponentRanks.rank_snapshot?.def_expected_points_added_allowed_per_rush_rank}
+                  ? opponentRanks?.off_expected_points_added_per_rush_rank
+                  : opponentRanks.def_expected_points_added_allowed_per_rush_rank}
               />
             </div>
           </div>
@@ -116,10 +116,10 @@ function UpcomingMatchup({ playerData, showMatchup }) {
           {/* Yards Allowed Position Section */}
           <div className="order-3 bg-geodude-950 p-2 md:p-4 h-full rounded-xl border border-geodude-800 flex flex-col justify-center">
             <YardsAllowedPosition
-              playerAbbreviation={playerRanks?.abbreviation}
-              opponentAbbreviation={opponentRanks?.abbreviation}
-              playerRanks={playerRanks?.rank_snapshot}
-              opponentRanks={opponentRanks?.rank_snapshot}
+              playerAbbreviation={playerRanks?.team?.abbreviation}
+              opponentAbbreviation={opponentRanks?.team?.abbreviation}
+              playerRanks={playerRanks}
+              opponentRanks={opponentRanks}
               displaySeason={displaySeason}
             />
           </div>

@@ -27,3 +27,7 @@ export const getCurrentStatDetails = (availableStats, activeStat) => {
     activeStatLabel: currentStatObj?.label ?? "",
   };
 };
+
+export function removeStatByKey(stats, key) {
+  return stats.filter(stat => stat.key !== key);
+}

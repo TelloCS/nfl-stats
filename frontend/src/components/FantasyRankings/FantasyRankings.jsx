@@ -46,7 +46,7 @@ function FantasyRankings() {
         teamConfig={TeamAbbreviations}
         SCORING_FORMATS={SCORING_FORMATS}
       />
-      <div className="container mx-auto p-4 md:px-8 relative">
+      <div className="container mx-auto p-2 sm:p-4 md:px-8 relative">
         <div>
           <Table
             isPositionFiltered={isPositionFiltered}

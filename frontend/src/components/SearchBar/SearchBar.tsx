@@ -39,7 +39,7 @@ export default function SearchBar({ onSearchComplete }: SearchBarProp) {
     setInput(player.fullName);
     setShowResults(false);
     setSelectedIndex(-1);
-    navigate(`/player/stats/id/${player.id}/${player.slug}`);
+    navigate(`/players/${player.id}/${player.slug}/stats`);
     onSearchComplete?.();
   };
 
@@ -113,7 +113,7 @@ export default function SearchBar({ onSearchComplete }: SearchBarProp) {
           {displayResults.map((r, index) => (
             <Link
               key={r.id}
-              to={`/player/stats/id/${r.id}/${r.slug}`}
+              to={`/players/${r.id}/${r.slug}/stats`}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 setShowResults(false);

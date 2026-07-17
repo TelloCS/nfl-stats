@@ -12,32 +12,64 @@ export const generateRadarData = (activeTabKey, rankingData, teamOne, teamTwo) =
 
     if (!activeCategory || !rankingData || !teamOne || !teamTwo) return [];
 
-    const teamOneStats = rankingData.find(t => t.abbreviation === teamOne);
-    const teamTwoStats = rankingData.find(t => t.abbreviation === teamTwo);
+    // 1. Normalize rankingData to handle potential DRF pagination results
+    const normalizedData = Array.isArray(rankingData)
+        ? rankingData
+        : (rankingData.results || []);
 
+    if (normalizedData.length === 0) return [];
+
+    // 2. Safely find the teams using the nested 'team' object and case-insensitive matching
+    const safeTeamOne = String(teamOne).toUpperCase();
+    const safeTeamTwo = String(teamTwo).toUpperCase();
+
+    const teamOneStats = normalizedData.find(
+        t => t?.team?.abbreviation?.toUpperCase() === safeTeamOne
+    );
+    const teamTwoStats = normalizedData.find(
+        t => t?.team?.abbreviation?.toUpperCase() === safeTeamTwo
+    );
+
+    // 3. Handle data shape variations 
+    // (Checks if stats are in a nested 'rank_snapshot' object or flat on the root object)
+    const teamOneSnapshot = teamOneStats?.rank_snapshot || teamOneStats;
+    const teamTwoSnapshot = teamTwoStats?.rank_snapshot || teamTwoStats;
+
+    // 4. Map the radar data, defaulting to 32 if a stat is missing
     return activeCategory.stats.map((stat) => ({
         subject: stat.label,
-        [teamOne]: teamOneStats?.rank_snapshot?.[stat.key] || 32,
-        [teamTwo]: teamTwoStats?.rank_snapshot?.[stat.key] || 32,
+        [teamOne]: teamOneSnapshot?.[stat.key] || 32,
+        [teamTwo]: teamTwoSnapshot?.[stat.key] || 32,
     }));
 };
 
 export const getFilteredTeamRankingStatMap = (config, rankingData, team) => {
     if (!rankingData) return [];
 
-    const teamData = Array.isArray(rankingData)
-        ? rankingData.find(t => t.full_name === team || t.abbreviation === team)
-        : rankingData?.[team];
+    const normalizedData = Array.isArray(rankingData)
+        ? rankingData
+        : (rankingData.results || []);
+
+    if (normalizedData.length === 0) return [];
+    const safeTeamQuery = String(team || "").toUpperCase();
+
+    const teamData = normalizedData.find(
+        t => t?.team?.abbreviation?.toUpperCase() === safeTeamQuery
+    );
 
     const snapshot = teamData?.rank_snapshot;
-    const activeSnapshot = snapshot || rankingData[0]?.rank_snapshot;
+    const activeSnapshot = snapshot || normalizedData[0]?.rank_snapshot || normalizedData[0];
 
     if (!activeSnapshot) return [];
 
     return config.map(category => ({
         ...category,
-        stats: category.stats.filter(
-            stat => Object.hasOwn(activeSnapshot, stat.key))
+        stats: category.stats.filter(stat => {
+            const value = activeSnapshot[stat.key];
+            return Object.hasOwn(activeSnapshot, stat.key) && 
+                   value !== 0 && 
+                   value != null; 
+        })
     })).filter(category => category.stats.length > 0);
 };
 

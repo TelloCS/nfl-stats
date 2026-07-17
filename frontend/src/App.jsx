@@ -87,7 +87,7 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [
           { index: true, element: <Home /> },
-          { path: '/player/stats/id/:player_id/:player_slug', element: <PlayerDashboard /> },
+          { path: '/players/:player_id/:player_slug/stats', element: <PlayerDashboard /> },
           { path: '/position-vs-opponent/', element: <PositionOpponent /> },
           { path: '/fantasy-rankings', element: <FantasyRankings />},
           { path: '/team/stats/', element: <TeamStats /> },

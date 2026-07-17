@@ -14,7 +14,7 @@ import { useVersionedQuery } from "../hooks/useVersionedQuery";
 import createPlayerStatsQueryOptions from '../queryOptions/createPlayerStatsQueryOptions';
 import createTeamStatsRanksQueryOptions from "../queryOptions/createTeamStatsRanksQueryOptions";
 
-const DEFAULTS = { season_year: "", season_type: "2" }
+const DEFAULTS = { season_year: "", season_type: "" }
 
 function PlayerDashboard() {
   const { player_id, player_slug } = useParams();

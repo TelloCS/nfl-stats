@@ -40,7 +40,7 @@ const Table = ({ data, availableStats }) => {
             </thead>
             <tbody className="divide-y divide-geodude-800/50">
               {sortedItems.map((log) => (
-                <tr key={log.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
+                <tr key={log.game.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
                   <td className="text-nowrap text-paper-500">{log.game.week}</td>
                   <td className="text-nowrap text-paper-500">{log.game.date}</td>
                   <td className="text-nowrap text-paper-400">{log.game.short_name}</td>

@@ -24,7 +24,7 @@ const Table = ({ isPositionFiltered, isLoading, data, currentFormat, sortConfig,
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg border border-geodude-800 bg-geodude-900 hide-scrollbar font-mono">
+    <div className="w-full overflow-x-auto sm:rounded-lg border border-geodude-800 bg-geodude-900 hide-scrollbar font-mono">
       <table className="w-full border-collapse border-spacing-0 text-left">
         <thead className="bg-geodude-950 text-paper-400 h-[40px]">
           <tr className="border-b border-geodude-800 uppercase text-[11px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
@@ -72,7 +72,7 @@ const Table = ({ isPositionFiltered, isLoading, data, currentFormat, sortConfig,
               <td className='text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800'>
                 <Link
                   key={stat.player.id}
-                  to={`/player/stats/id/${stat.player.id}/${stat.player.slug}`}
+                  to={`/players/${stat.player.id}/${stat.player.slug}/stats`}
                 >
                   <span className='cursor-pointer hover:text-status-info'>
                     {stat.player.fullName}

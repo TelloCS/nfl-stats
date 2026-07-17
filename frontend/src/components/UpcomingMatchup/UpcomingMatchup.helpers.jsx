@@ -35,9 +35,16 @@ export const getMatchupData = (scheduleData, rankData, playerTeam) => {
     const opponent = competitors.find((c) => c.team?.abbreviation !== playerTeam);
     const opponentAbbreviation = opponent?.team?.abbreviation;
 
+    const normalizedData = Array.isArray(rankData)
+        ? rankData
+        : (rankData.results || []);
+
+    const safePlayerTeamQuery = String(playerTeam || "").toUpperCase();
+    const safeOpponentTeamQuery = String(opponentAbbreviation || "").toUpperCase();
+
     return {
         nextGame,
-        playerRanks: rankData.find((t) => t.abbreviation === playerTeam),
-        opponentRanks: rankData.find((t) => t.abbreviation === opponentAbbreviation),
+        playerRanks: normalizedData.find(t => t?.team?.abbreviation?.toUpperCase() === safePlayerTeamQuery),
+        opponentRanks: normalizedData.find(t => t?.team?.abbreviation?.toUpperCase() === safeOpponentTeamQuery)
     };
 };
