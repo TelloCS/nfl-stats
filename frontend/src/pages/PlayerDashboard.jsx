@@ -8,6 +8,7 @@ import PlayerCareerStats from "../components/PlayerPerformance/PlayerCareerStats
 import UpcomingMatchup from "../components/UpcomingMatchup";
 import MatchupAnalysisSection from "../components/MatchupAnalysis";
 import useUrlFilters from "../hooks/useUrlFilters"
+import useMatchupData from "../hooks/useMatchupData";
 
 import { FilterConfig } from "../components/Config";
 import { useVersionedQuery } from "../hooks/useVersionedQuery";
@@ -51,13 +52,16 @@ function PlayerDashboard() {
     }
   );
 
+  const playerTeam = playerData?.team?.abbreviation;
+  const { nextGame } = useMatchupData(playerTeam);
+
   const hasStats = Boolean(playerData?.stats?.length > 0);
   const hasRankings = Boolean(rankingData?.length > 0);
   const isFreeAgent = Boolean(playerData?.team?.full_name === "Free Agent" || !playerData?.team);
 
   const showMatchupAnalysis = hasStats && hasRankings;
   const showUpcomingMatchup = !isFreeAgent;
-  const isSplitLayout = showMatchupAnalysis && showUpcomingMatchup;
+  const isSplitLayout = showMatchupAnalysis && showUpcomingMatchup && nextGame;
 
   if (isPlayerPending || isRankingPending) {
     return (
