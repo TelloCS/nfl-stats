@@ -1,29 +1,28 @@
-import { memo, useState, useMemo } from "react";
+import { memo, useState } from "react";
 import { TeamRankingStatMap, PositionStatMap } from "../Config";
-import useTeamRanks from "../../hooks/useTeamRanks";
-import useUpcomingGames from "../../hooks/useUpcomingGames";
 import StatRow from "./StatRow";
 import TeamSchemes from "./TeamSchemes";
 import MatchupHeader from "./MatchupHeader";
 import YardsAllowedPosition from "./YardsAllowedPosition";
 import TeamSideSelector from "./TeamSideSelector";
 import PlayerVsUpcomingMatchup from "./PlayerVsUpcomingMatchup";
-import { getMatchupData } from "./UpcomingMatchup.helpers";
+import useMatchupData from "../../hooks/useMatchupData";
 
 function UpcomingMatchup({ playerData, showMatchup }) {
   const [playerSide, setPlayerSide] = useState("off");
   const [opponentSide, setOpponentSide] = useState("def");
 
-  const { data: scheduleData, isPending: isSchedulePending } = useUpcomingGames();
-  const { data: rankData, isPending: isRanksPending } = useTeamRanks();
-
   const playerTeam = playerData?.team?.abbreviation;
+  const { 
+    nextGame, 
+    playerRanks, 
+    opponentRanks, 
+    rankData, 
+    isSchedulePending, 
+    isRanksPending 
+  } = useMatchupData(playerTeam);
 
-  const { nextGame, playerRanks, opponentRanks } = useMemo(() => {
-    return getMatchupData(scheduleData, rankData, playerTeam) || {};
-  }, [scheduleData, rankData, playerTeam]);
-
-  const displaySeason = 2025;
+  const displaySeason = rankData?.[0]?.season_year;
 
   if (isSchedulePending || isRanksPending) {
     return null;
