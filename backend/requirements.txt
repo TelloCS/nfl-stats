@@ -71,3 +71,4 @@ vine==5.1.0
 wcwidth==0.2.14
 yarl==1.22.0
 drf_orjson_renderer==1.8.0
+curl_cffi==0.16.0
