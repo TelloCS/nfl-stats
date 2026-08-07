@@ -32,7 +32,7 @@ function SelectDropdown({ value, onChange, options = [], minWidth = "120px", cla
       </button>
 
       {isOpen && (
-        <div className="min-w-full w-max absolute left-0 z-50 mt-1 bg-geodude-800 border border-geodude-700 rounded-md max-h-60 overflow-auto hide-scrollbar">
+        <div className="w-full absolute left-0 z-50 mt-1 bg-geodude-800 border border-geodude-700 rounded-md max-h-60 overflow-auto hide-scrollbar">
           <ul className="">
             {options?.map((opt) => (
               <li key={opt.value}>

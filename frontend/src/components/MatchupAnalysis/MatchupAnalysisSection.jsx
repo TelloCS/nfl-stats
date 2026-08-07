@@ -1,7 +1,6 @@
 import { memo, useState, useMemo, useEffect, useRef } from "react";
 import { TeamRankingStatMap } from "../Config";
 import { getMatchupTeams, generateRadarData, getFilteredTeamRankingStatMap, getGameOptions } from "./MatchupAnalysis.helpers";
-import MatchupRadarChart from "./MatchupRadarChart";
 import Table from "./Table";
 import StatToggle from "../StatToggle";
 import SelectDropdown from "../SelectDropdown";
@@ -45,7 +44,7 @@ function MatchupAnalysisSection({ data, rankingData }) {
   if (!games || games.length === 0) return null;
 
   return (
-    <div className="bg-geodude-900 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
+    <div className="bg-geodude-900 col-span-2 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800">
       <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
         <div className="min-w-0">
           <span className="font-semibold text-foreground text-lg">Previous Matchups</span>
@@ -64,17 +63,12 @@ function MatchupAnalysisSection({ data, rankingData }) {
           activeKey={activeTabKey}
           onSelect={setActiveTabKey}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
+        <div className="font-mono">
           <Table
             data={radarData}
             teamOne={teamOne}
             teamTwo={teamTwo}
             statLabel={statLabel}
-          />
-          <MatchupRadarChart
-            radarData={radarData}
-            teamOne={teamOne}
-            teamTwo={teamTwo}
           />
         </div>
       </div>

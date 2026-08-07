@@ -58,7 +58,12 @@ const ResultsTable = ({ isLoading, data, statsToShow, sortConfig, onHeaderClick 
                 </Link>
               </td>
               <td className="text-nowrap text-paper-400">{log.player.position}</td>
-              <td className="text-nowrap">{log.team.abbreviation}</td>
+              <td className='text-nowrap'>
+                <Link
+                  to={`/teams/${log?.team?.slug}`}>
+                    <span className="cursor-pointer hover:text-status-info">{log.team.abbreviation}</span>
+                </Link>
+              </td>
               <td className="text-nowrap text-paper-400">{log.game.short_name}</td>
               <td className="text-nowrap text-paper-500">{log.game.away_score} - {log.game.home_score}</td>
               {statsToShow.map((statConfig) => (
