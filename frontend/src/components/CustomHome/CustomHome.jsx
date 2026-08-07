@@ -1,4 +1,5 @@
 import { useState, memo } from 'react';
+import Teams from '../Teams';
 import Table from '../UpcomingGames/Table';
 import ScheduleHeader from '../UpcomingGames/ScheduleHeader';
 import HistoricSlates from "../HistoricSlates/HistoricSlates";
@@ -27,6 +28,7 @@ function CustomHome() {
       ) : (
         <HistoricSlates />
       )}
+      <Teams />
     </div>
   );
 };

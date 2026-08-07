@@ -60,7 +60,7 @@ class GameSerializer(serializers.ModelSerializer):
 class PlayerTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ['id', 'full_name', 'nickname', 'abbreviation', 'conference', 'division']
+        fields = ['id', 'full_name', 'nickname', 'abbreviation', 'conference', 'division', 'slug']
 
 
 class PlayerGameSerializer(serializers.ModelSerializer):
@@ -78,6 +78,7 @@ class PlayerGameSerializer(serializers.ModelSerializer):
 
 class PlayerGameStatsSerializer(serializers.ModelSerializer):
     game = PlayerGameSerializer(read_only=True)
+    team = TeamSerializerV1()
 
     class Meta:
         model = PlayerGameStats
@@ -88,7 +89,7 @@ class PlayerGameStatsSerializer(serializers.ModelSerializer):
             "yards_per_reception", "long_reception", "fumbles", "fumbles_lost",
             "two_pt_conversions", "off_fum_rec_tds",
             "kick_return_tds", "punt_return_tds", "ppr_points", "half_ppr_points", "non_ppr_points", "yahoo_points",
-            "draftkings_points", "fanduel_points", "game"
+            "draftkings_points", "fanduel_points", "game", "team"
         ]
 
 
@@ -139,7 +140,7 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['id', 'slug', 'fullName', 'position', 'team']
+        fields = ['id', 'slug', 'fullName', 'position', 'jersey', 'team']
 
 #######################################################################################################################
 
@@ -206,6 +207,24 @@ class TeamRanksSerializer(serializers.ModelSerializer):
             "motion_rate_rank", "play_action_rate_rank", "shotgun_rate_rank", "nohuddle_rate_rank",
             "yards_allowed_wr_rank", "yards_allowed_te_rank", "yards_allowed_rb_rank",
             "yards_allowed_outside_rank", "yards_allowed_slot_rank"
+        ]
+
+
+class TeamRanksSerializerV2(serializers.ModelSerializer):
+    team = TeamSerializerV1(read_only=True)
+
+    class Meta:
+        model = TeamRankSnapshot
+        fields = [
+            "id", "team", "season_year",
+            "off_pass_yards_rank", "off_pass_tds_rank", "off_pass_rating_rank",
+            "off_rush_yards_rank", "off_rush_tds_rank", "off_rush_attempts_rank",
+            "off_receptions_rank", "off_rec_yards_rank", "off_rec_tds_rank",
+
+            "def_pass_yards_rank", "def_pass_tds_rank", "def_pass_rating_rank",
+            "def_rush_yards_rank", "def_rush_tds_rank", "def_rush_attempts_rank",
+            "def_receptions_rank", "def_rec_yards_rank",
+            "def_rec_tds_rank", "def_pass_defended_rank"
         ]
 
 #######################################################################################################################
@@ -332,7 +351,7 @@ class PlayerSerializerV2(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['id', 'slug', 'fullName', 'position']
+        fields = ['id', 'slug', 'fullName', 'position', 'jersey']
 
 
 class PlayerSeasonStatsSerializer(serializers.ModelSerializer):
@@ -377,3 +396,14 @@ class PlayerCareerStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerSeasonStats
         fields = '__all__'
+
+
+#######################################################################################################################
+
+class PlayerTeammatesSerializer(serializers.ModelSerializer):
+    team = HistoricTeamSerializer()
+    players = PlayerSerializerV2(many=True)
+
+    class Meta:
+        model = PlayerGameStats
+        fields = ['team', 'players']

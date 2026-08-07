@@ -1,5 +1,6 @@
 import { queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
+import { cleanFilters } from "../hooks/useCleanFilters";
 
 export default function createTeamStatsQueryOptions(filters, version) {
     return queryOptions({
@@ -11,7 +12,8 @@ export default function createTeamStatsQueryOptions(filters, version) {
 }
 
 const getTeamStats = async (filters) => {
-    const params = new URLSearchParams(filters).toString();
+    const cleaned = cleanFilters(filters);
+    const params = new URLSearchParams(cleaned).toString();
     const json = await apiFetch(`/nfl/team/stats${params ? `?${params}` : ''}`);
     return json;
 }

@@ -128,3 +128,12 @@ class GameScheduleFilter(FilterSet):
     class Meta:
         model = Game
         fields = ['season_year', 'season_type', 'week']
+
+
+class PlayerTeammatesFilter(FilterSet):
+    team = CharFilter(field_name="team__abbreviation")
+    season_year = NumberFilter(field_name='game__season_year')
+
+    class Meta:
+        model = PlayerGameStats
+        fields = ['team', 'season_year']

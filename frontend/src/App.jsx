@@ -9,6 +9,7 @@ import PublicRoute from "./components/PublicRoute";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import PositionOpponent from './components/PositionOpponent';
+import Team from './components/Team/Team';
 import TeamStats from './pages/TeamStats';
 import PlayerDashboard from './pages/PlayerDashboard';
 import Register from './pages/Register';
@@ -91,6 +92,7 @@ const router = createBrowserRouter([
           { path: '/position-vs-opponent/', element: <PositionOpponent /> },
           { path: '/fantasy-rankings', element: <FantasyRankings />},
           { path: '/team/stats/', element: <TeamStats /> },
+          { path: '/teams/:team_slug', element: <Team />},
           { path: '*', element: <ErrorPage /> }
         ]
       }

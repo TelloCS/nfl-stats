@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useVersionedQuery } from "../../hooks/useVersionedQuery";
 import { formatOrdinal } from "../FantasyRankings/FantasyRankings.helpers";
 import { removeStatByKey } from "./PlayerPerformance.helpers";
@@ -60,7 +60,12 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
               <tbody className="divide-y divide-geodude-800/50">
                 {filteredData.map((row) => (
                   <tr key={row.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
-                    <td className="text-nowrap text-paper-500">{row.historic_team.abbreviation}</td>
+                    <td className="text-nowrap text-paper-500">
+                      <Link
+                        to={`/teams/${row?.historic_team?.slug}`}>
+                        <span className="cursor-pointer hover:text-status-info">{row?.historic_team?.abbreviation}</span>
+                      </Link>
+                    </td>
                     <td className="text-nowrap text-paper-500">{row.season_year}</td>
                     <td className="text-nowrap text-paper-500">{row.games_played}</td>
                     {availableStatsCopy.map((statConfig) => (
@@ -90,7 +95,13 @@ function PlayerCareerStats({ availableStats, currentFormat, seasonType }) {
               <tbody className="divide-y divide-geodude-800/50">
                 {filteredData.map((row) => (
                   <tr key={row.id} className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group">
-                    <td className="text-nowrap text-paper-500">{row.historic_team.abbreviation}</td>
+                    <td className="text-nowrap text-paper-500">
+                      <Link
+                        to={`/teams/${row?.historic_team?.slug}`}>
+                        <span className="cursor-pointer hover:text-status-info">{row?.historic_team?.abbreviation}</span>
+                      </Link>
+                    </td>
+
                     <td className="text-nowrap text-paper-500">{row.season_year}</td>
                     <td className="text-nowrap text-paper-500">{row.games_played}</td>
                     <td className="text-nowrap text-paper-200">

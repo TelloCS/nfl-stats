@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Dot } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 const Profile = ({ data }) => {
   const isFreeAgent = !data?.team || data?.team === "FA" || data?.team?.full_name === "Free Agent";
@@ -16,7 +17,12 @@ const Profile = ({ data }) => {
           </div>
         ) : (
           <div className="flex items-center gap-1">
-            {data?.team?.full_name} <Dot /> {data?.position} <Dot />  #{data?.jersey}
+            <Link
+              to={`/teams/${data?.team?.slug}`}>
+              <span className="cursor-pointer hover:text-status-info">{data?.team?.full_name}</span>
+            </Link>
+
+            <Dot /> {data?.position} <Dot />  #{data?.jersey}
           </div>
         )}
       </div>

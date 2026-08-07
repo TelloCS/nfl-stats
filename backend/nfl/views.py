@@ -11,7 +11,7 @@ from django_ratelimit.decorators import ratelimit
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import Max, Prefetch, prefetch_related_objects
 from .models import (
     Team,
     Game,
@@ -30,8 +30,10 @@ from .serializers import (
     PlayerSeasonStatsSerializer,
     TeamStatsSerializer,
     TeamRanksSerializer,
+    TeamRanksSerializerV2,
     PlayerGameStatsMatchupsSerializer,
     PlayerCareerStatsSerializer,
+    PlayerTeammatesSerializer,
     GameSerializer,
     NFLScheduleSerializer
 )
@@ -42,10 +44,92 @@ from .filters import (
     TeamStatsFilter,
     PlayerSeasonStatsFilter,
     PlayerVsUpcomingMatchupFilter,
+    PlayerTeammatesFilter,
     GameScheduleFilter
 )
 from .mixins import KeyBasedCacheMixin
 from nfl.utils import is_nfl_in_season, get_current_etl_version
+
+
+class TeamRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIView):
+    renderer_classes = [ORJSONRenderer]
+    serializer_class = TeamSerializerV1
+    lookup_field = 'slug'
+
+    def get_cache_key(self, request):
+        v = get_current_etl_version()
+        cache_key = f'team_retrieve:v{v}:{request.get_full_path()}'
+        return cache_key
+
+    @method_decorator(ratelimit(key='ip', rate='20/m', method='GET', block=True))
+    def get(self, request, *args, **kwargs):
+        cached_data = self.retrieve_from_cache(request)
+
+        if cached_data:
+            return Response(cached_data)
+
+        response = super().get(request, *args, **kwargs)
+        self.store_in_cache(request, response.data)
+        return response
+
+    def get_queryset(self):
+        return Team.objects.all()
+
+
+class TeamRosterListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
+    renderer_classes = [ORJSONRenderer]
+    serializer_class = PlayerSerializer
+    pagination_class = None
+
+    def get_cache_key(self, request):
+        v = get_current_etl_version()
+        cache_key = f'team_roster:v{v}:{request.get_full_path()}'
+        return cache_key
+
+    @method_decorator(ratelimit(key='ip', rate='20/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        cached_data = self.retrieve_from_cache(request)
+
+        if cached_data:
+            return Response(cached_data)
+
+        response = super().list(request, *args, **kwargs)
+        self.store_in_cache(request, response.data)
+        return response
+
+    def get_queryset(self):
+        team_slug = self.kwargs.get('team_slug')
+        return Player.objects.filter(team__slug=team_slug).select_related('team')
+
+
+class TeamRanksListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
+    renderer_classes = [ORJSONRenderer]
+    serializer_class = TeamRanksSerializerV2
+    filter_backends = [DjangoFilterBackend]
+    pagination_class = None
+
+    def get_cache_key(self, request):
+        v = get_current_etl_version()
+        cache_key = f'team_ranks:v{v}:{request.get_full_path()}'
+        return cache_key
+
+    @method_decorator(ratelimit(key='ip', rate='20/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        cached_data = self.retrieve_from_cache(request)
+
+        if cached_data:
+            return Response(cached_data)
+
+        response = super().list(request, *args, **kwargs)
+        self.store_in_cache(request, response.data)
+        return response
+
+    def get_queryset(self):
+        team_slug = self.kwargs.get('team_slug')
+
+        return TeamRankSnapshot.objects.filter(
+            team__slug=team_slug
+        ).select_related('team').order_by('season_year')
 
 
 class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
@@ -131,7 +215,11 @@ class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIVie
         try:
             season_year = int(param_year)
         except (ValueError, TypeError):
-            season_year = available_seasons[0] if available_seasons else None
+            if available_seasons:
+                season_year = available_seasons[0]
+            else:
+                global_max = PlayerGameStats.objects.aggregate(max_year=Max('game__season_year'))
+                season_year = global_max['max_year']
 
         try:
             season_type = int(param_type)
@@ -149,7 +237,7 @@ class PlayerGameStatsRetrieveAPIView(KeyBasedCacheMixin, generics.RetrieveAPIVie
                 'game__homeTeam',
                 'game__awayTeam',
                 'team'
-            ).order_by('-game__week')
+            ).order_by('game__week')
 
         prefetch_related_objects([player], Prefetch('stats', queryset=queryset))
 
@@ -382,6 +470,68 @@ class PlayerFantasyRankingsView(KeyBasedCacheMixin, generics.ListAPIView):
             'player',
             'historic_team'
         ).order_by('-season_year')
+
+
+class PlayerTeammatesListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
+    renderer_classes = [ORJSONRenderer]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PlayerTeammatesFilter
+    pagination_class = None
+
+    def get_cache_key(self, request):
+        v = get_current_etl_version()
+        return f'player_teammates:v{v}:{request.get_full_path()}'
+
+    @method_decorator(ratelimit(key='ip', rate='20/m', method='GET', block=True))
+    def list(self, request, *args, **kwargs):
+        cached_data = self.retrieve_from_cache(request)
+        if cached_data:
+            return Response(cached_data)
+
+        team = request.query_params.get("team")
+        season_year = request.query_params.get("season_year")
+
+        if not team:
+            return Response({
+                "detail": "'team' query parameter is required."
+            }, status=400)
+
+        if not season_year:
+            default_max_year = PlayerGameStats.objects.filter(
+                team__abbreviation=team
+            ).aggregate(season_year=Max('game__season_year'))
+
+            season_year = default_max_year['season_year']
+
+        queryset = self.filter_queryset(
+            self.get_queryset().filter(game__season_year=season_year)
+        )
+
+        results = list(queryset)
+
+        if not results:
+            response_data = Response({
+                "team": None,
+                "players": [],
+            })
+
+            self.store_in_cache(request, response_data)
+            return Response(response_data)
+
+        serializer = PlayerTeammatesSerializer({
+            'team': results[0].team,
+            'players': [stat.player for stat in results]
+        })
+
+        response_data = serializer.data
+        self.store_in_cache(request, response_data)
+        return Response(response_data)
+
+    def get_queryset(self):
+        return PlayerGameStats.objects.select_related(
+            'team',
+            'player'
+        ).order_by("player_id", "game_id").distinct("player_id")
 
 
 class HistoricNFLSchedulesListAPIView(KeyBasedCacheMixin, generics.ListAPIView):

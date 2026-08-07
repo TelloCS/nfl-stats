@@ -80,7 +80,12 @@ const Table = ({ isPositionFiltered, isLoading, data, currentFormat, sortConfig,
                 </Link>
               </td>
               <td className='text-nowrap text-paper-400'>{stat.player.position}</td>
-              <td className='text-nowrap'>{stat?.historic_team?.abbreviation}</td>
+              <td className='text-nowrap'>
+                <Link
+                  to={`/teams/${stat?.historic_team?.slug}`}>
+                    <span className="cursor-pointer hover:text-status-info">{stat?.historic_team?.abbreviation}</span>
+                </Link>
+              </td>
               <td className='text-nowrap'>{stat.games_played}</td>
               <td className="text-nowrap text-paper-200">{stat.pass_yards}</td>
               <td className="text-nowrap text-paper-200">{stat.pass_touchdowns}</td>

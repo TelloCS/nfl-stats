@@ -1,5 +1,6 @@
 import { queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch } from "../utils/apiFetch";
+import { cleanFilters } from "../hooks/useCleanFilters";
 
 export default function createSlatesQueryOptions(filters, version) {
     return queryOptions({
@@ -11,13 +12,8 @@ export default function createSlatesQueryOptions(filters, version) {
 }
 
 const getSlates = async (filters) => {
-    const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(
-            ([, value]) => value !== "" && value !== null && value !== undefined
-        )
-    );
-
-    const params = new URLSearchParams(cleanFilters).toString();
+    const cleaned = cleanFilters(filters);
+    const params = new URLSearchParams(cleaned).toString();
     const json = await apiFetch(`/nfl/slates${params ? `?${params}` : ''}`);
     return json;
 }

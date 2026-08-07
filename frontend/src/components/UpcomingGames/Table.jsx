@@ -2,6 +2,7 @@ import { memo } from "react";
 import CustomLoader from "../CustomLoader"
 import GameTableRow from "./GameTableRow";
 import ScheduleHeader from "./ScheduleHeader";
+import UpcomingGames from "./UpcomingGames";
 import useUpcomingGames from "../../hooks/useUpcomingGames";
 
 function Table() {
@@ -12,6 +13,13 @@ function Table() {
       <CustomLoader />
     );
   };
+
+  if (data?.events.length < 3) {
+    return (
+      <UpcomingGames />
+    );
+  };
+
 
   return (
     <>

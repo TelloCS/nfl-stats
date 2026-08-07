@@ -7,6 +7,7 @@ import PlayerPerformanceSection from "../components/PlayerPerformance";
 import PlayerCareerStats from "../components/PlayerPerformance/PlayerCareerStats";
 import UpcomingMatchup from "../components/UpcomingMatchup";
 import MatchupAnalysisSection from "../components/MatchupAnalysis";
+import Rosters from "../components/Rosters/Rosters";
 import useUrlFilters from "../hooks/useUrlFilters"
 import useMatchupData from "../hooks/useMatchupData";
 
@@ -97,12 +98,15 @@ function PlayerDashboard() {
             onFilterChange={setFilter}
             filters={filters}
           />
-          {showMatchupAnalysis && (
-            <MatchupAnalysisSection
-              data={playerData}
-              rankingData={rankingData}
-            />
-          )}
+          <div className={`flex flex-col grid grid-cols-1 ${showMatchupAnalysis ? 'lg:grid-cols-3': 'lg:grid-cols-1'} lg:gap-4`}>
+            {showMatchupAnalysis && (
+              <MatchupAnalysisSection
+                data={playerData}
+                rankingData={rankingData}
+              />
+            )}
+            <Rosters data={playerData} showMatchup={showMatchupAnalysis} />
+          </div>
         </div>
 
         {showUpcomingMatchup && (

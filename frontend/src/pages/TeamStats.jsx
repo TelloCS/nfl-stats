@@ -1,5 +1,5 @@
 import { useMemo, memo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { SearchX } from 'lucide-react';
 
 import { TeamStatMap } from '../components/Config';
@@ -47,7 +47,7 @@ export default function TeamStats() {
           const updated = new URLSearchParams(prev);
           updated.set("tab", _activeTabKey);
           return sortParams(updated);
-        }, { replace: true }); 
+        }, { replace: true });
       }
     }
   }, [isLoading, teamData, availableTabs, activeTabKey, _activeTabKey, setSearchParams]);
@@ -177,8 +177,11 @@ const ResultsTable = memo(({ isLoading, data, columnsToShow, tableKey, sortConfi
         <tbody className="divide-y divide-geodude-800/50">
           {data.map((team, index) => (
             <tr key={team.id || index} className="group hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300">
-              <td className="px-2 text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800 transition-colors">
-                {team.full_name}
+              <td className='px-2 text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800 transition-colors'>
+                <Link
+                  to={`/teams/${team?.slug}`}>
+                  <span className="cursor-pointer hover:text-status-info">{team.full_name}</span>
+                </Link>
               </td>
 
               {columnsToShow.map((stat) => (
