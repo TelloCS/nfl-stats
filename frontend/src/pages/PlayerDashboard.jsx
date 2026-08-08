@@ -54,7 +54,7 @@ function PlayerDashboard() {
   );
 
   const playerTeam = playerData?.team?.abbreviation;
-  const { nextGame } = useMatchupData(playerTeam);
+  const { nextGame, isSchedulePending, isRanksPending } = useMatchupData(playerTeam);
 
   const hasStats = Boolean(playerData?.stats?.length > 0);
   const hasRankings = Boolean(rankingData?.length > 0);
@@ -64,7 +64,7 @@ function PlayerDashboard() {
   const showUpcomingMatchup = !isFreeAgent;
   const isSplitLayout = showMatchupAnalysis && showUpcomingMatchup && nextGame;
 
-  if (isPlayerPending || isRankingPending) {
+  if (isPlayerPending || isRankingPending || isSchedulePending || isRanksPending) {
     return (
       <div className="flex justify-center items-center h-[500px]">
         <CustomLoader />
@@ -98,7 +98,7 @@ function PlayerDashboard() {
             onFilterChange={setFilter}
             filters={filters}
           />
-          <div className={`flex flex-col grid grid-cols-1 ${showMatchupAnalysis ? 'lg:grid-cols-3': 'lg:grid-cols-1'} lg:gap-4`}>
+          <div className={`flex flex-col grid grid-cols-1 gap-0.5 ${showMatchupAnalysis ? 'lg:grid-cols-3': 'lg:grid-cols-1'} sm:gap-4 lg:gap-4`}>
             {showMatchupAnalysis && (
               <MatchupAnalysisSection
                 data={playerData}

@@ -400,11 +400,12 @@ def transform_player_profiles(rosters_raw, unique_profiles) -> None:
                                 'team': current_team_abbr
                             }
 
-    for player_espn_id, profile in unique_profiles.items():
-        if player_espn_id not in seen_player_ids:
-            if profile.get('team') is not None:
-                logger.info(f"FREE AGENT DETECTED: {profile.get('full_name')} is no longer on a roster.")
-                profile['team'] = None  
+    released_players = Player.objects.exclude(team__isnull=True).exclude(espn_id__in=seen_player_ids)
+    for player in released_players:
+        logger.info(f"FREE AGENT DETECTED: {player.full_name} is no longer on a roster.")
+        if player.espn_id in unique_profiles:
+            unique_profiles[player.espn_id]['team'] = None
+    released_players.update(team=None)
 
     team_cache = {t.abbreviation: t for t in Team.objects.all()}
     for espn_id, profile_data in unique_profiles.items():
@@ -473,15 +474,15 @@ def transform(raw_payload: dict, config: dict) -> None:
         tranform_teams(raw_payload['teams'])
 
     if raw_payload.get('events', []):
-        transform_events(raw_payload['events'])
+        transform_events(raw_payload.get('events', []))
 
-    if raw_payload.get('games', []) and raw_payload.get('players', []):
-        unique_profiles = transform_skill_player_stats(raw_payload['games'])
+    if raw_payload.get('players', []):
+        unique_profiles = transform_skill_player_stats(raw_payload.get('games', []))
         transform_player_profiles(raw_payload['players'], unique_profiles)
 
     if raw_payload.get('offense_passing', []):
         transform_team_stats(
-            raw_data=raw_payload['offense_passing'],
+            raw_data=raw_payload.get('offense_passing', []),
             season_year=season_year,
             model=TeamOffensePassingStats,
             field_mapping=PASSING_STATS_MAP,
@@ -489,7 +490,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('offense_rushing', []):
         transform_team_stats(
-            raw_data=raw_payload['offense_rushing'],
+            raw_data=raw_payload.get('offense_rushing', []),
             season_year=season_year,
             model=TeamOffenseRushingStats,
             field_mapping=RUSHING_STATS_MAP,
@@ -497,7 +498,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('offense_receiving', []):
         transform_team_stats(
-            raw_data=raw_payload['offense_receiving'],
+            raw_data=raw_payload.get('offense_receiving', []),
             season_year=season_year,
             model=TeamOffenseReceivingStats,
             field_mapping=RECEIVING_STATS_MAP,
@@ -511,7 +512,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         DEF_PASSING_STATS_MAP['pass_yards'] = ('Yds', int)
 
         transform_team_stats(
-            raw_data=raw_payload['defense_passing'],
+            raw_data=raw_payload.get('defense_passing', []),
             season_year=season_year,
             model=TeamDefensePassingStats,
             field_mapping=DEF_PASSING_STATS_MAP,
@@ -519,7 +520,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('defense_rushing', []):
         transform_team_stats(
-            raw_data=raw_payload['defense_rushing'],
+            raw_data=raw_payload.get('defense_rushing', []),
             season_year=season_year,
             model=TeamDefenseRushingStats,
             field_mapping=RUSHING_STATS_MAP,
@@ -530,7 +531,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         DEF_RECEIVING_STATS_MAP['pass_defended'] = ('PDef', int)
 
         transform_team_stats(
-            raw_data=raw_payload['defense_receiving'],
+            raw_data=raw_payload.get('defense_receiving', []),
             season_year=season_year,
             model=TeamDefenseReceivingStats,
             field_mapping=DEF_RECEIVING_STATS_MAP,
@@ -539,7 +540,7 @@ def transform(raw_payload: dict, config: dict) -> None:
 
     if raw_payload.get('advance_offense', []):
         transform_team_stats(
-            raw_data=raw_payload['advance_offense'],
+            raw_data=raw_payload.get('advance_offense', []),
             season_year=season_year,
             model=TeamAdvanceOffenseStats,
             field_mapping=ADVANCE_OFF_STATS_MAP,
@@ -547,7 +548,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('advance_defense', []):
         transform_team_stats(
-            raw_data=raw_payload['advance_defense'],
+            raw_data=raw_payload.get('advance_defense', []),
             season_year=season_year,
             model=TeamAdvanceDefenseStats,
             field_mapping=ADVANCE_DEF_STATS_MAP,
@@ -556,7 +557,7 @@ def transform(raw_payload: dict, config: dict) -> None:
 
     if raw_payload.get('coverage_schemes', []):
        transform_team_stats(
-            raw_data=raw_payload['coverage_schemes'],
+            raw_data=raw_payload.get('coverage_schemes', []),
             season_year=season_year,
             model=TeamCoverageSchemeStats,
             field_mapping=COVERAGE_SCHEMES_STATS_MAP,
@@ -564,7 +565,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('offense_tendencies', []):
         transform_team_stats(
-            raw_data=raw_payload['offense_tendencies'],
+            raw_data=raw_payload.get('offense_tendencies', []),
             season_year=season_year,
             model=TeamOffensePlayCallingStats,
             field_mapping=OFF_TENDENCIES_STATS_MAP,
@@ -572,7 +573,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
     if raw_payload.get('coverage_position', []):
         transform_team_stats(
-            raw_data=raw_payload['coverage_position'],
+            raw_data=raw_payload.get('coverage_position', []),
             season_year=season_year,
             model=TeamCoverageStatsByPosition,
             field_mapping=COVERAGE_STATS_BY_POSITION_STATS_MAP,

@@ -54,7 +54,7 @@ export default function Team() {
 
   return (
     <div className='container mx-auto sm:p-4 md:px-8 font-poppins text-foreground'>
-      <div className="bg-geodude-900 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
+      <div className="bg-geodude-900 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
 
         <div className="p-4 md:p-6">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
@@ -80,7 +80,7 @@ export default function Team() {
         </div>
 
         <div className="p-4 md:p-6">
-          <div className="bg-geodude-950 p-4">
+          <div className="p-4 border border-geodude-800">
             <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
               <div className="flex flex-col text-center text-foreground sm:text-left">
                 <div className="text-xl sm:text-2xl">
