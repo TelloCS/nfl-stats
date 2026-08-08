@@ -20,7 +20,7 @@ function Rosters({ data, showMatchup }) {
   const groupedPlayers = usePlayersByPosition(teammates?.players);
 
   return (
-    <div className="bg-geodude-900 col-span-1 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800">
+    <div className="bg-geodude-900 lg:col-span-1 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800">
       <div className="flex flex-row items-center text-paper-400 justify-between mb-4">
         <div className="min-w-0">
           <span className="font-semibold text-foreground text-lg">Roster</span>

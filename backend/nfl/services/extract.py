@@ -6,7 +6,7 @@ from asyncio import TaskGroup, TimeoutError
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from dotenv import load_dotenv
 from nfl.services.utils import (
-    Table,
+    Table, DEFAULT_HEADERS
 )
 
 load_dotenv()
@@ -38,7 +38,7 @@ class Extract:
                 request_params[key] = value
 
         try:
-            async with session.get(url=url, params=request_params) as response:
+            async with session.get(url=url, headers=DEFAULT_HEADERS, params=request_params) as response:
                 logger.info(f"[CACHE MISS] Request: {response.url} | Status: {response.status}")
                 response.raise_for_status()
                 processed_json = await self.process_response(response)

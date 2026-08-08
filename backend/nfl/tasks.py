@@ -26,10 +26,6 @@ logger = get_task_logger(__name__)
 def weekly_nfl_sync():
     context = get_pipeline_context(manual_config=PIPELINE_CONFIG)
 
-    if not context:
-        logger.info("NFL is out of season. Exiting.")
-        return
-
     logger.info("Celery task started")
     raw_payload = run(run_extraction_pipeline(config=context))
 
@@ -39,18 +35,21 @@ def weekly_nfl_sync():
             main(raw_payload, context=context)
             logger.info("Main pipeline finished successfully")
 
-            season_year = context['dates']
-            season_type = context['seasontype']
+            if not context:
+                season_year = context['dates']
+                season_type = context['seasontype']
 
-            logger.info("Triggered follow-up rank update task")
-            transaction.on_commit(lambda: update_team_rank_snapshots.delay(
-                season_year=season_year
-            ))
+                logger.info("Triggered follow-up rank update task")
+                transaction.on_commit(lambda: update_team_rank_snapshots.delay(
+                    season_year=season_year
+                ))
 
-            transaction.on_commit(lambda: update_player_season_stats_and_ranks.delay(
-                season_year=season_year,
-                season_type=season_type
-            ))
+                transaction.on_commit(lambda: update_player_season_stats_and_ranks.delay(
+                    season_year=season_year,
+                    season_type=season_type
+                ))
+            else:
+                transaction.on_commit(cache_invalidated_global_version_bumped)
     except Exception as e:
         logger.exception(f"Scheduled task failed: {e}")
 
@@ -191,7 +190,7 @@ def update_team_rank_snapshots(season_year: int):
                 )
 
             logger.info("Updated TeamRankSnapshot Model")
-            transaction.on_commit(finalize_rank_updates)
+            transaction.on_commit(cache_invalidated_global_version_bumped)
     except Exception as e:
         logger.exception(f"Scheduled task failed for TeamRankSnapshot Model: {e}")
 
@@ -363,7 +362,7 @@ def update_player_season_stats_and_ranks(season_year: int, season_type: int):
             )
 
 
-def finalize_rank_updates():
+def cache_invalidated_global_version_bumped():
     """
     Runs only after the ranks are safely committed to the database.
     """

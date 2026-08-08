@@ -30,8 +30,7 @@ export const generateRankOptions = (dataObj) => {
       const formattedLabel = key
         .replace(/_rank$/, '')
         .split('_')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+        .join(' ').toUpperCase()
 
       return {
         value: key,
