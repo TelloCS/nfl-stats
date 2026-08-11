@@ -20,7 +20,7 @@ const TeamSchemes = memo(({ abbreviation, side, ranks, isOpponent }) => {
 
   return (
     <div className="flex-1 flex flex-col p-1">
-      <div className="border-b border-geodude-800 text-center font-bold pb-2 mb-3">
+      <div className="border-b border-geodude-800 text-center font-bold p-1.5 mb-3">
         <span className={`${textColor} tracking-wide`}>{abbreviation}</span>
       </div>
 
@@ -28,7 +28,7 @@ const TeamSchemes = memo(({ abbreviation, side, ranks, isOpponent }) => {
         {schemeStats.map((stat, idx) => (
           <div key={idx} className="flex items-center justify-between hover:bg-geodude-800 rounded-md transition-colors p-1.5">
             <span className="text-foreground font-medium text-xs sm:text-sm">{stat.label}</span>
-            <span className={`text-[11px] px-2 py-0.5 rounded border font-medium ${getRankBadgeClass(stat.val)}`}>
+            <span className={`text-xs px-2.5 py-1 rounded-md border font-medium ${getRankBadgeClass(stat.val)}`}>
               {formatOrdinal(stat.val) || '--'}
             </span>
           </div>

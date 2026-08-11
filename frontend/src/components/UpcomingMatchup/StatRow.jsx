@@ -7,7 +7,7 @@ const StatRow = memo(({ label, playerVal, opponentVal }) => (
     <span className={`text-xs px-2.5 py-1 rounded-md border font-medium mx-auto ${getRankBadgeClass(playerVal)}`}>
       {formatOrdinal(playerVal) || '--'}
     </span>
-    <span className="text-sm text-foreground font-semibold tracking-tight">{label}</span>
+    <span className="text-xs sm:text-sm text-foreground font-semibold tracking-tight">{label}</span>
     <span className={`text-xs px-2.5 py-1 rounded-md border font-medium mx-auto ${getRankBadgeClass(opponentVal)}`}>
       {formatOrdinal(opponentVal) || '--'}
     </span>

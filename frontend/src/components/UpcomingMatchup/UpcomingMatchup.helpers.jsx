@@ -16,10 +16,10 @@ export const getRankBadgeClass = (rank) => {
 
     const rankNum = parseInt(rank, 10);
 
-    if (rankNum <= 10) return `${baseShape} bg-primary/20 text-primary border-primary/20`;
-    if (rankNum >= 23) return `${baseShape} bg-status-error/20 text-status-error border-status-error/20`;
+    if (rankNum <= 10) return `${baseShape} bg-primary/20 text-foreground border-primary/20`;
+    if (rankNum >= 23) return `${baseShape} bg-status-error/20 text-foreground border-status-error/20`;
 
-    return `${baseShape} bg-status-aware/20 text-status-aware border-status-aware/20`;
+    return `${baseShape} bg-status-aware/20 text-foreground border-status-aware/20`;
 };
 
 export const getMatchupData = (scheduleData, rankData, playerTeam) => {

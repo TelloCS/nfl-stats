@@ -14,8 +14,8 @@ function PlayerPerformanceSection({ data, onFilterChange, filters }) {
   const { state, options, computed, actions } = usePlayerPerformance(data, filters, onFilterChange);
 
   const getTabClass = (tabName) => `flex-1 text-center py-2 px-1 text-xs sm:text-sm font-semibold transition-colors border-b-2 ${state.activeTab === tabName
-      ? "border-foreground text-foreground"
-      : "border-transparent text-paper-400 hover:text-foreground hover:border-geodude-700"
+    ? "border-foreground text-foreground"
+    : "border-transparent text-paper-400 hover:text-foreground hover:border-geodude-700"
     }`;
 
   return (
@@ -45,18 +45,35 @@ function PlayerPerformanceSection({ data, onFilterChange, filters }) {
       {/* CONTENT SECTION */}
       <div className="w-full">
         {state.activeTab === "gamelogs" && (
-          state.viewMode === "table" ? (
-            <Table data={data} availableStats={options.availableStats} />
+          data?.stats.length > 0 ? (
+            state.viewMode === "table" ? (
+              <Table data={data} availableStats={options.availableStats} />
+            ) : (
+              <>
+                <div className="mb-4">
+                  <StatToggle
+                    options={options.availableStats}
+                    activeKey={computed.currentStatKey}
+                    onSelect={actions.setActiveStat}
+                  />
+                </div>
+                <PlayerPerformanceChart
+                  activeStatLabel={computed.activeStatLabel}
+                  currentStatKey={computed.currentStatKey}
+                  chartData={computed.chartData}
+                  isMobile={isMobile}
+                />
+              </>
+            )
           ) : (
-            <>
-              <div className="mb-4">
-                <StatToggle options={options.availableStats} activeKey={computed.currentStatKey} onSelect={actions.setActiveStat} />
-              </div>
-              <PlayerPerformanceChart activeStatLabel={computed.activeStatLabel} currentStatKey={computed.currentStatKey} chartData={computed.chartData} isMobile={isMobile} />
-            </>
+            <div className="p-4 bg-geodude-900 border border-geodude-800 rounded-lg">
+              <p className="text-paper-400 text-sm text-center">
+                No game log stats found.
+              </p>
+            </div>
           )
         )}
-        
+
         {state.activeTab === "career" && (
           <PlayerCareerStats availableStats={options.availableStats} currentFormat={state.currentFormat} seasonType={state.careerSeasonType} />
         )}

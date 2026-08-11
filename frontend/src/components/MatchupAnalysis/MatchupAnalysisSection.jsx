@@ -3,9 +3,11 @@ import { TeamRankingStatMap } from "../Config";
 import { getMatchupTeams, generateRadarData, getFilteredTeamRankingStatMap, getGameOptions } from "./MatchupAnalysis.helpers";
 import Table from "./Table";
 import StatToggle from "../StatToggle";
-import SelectDropdown from "../SelectDropdown";
+import TableChartButton from "./TableChartButton";
+import MatchupRadarChart from "./MatchupRadarChart";
 
 function MatchupAnalysisSection({ data, rankingData }) {
+  const [viewMode, setViewMode] = useState("table");
   const games = data?.stats;
 
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
@@ -44,32 +46,36 @@ function MatchupAnalysisSection({ data, rankingData }) {
   if (!games || games.length === 0) return null;
 
   return (
-    <div className="bg-geodude-900 lg:col-span-2 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800">
-      <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
-        <div className="min-w-0">
-          <span className="font-semibold text-foreground text-lg">Previous Matchups</span>
-        </div>
+    <div className="bg-geodude-900 lg:col-span-2 p-4 sm:p-6 sm:rounded-md border-t sm:border border-geodude-800">
+      <TableChartButton 
+        selectedGameIndex={selectedGameIndex}
+        setSelectedGameIndex={setSelectedGameIndex}
+        gameOptions={gameOptions}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+      />
 
-        <SelectDropdown
-          value={selectedGameIndex}
-          onChange={setSelectedGameIndex}
-          options={gameOptions}
-          minWidth="120px"
-        />
-      </div>
       <div className="w-full">
         <StatToggle
           options={availableStats}
           activeKey={activeTabKey}
           onSelect={setActiveTabKey}
         />
-        <div className="font-mono">
-          <Table
-            data={radarData}
-            teamOne={teamOne}
-            teamTwo={teamTwo}
-            statLabel={statLabel}
-          />
+        <div className="font-mono mt-8">
+          {viewMode === "table" ? (
+            <Table
+              data={radarData}
+              teamOne={teamOne}
+              teamTwo={teamTwo}
+              statLabel={statLabel}
+            />
+          ) : (
+            <MatchupRadarChart
+              radarData={radarData}
+              teamOne={teamOne}
+              teamTwo={teamTwo}
+            />
+          )}
         </div>
       </div>
     </div>
