@@ -98,9 +98,10 @@ function PlayerDashboard() {
             onFilterChange={setFilter}
             filters={filters}
           />
-          <div className={`flex flex-col grid grid-cols-1 gap-0.5 ${showMatchupAnalysis ? 'lg:grid-cols-3': 'lg:grid-cols-1'} sm:gap-4 lg:gap-4`}>
+          <div className={`flex flex-col grid grid-cols-1 gap-0.5 ${showMatchupAnalysis ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} sm:gap-4 lg:gap-4`}>
             {showMatchupAnalysis && (
               <MatchupAnalysisSection
+                key={playerData?.id}
                 data={playerData}
                 rankingData={rankingData}
               />

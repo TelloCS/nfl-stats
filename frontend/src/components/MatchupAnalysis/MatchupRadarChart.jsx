@@ -8,7 +8,7 @@ const MatchupRadarChart = ({
 }) => {
   return (
     <div className="w-full max-w-md mx-auto">
-      <ResponsiveContainer width="100%" height="290">
+      <ResponsiveContainer width="100%" height="260">
         <RadarChart data={radarData} margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
           <PolarGrid stroke="var(--app-paper-400)" opacity={0.3} />
           <PolarAngleAxis

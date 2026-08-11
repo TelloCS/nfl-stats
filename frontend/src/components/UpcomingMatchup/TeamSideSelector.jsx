@@ -6,7 +6,7 @@ const TeamSideSelector = memo(({ abbreviation, side, setSide, isOpponent }) => {
   return (
     <div className="flex flex-col items-center gap-2">
       <span className={`${textColor} text-base font-bold tracking-wide`}>{abbreviation}</span>
-      <div className="flex bg-geodude-950 p-1 w-full rounded-full border border-geodude-800 shrink-0 gap-1">
+      <div className="flex bg-geodude-900 p-1 w-full max-w-xs rounded-full border border-geodude-800 shrink-0 gap-1">
         <button
           onClick={() => setSide("off")}
           className={`flex-1 text-xs font-bold py-1 rounded-full transition-all duration-200 ${side === "off"
