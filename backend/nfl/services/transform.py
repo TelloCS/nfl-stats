@@ -35,16 +35,11 @@ def tranform_teams(teams_raw) -> None:
                     "division": division['abbreviation'],
                 }
 
-                obj, created = Team.objects.update_or_create(
+                Team.objects.update_or_create(
                     abbreviation=defaults['abbreviation'],
                     defaults=defaults
                 )
 
-                if created:
-                    logger.info(f"CREATED: TEAM {obj.full_name.upper()}")
-                else:
-                    logger.debug(f"UPDATED: TEAM {obj.full_name.upper()}")
-    
     return None
 
 
@@ -92,15 +87,10 @@ def transform_events(events_raw) -> None:
                 'event': event['id'] 
             }
 
-            obj, created = Game.objects.update_or_create(
-                    event=defaults['event'],
-                    defaults=defaults
-                )
-
-            if created:
-                logger.info(f"CREATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
-            else:
-                logger.debug(f"UPDATED: EVENT {obj.short_name.upper()} - WEEK {obj.week}")
+            Game.objects.update_or_create(
+                event=defaults['event'],
+                defaults=defaults
+            )
 
     return None
 
@@ -343,16 +333,11 @@ def transform_skill_player_stats(games_raw: list[dict]) -> dict:
                 'fanduel_points': float(fantasy_scores.get('fanduel_points', 0.0))
             }
             
-            _, created = PlayerGameStats.objects.update_or_create(
+            PlayerGameStats.objects.update_or_create(
                 player=player_instance,
                 game=game_instance,
                 defaults=defaults
             )
-
-            if created:
-                logger.info(f"CREATED: PLAYER_STATS {str(player_full_name).upper()}")
-            else:
-                logger.debug(f"UPDATED: PLAYER_STATS {str(player_full_name).upper()}")
 
     return unique_profiles
 
@@ -418,15 +403,10 @@ def transform_player_profiles(rosters_raw, unique_profiles) -> None:
         else:
             defaults['team'] = None
 
-        obj, created = Player.objects.update_or_create(
+        Player.objects.update_or_create(
             espn_id=defaults['espn_id'],
             defaults=defaults
         )
-
-        if created:
-            logger.info(f"CREATED: PLAYER {obj.full_name.upper()}")
-        else:
-            logger.debug(f"UPDATED: PLAYER {obj.full_name.upper()}")
 
     return None
 
@@ -454,21 +434,17 @@ def transform_team_stats(raw_data: dict, season_year: int, model: models.Model, 
             raw_value = item.get(raw_key, 0)
             defaults[model_field] = cast_type(raw_value)
 
-        _, created = model.objects.update_or_create(
+        model.objects.update_or_create(
             team=team_instance,
             season_year=int(season_year),
             defaults=defaults
         )
 
-        if created:
-            logger.info(f"CREATED: {label} {str(item['Team']).upper()}")
-        else:
-            logger.debug(f"UPDATED: {label} {str(item['Team']).upper()}")
     raw_data = None
 
 
 def transform(raw_payload: dict, config: dict) -> None:
-    season_year = config.get('dates', '')
+    season_year = config.get('dates', '') if config is not None else None
 
     if raw_payload.get('teams', []):
         tranform_teams(raw_payload['teams'])

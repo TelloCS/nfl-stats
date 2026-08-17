@@ -35,7 +35,7 @@ def weekly_nfl_sync():
             main(raw_payload, context=context)
             logger.info("Main pipeline finished successfully")
 
-            if not context:
+            if context is not None:
                 season_year = context['dates']
                 season_type = context['seasontype']
 

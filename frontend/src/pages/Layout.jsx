@@ -8,10 +8,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import { useIsDesktop } from "../hooks/useMediaQueries";
 import StatusErrorModal from '../components/StatusErrorModal';
 import Dropdown from "../components/Dropdown";
-
-const NAV_LINKS = [
-  { to: "/team/stats", label: "Team Stats" }
-];
+import { TEAM_NAV_LINKS, PLAYER_NAV_LINKS } from "./utils";
 
 export default function Layout() {
   const { user, isLoading, isLoggedIn, logoutMutation } = useAuth();
@@ -66,15 +63,17 @@ export default function Layout() {
                   </Link>
                 </li>
                 <li>
-                  <Dropdown />
+                  <Dropdown
+                    navLinks={PLAYER_NAV_LINKS}
+                    title={"Players"}
+                  />
                 </li>
-                {NAV_LINKS.map(({ to, label }) => (
-                  <li key={to}>
-                    <Link to={to} className="hover:text-primary transition-colors flex items-center">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Dropdown
+                    navLinks={TEAM_NAV_LINKS}
+                    title={"Teams"}
+                  />
+                </li>
               </ul>
             </div>
 
@@ -108,12 +107,15 @@ export default function Layout() {
                 <Dropdown
                   isMobile={true}
                   onLinkClick={() => setIsMenuOpen(false)}
+                  navLinks={PLAYER_NAV_LINKS}
+                  title={"Players"}
                 />
-                {NAV_LINKS.map(({ to, label }) => (
-                  <Link key={to} to={to} onClick={() => setIsMenuOpen(false)} className="rounded-lg font-semibold text-xl/9 text-paper-200 hover:text-primary hover:bg-geodude-800 px-3 py-2">
-                    {label}
-                  </Link>
-                ))}
+                <Dropdown
+                  isMobile={true}
+                  onLinkClick={() => setIsMenuOpen(false)}
+                  navLinks={TEAM_NAV_LINKS}
+                  title={"Teams"}
+                />
               </div>
             </div>
           </div>

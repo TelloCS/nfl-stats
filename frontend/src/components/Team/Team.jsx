@@ -6,6 +6,7 @@ import { PlayerPositionGroup } from "./PlayerPositionGroup";
 
 import StatToggle from "../StatToggle";
 import SelectDropdown from "../SelectDropdown";
+import CustomLoader from "../CustomLoader";
 
 import { useVersionedQuery } from "../../hooks/useVersionedQuery";
 import createTeamQueryOptions from "../../queryOptions/createTeamQueryOptions";
@@ -46,8 +47,8 @@ export default function Team() {
 
   if (teamDataFetching || teamRosterFetching || teamRanksFetching) {
     return (
-      <div className="flex justify-center items-center">
-        <span className="text-xl text-paper-400">...</span>
+      <div className="flex justify-center items-center h-[500px]">
+        <CustomLoader />
       </div>
     );
   };
