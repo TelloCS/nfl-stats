@@ -20,6 +20,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import FantasyRankings from './components/FantasyRankings';
+import TeamsPage from './pages/TeamsPage';
+import Footer from './components/Footer/Footer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +60,7 @@ const router = createBrowserRouter([
       <AuthProvider>
         <Outlet />
         <ScrollRestoration />
+        <Footer />
       </AuthProvider>
     ),
     errorElement: <ErrorPage />,
@@ -92,6 +95,7 @@ const router = createBrowserRouter([
           { path: '/players/:player_id/:player_slug/stats', element: <PlayerDashboard /> },
           { path: '/position-vs-opponent/', element: <PositionOpponent /> },
           { path: '/fantasy-rankings', element: <FantasyRankings />},
+          { path: '/teams/', element: <TeamsPage /> },
           { path: '/team/stats/', element: <TeamStats /> },
           { path: '/teams/:team_slug', element: <Team />},
           { path: '*', element: <ErrorPage /> }

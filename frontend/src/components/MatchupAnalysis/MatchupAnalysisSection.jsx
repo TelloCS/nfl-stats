@@ -46,7 +46,7 @@ function MatchupAnalysisSection({ data, rankingData }) {
   if (!games || games.length === 0) return null;
 
   return (
-    <div className="bg-geodude-900 lg:col-span-2 p-4 sm:p-6 sm:rounded-md border-t sm:border border-geodude-800">
+    <div className="bg-geodude-900 lg:col-span-1 p-4 sm:p-6 sm:rounded-md border-t sm:border border-geodude-800">
       <TableChartButton 
         selectedGameIndex={selectedGameIndex}
         setSelectedGameIndex={setSelectedGameIndex}
