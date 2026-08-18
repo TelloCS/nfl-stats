@@ -114,7 +114,7 @@ class PlayerVsUpcomingMatchupFilter(FilterSet):
         fields = ['team']
 
     def filter_by_team(self, queryset, name, team):
-        return queryset.filter(
+        return queryset.exclude(team__abbreviation=team).filter(
             Q(game__homeTeam__abbreviation=team) |
             Q(game__awayTeam__abbreviation=team)
         )
