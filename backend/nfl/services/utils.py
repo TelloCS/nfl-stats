@@ -168,6 +168,9 @@ class Table(object):
     def parser(self):
         soup = BeautifulSoup(self.html, 'lxml')
         table = soup.find('table')
+
+        if table is None: return None
+
         headers = [th.get_text(strip=True) for th in table.find_all('th')]
 
         rows, i = table.find_all('tr'), 0
@@ -270,8 +273,15 @@ def should_pipeline_run() -> dict:
         logger.info(f"Status: {'Final' if is_complete else 'Active'}")
         logger.info(f"Time since kickoff: {days_since_game} days")
 
-        if is_complete and days_since_game > 3:
-            logger.info("Event is stale (> 3 days post-game). Pipeline SKIP.")
+        now = datetime.now()
+        in_nfl_season = now.month in range(1, 3) or now.month in range(9, 13)
+
+        if not in_nfl_season:
+            logger.info("NFL offseason. Pipeline SKIP.")
+            return None
+
+        if is_complete and days_since_game > 7:
+            logger.info("Event is stale (> 7 days post-game). Pipeline SKIP.")
             return None
 
         logger.info(f"Pipeline GO: Year {current_year} | Type {current_type} | Week {current_week}")

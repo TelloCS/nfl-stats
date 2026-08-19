@@ -12,6 +12,10 @@ export default function createPlayerTeammatesQueryOptions(filters, version) {
 }
 
 const getPlayerTeammates = async (filters) => {
+    if (filters.team === "FA") {
+        return []
+    };
+
     const cleaned = cleanFilters(filters);
     const params = new URLSearchParams(cleaned).toString();
     const json = await apiFetch(`/nfl/players/teammates${params ? `?${params}` : ''}`)

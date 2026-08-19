@@ -19,6 +19,10 @@ function Rosters({ data, showMatchup }) {
   )
   const groupedPlayers = usePlayersByPosition(teammates?.players);
 
+  if (filters.team === "FA") {
+    return null
+  };
+
   return (
     <div className="bg-geodude-900 h-full max-h-[500px] flex flex-col lg:col-span-1 p-4 sm:rounded-md border-t sm:border border-geodude-800">
       <div className="bg-geodude-800 border border-geodude-800 rounded-xl flex flex-row items-center text-paper-400 justify-between p-4 lg:px-2 mb-4">
