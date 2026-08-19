@@ -46,7 +46,7 @@ class Extract:
         except Exception as e:
             logger.exception(f"[API ERROR] Request failed for {url}. Defaulting to empty state. Error: {e}")
             self.raw = None
-            return self.raw
+            return
 
     async def spawn_tasks(self, session: ClientSession, ids: list[Any], id_key: str):
         async with TaskGroup() as taskgroup:
@@ -65,7 +65,7 @@ class Extract:
 
 
 class Teams(Extract):
-    BASE_URL: str = os.getenv('TEAMS_URL')
+    BASE_URL: str = os.getenv('TEAMS_URL', "https://cdn.espn.com/core/nfl/standings?xhr=1")
     SOURCE: str = "espn"
 
     def __init__(self, params = None):
@@ -85,7 +85,7 @@ class Teams(Extract):
 
 
 class Players(Extract):
-    BASE_URL: str = os.getenv("PLAYERS_URL")
+    BASE_URL: str = os.getenv("PLAYERS_URL", "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/{team_id}/roster")
     SOURCE: str = "espn"
 
     def __init__(self, params=None):
@@ -93,7 +93,7 @@ class Players(Extract):
 
 
 class Events(Extract):
-    BASE_URL: str = os.getenv('EVENTS_URL')
+    BASE_URL: str = os.getenv('EVENTS_URL', "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
     SOURCE: str = "espn"
 
     def __init__(self, params = None):
@@ -119,7 +119,7 @@ class Events(Extract):
 
 
 class Games(Extract):
-    BASE_URL: str = os.getenv("BOXSCORE_URL")
+    BASE_URL: str = os.getenv("BOXSCORE_URL", "https://site.web.api.espn.com/apis/site/v2/sports/football/nfl/summary")
     SOURCE: str = "espn"
 
     def __init__(self, params = None):
@@ -137,7 +137,7 @@ class ExtractTable(Extract):
 
 
 class OffensePassing(ExtractTable):
-    BASE_URL: str = os.getenv('OFFENSE_PASSING_URL')
+    BASE_URL: str = os.getenv('OFFENSE_PASSING_URL', "https://www.nfl.com/stats/team-stats/offense/passing/{season_year}/reg/all")
     SOURCE: str = "nfl"
 
     def __init__(self, params = None):
@@ -145,7 +145,7 @@ class OffensePassing(ExtractTable):
 
 
 class OffenseRushing(ExtractTable):
-    BASE_URL: str = os.getenv('OFFENSE_RUSHING_URL')
+    BASE_URL: str = os.getenv('OFFENSE_RUSHING_URL', "https://www.nfl.com/stats/team-stats/offense/rushing/{season_year}/reg/all")
     SOURCE: str = "nfl"
 
     def __init__(self, params = None):
@@ -153,7 +153,7 @@ class OffenseRushing(ExtractTable):
 
 
 class OffenseReceiving(ExtractTable):
-    BASE_URL = os.getenv('OFFENSE_RECEIVING_URL')
+    BASE_URL = os.getenv('OFFENSE_RECEIVING_URL', "https://www.nfl.com/stats/team-stats/offense/receiving/{season_year}/reg/all")
     SOURCE = "nfl"
 
     def __init__(self, params = None):
@@ -161,7 +161,7 @@ class OffenseReceiving(ExtractTable):
 
 
 class DefensePassing(ExtractTable):
-    BASE_URL = os.getenv('DEFENSE_PASSING_URL')
+    BASE_URL = os.getenv('DEFENSE_PASSING_URL', "https://www.nfl.com/stats/team-stats/defense/passing/{season_year}/reg/all")
     SOURCE = "nfl"
 
     def __init__(self, params = None):
@@ -169,7 +169,7 @@ class DefensePassing(ExtractTable):
 
 
 class DefenseRushing(ExtractTable):
-    BASE_URL = os.getenv('DEFENSE_RUSHING_URL')
+    BASE_URL = os.getenv('DEFENSE_RUSHING_URL', "https://www.nfl.com/stats/team-stats/defense/rushing/{season_year}/reg/all")
     SOURCE = "nfl"
 
     def __init__(self, params = None):
@@ -177,7 +177,7 @@ class DefenseRushing(ExtractTable):
 
 
 class DefenseReceiving(ExtractTable):
-    BASE_URL = os.getenv('DEFENSE_RECEIVING_URL')
+    BASE_URL = os.getenv('DEFENSE_RECEIVING_URL', "https://www.nfl.com/stats/team-stats/defense/receiving/{season_year}/reg/all")
     SOURCE = "nfl"
 
     def __init__(self, params = None):
@@ -185,7 +185,7 @@ class DefenseReceiving(ExtractTable):
 
 
 class AdvanceOffense(ExtractTable):
-    BASE_URL = os.getenv('ADVANCE_OFFENSE_URL')
+    BASE_URL = os.getenv('ADVANCE_OFFENSE_URL', "https://sumersports.com/teams/offensive/")
     SOURCE = "sumer"
 
     def __init__(self, params = None):
@@ -193,7 +193,7 @@ class AdvanceOffense(ExtractTable):
 
 
 class AdvanceDefense(ExtractTable):
-    BASE_URL = os.getenv('ADVANCE_DEFENSE_URL')
+    BASE_URL = os.getenv('ADVANCE_DEFENSE_URL', "https://sumersports.com/teams/defensive/")
     SOURCE = "sumer"
 
     def __init__(self, params = None):
@@ -201,7 +201,7 @@ class AdvanceDefense(ExtractTable):
 
 
 class CoverageSchemes(ExtractTable):
-    BASE_URL = os.getenv('COVERAGE_SCHEMES_URL')
+    BASE_URL = os.getenv('COVERAGE_SCHEMES_URL', "https://www.sharpfootballanalysis.com/stats-nfl/nfl-coverage-schemes/")
     SOURCE = "sharp"
 
     def __init__(self, params = None):
@@ -209,7 +209,7 @@ class CoverageSchemes(ExtractTable):
 
 
 class OffenseTendencies(ExtractTable):
-    BASE_URL = os.getenv('OFFENSE_TENDENCIES_URL')
+    BASE_URL = os.getenv('OFFENSE_TENDENCIES_URL', "https://www.sharpfootballanalysis.com/stats-nfl/nfl-offensive-tendencies-stats/")
     SOURCE = "sharp"
 
     def __init__(self, params = None):
@@ -217,7 +217,7 @@ class OffenseTendencies(ExtractTable):
 
 
 class CoverageStatsByPosition(ExtractTable):
-    BASE_URL = os.getenv('COVERAGE_STATS_BY_POSITION_URL')
+    BASE_URL = os.getenv('COVERAGE_STATS_BY_POSITION_URL', "https://www.sharpfootballanalysis.com/stats-nfl/nfl-coverage-stats-by-position/")
     SOURCE = "sharp"
 
     def __init__(self, params = None):

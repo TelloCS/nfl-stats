@@ -197,7 +197,7 @@ CELERY_RESULT_EXPIRES = 3600
 CELERY_BEAT_SCHEDULE = {
     'ingest-nfl-data-every-week': {
         'task': 'nfl.tasks.weekly_nfl_sync',
-        'schedule': crontab(day_of_week=2, hour=17, minute=52),
+        'schedule': crontab(day_of_week=3, hour=14, minute=30),
     },
     'refresh-nfl-schedule-every-minute': {
         'task': 'nfl.tasks.update_nfl_cache_task',
