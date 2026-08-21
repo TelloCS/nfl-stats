@@ -8,7 +8,8 @@ import ThemeToggle from "../components/ThemeToggle";
 import { useIsDesktop } from "../hooks/useMediaQueries";
 import StatusErrorModal from '../components/StatusErrorModal';
 import Dropdown from "../components/Dropdown";
-import { TEAM_NAV_LINKS, PLAYER_NAV_LINKS } from "./utils";
+import TeamDropdown from "../components/Teams/TeamDropdown";
+import { STAT_NAV_LINKS, PLAYER_NAV_LINKS } from "./utils";
 
 export default function Layout() {
   const { user, isLoading, isLoggedIn, logoutMutation } = useAuth();
@@ -69,9 +70,12 @@ export default function Layout() {
                   />
                 </li>
                 <li>
+                  <TeamDropdown />
+                </li>
+                <li>
                   <Dropdown
-                    navLinks={TEAM_NAV_LINKS}
-                    title={"Teams"}
+                    navLinks={STAT_NAV_LINKS}
+                    title={"Stats"}
                   />
                 </li>
               </ul>
@@ -110,11 +114,15 @@ export default function Layout() {
                   navLinks={PLAYER_NAV_LINKS}
                   title={"Players"}
                 />
+                <TeamDropdown 
+                  isMobile={true}
+                  onLinkClick={() => setIsMenuOpen(false)}
+                />
                 <Dropdown
                   isMobile={true}
                   onLinkClick={() => setIsMenuOpen(false)}
-                  navLinks={TEAM_NAV_LINKS}
-                  title={"Teams"}
+                  navLinks={STAT_NAV_LINKS}
+                  title={"Stats"}
                 />
               </div>
             </div>

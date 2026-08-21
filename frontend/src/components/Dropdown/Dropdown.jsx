@@ -25,6 +25,7 @@ export default function Dropdown({ isMobile, onLinkClick, navLinks, title }) {
             {navLinks?.map(({ to, label }) => (
               <NavLink
                 to={to}
+                key={to}
                 onClick={onLinkClick}
                 className={({ isActive }) =>
                   `rounded-r-lg font-medium text-lg/8 text-paper-400 hover:text-primary hover:bg-geodude-800 pl-6 pr-2 py-2 ${isActive
@@ -59,6 +60,7 @@ export default function Dropdown({ isMobile, onLinkClick, navLinks, title }) {
         {navLinks.map(({ to, label }) => (
           <NavLink
             to={to}
+            key={to}
             className={({ isActive }) =>
               `block px-4 py-2 text-xs transition-colors normal-case font-medium rounded-lg uppercase tracking-widest ${isActive
                 ? "text-primary"

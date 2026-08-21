@@ -30,6 +30,7 @@ export const TeamYearlyChart = memo(({
             tick={{ fontSize: 11, fill: 'var(--app-paper-400)' }}
             axisLine={false}
             tickLine={false}
+            reversed={true}
             width={50}
           />
 
