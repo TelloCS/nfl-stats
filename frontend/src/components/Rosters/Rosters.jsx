@@ -1,5 +1,4 @@
 import { memo } from "react"
-import { Link } from "react-router-dom"
 import { usePlayersByPosition } from "../Team/Team.helper"
 import { PlayerPositionGroup } from "../Team/PlayerPositionGroup"
 

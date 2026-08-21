@@ -1,6 +1,4 @@
 import { memo } from "react";
-import { Dot } from 'lucide-react';
-import StatToggle from "../StatToggle";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import CustomizedAxisTick from "../CustomizedAxisTick";
 import CustomTooltip from "../CustomTooltip";

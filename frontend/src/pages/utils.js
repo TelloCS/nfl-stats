@@ -3,7 +3,6 @@ export const PLAYER_NAV_LINKS = [
     { to: "/position-vs-opponent", label: "Position vs Opponent" }
 ];
 
-export const TEAM_NAV_LINKS = [
-  { to: "/teams", label: "Teams" },
-  { to: "/team/stats", label: "Seasonal Stats" },
+export const STAT_NAV_LINKS = [
+  { to: "/team/stats", label: "Team Stats" },
 ];
