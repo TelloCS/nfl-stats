@@ -29,6 +29,8 @@ export const PositionStatMap = {
         { key: 'receptions', label: 'Rec' },
         { key: 'rec_targets', label: 'Tgts' },
         { key: 'rec_yards', label: 'Rec Yds' },
+        { key: 'fumbles', label: 'Fum' },
+        { key: 'fumbles_lost', label: 'Lost' },
         { key: 'yards_per_reception', label: 'Yds/Rec' },
         { key: 'long_reception', label: 'Long Rec' },
         { key: 'rec_touchdowns', label: 'Rec TD' },
@@ -44,6 +46,8 @@ export const PositionStatMap = {
         { key: 'rec_touchdowns', label: 'Rec TD' },
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
+        { key: 'fumbles', label: 'Fum' },
+        { key: 'fumbles_lost', label: 'Lost' },
         { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
@@ -60,6 +64,8 @@ export const PositionStatMap = {
 
         { key: 'rush_attempts', label: 'Rush Att' },
         { key: 'rush_yards', label: 'Rush Yds' },
+        { key: 'fumbles', label: 'Fum' },
+        { key: 'fumbles_lost', label: 'Lost' },
         { key: 'yards_per_rush_attempt', label: 'Yds/Rush' },
         { key: 'long_rushing', label: 'Long Rush' },
         { key: 'rush_touchdowns', label: 'Rush TD' },
@@ -356,6 +362,7 @@ export const TeamRankingStatMap = [
 
 export const FilterConfig = {
   season_year: [
+    { label: "2026", value: 2026 },
     { label: "2025", value: 2025 },
     { label: "2024", value: 2024 },
     { label: "2023", value: 2023 },
