@@ -105,14 +105,16 @@ const PositionOpponentChart = ({
               <div className="space-y-3">
                 {data.contributors?.map((player, pIdx) => (
                   <div key={pIdx} className="flex flex-col gap-1.5">
-                    <Link
-                      key={pIdx}
-                      to={`/players/${player.player?.id}/${player.player?.slug}/stats`}
-                    >
-                      <span className='text-sm font-semibold text-paper-400 cursor-pointer hover:text-status-info'>
-                        {player.player?.fullName}
-                      </span>
-                    </Link>
+                    <div>
+                      <Link
+                        key={pIdx}
+                        to={`/players/${player.player?.id}/${player.player?.slug}/stats`}
+                      >
+                        <span className='text-sm font-semibold text-paper-400 cursor-pointer hover:text-status-info'>
+                          {player.player?.fullName}
+                        </span>
+                      </Link>
+                    </div>
                     <div className="grid grid-cols-3 gap-1">
                       {activeStats.map((stat) => (
                         <div key={stat.key} className="flex justify-between items-center bg-geodude-900 px-2 py-1 rounded border border-geodude-800">

@@ -27,7 +27,7 @@ export default function Login() {
     loginMutation.mutate({ email, password });
   };
 
-  const inputClasses = "block w-full p-2.5 pl-10 text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200";
+  const inputClasses = "block w-full p-2.5 pl-10 text-base sm:text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200";
 
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-background sm:p-6'>

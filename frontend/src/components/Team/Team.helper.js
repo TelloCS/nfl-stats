@@ -6,16 +6,17 @@ export const usePlayersByPosition = (players = []) => {
       return {};
     }
 
+    const getPosition = (item) =>
+      item?.player?.position ?? item?.position ?? 'Unknown';
+
     if (typeof Object.groupBy === 'function') {
-      return Object.groupBy(players, (player) => player.position || 'Unknown');
+      return Object.groupBy(players, getPosition);
     }
 
-    return players.reduce((acc, player) => {
-      const pos = player.position || 'Unknown';
-      if (!acc[pos]) {
-        acc[pos] = [];
-      }
-      acc[pos].push(player);
+    return players.reduce((acc, item) => {
+      const pos = getPosition(item);
+
+      (acc[pos] ??= []).push(item);
       return acc;
     }, {});
   }, [players]);

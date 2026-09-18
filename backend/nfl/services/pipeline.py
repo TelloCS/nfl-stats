@@ -53,8 +53,8 @@ async def run_extraction_pipeline(config: dict):
             advance_offense = await AdvanceOffense().send_api_request(session, season=config['dates'])
             advance_defense = await AdvanceDefense().send_api_request(session, season=config['dates'])
             coverage_schemes = await CoverageSchemes().send_api_request(session)
-            offense_tendencies = await CoverageStatsByPosition().send_api_request(session)
-            coverage_position = await OffenseTendencies().send_api_request(session)
+            coverage_position = await CoverageStatsByPosition().send_api_request(session)
+            offense_tendencies = await OffenseTendencies().send_api_request(session)
         else:
             logger.info("NFL is out of season. Skipping Game and Team Stats ingestion.")
 

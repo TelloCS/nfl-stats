@@ -407,3 +407,71 @@ class PlayerTeammatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerGameStats
         fields = ['team', 'players']
+
+
+#######################################################################################################################
+
+class PlayerSerializerV2(serializers.ModelSerializer):
+    """
+    For the autocomplete search bar.
+
+    """
+    fullName = serializers.CharField(source='full_name')
+
+    class Meta:
+        model = Player
+        fields = ['id', 'slug', 'fullName', 'position']
+
+
+class TeamSerializerV2(serializers.ModelSerializer):
+    players = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Team
+        fields = [
+            'id', 'slug', 'full_name', 'nickname', 'abbreviation', 'conference', 'division', 'players'
+        ]
+        read_only_fields = ['slug']
+
+    def get_players(self, team):
+        game_stats = self.context["game_stats"]
+
+        stats = [
+            stat
+            for stat in game_stats
+            if stat.team_id == team.id
+        ]
+
+        return PlayerGameStatsSerializerV2(
+            stats,
+            many=True,
+            context=self.context
+        ).data
+
+
+class GameSerializerV2(serializers.ModelSerializer):
+    homeTeam = TeamSerializerV2(read_only=True)
+    awayTeam = TeamSerializerV2(read_only=True)
+
+    class Meta:
+        model = Game
+        fields = [
+            'id', 'date', 'name', 'short_name', 'season_year', 'season_type', 'week', 'status',
+            'homeTeam', 'awayTeam', 'home_score', 'away_score'
+        ]
+
+
+class PlayerGameStatsSerializerV2(serializers.ModelSerializer):
+    player = PlayerSerializerV2(read_only=True)
+
+    class Meta:
+        model = PlayerGameStats
+        fields = [
+            "player", "pass_attempts", "completions", "pass_yards", "yards_per_pass_attempt", "pass_touchdowns",
+            "interceptions", "completion_pct", "sacks", "pass_rating", "adjusted_qbr",
+            "rush_attempts", "rush_yards", "rush_touchdowns", "yards_per_rush_attempt", "long_rushing", "receptions",
+            "rec_targets", "rec_yards", "rec_touchdowns", "yards_per_reception", "long_reception",
+            "fumbles", "fumbles_lost", "two_pt_conversions", "off_fum_rec_tds",
+            "kick_return_tds", "punt_return_tds", "ppr_points", "half_ppr_points", "non_ppr_points", "yahoo_points",
+            "draftkings_points", "fanduel_points"
+        ]

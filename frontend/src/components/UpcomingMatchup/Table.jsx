@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import { Link } from "react-router-dom";
 import useUrlTableSort from "../../hooks/useUrlTableSort";
 import { SortableTh } from "../../helpers/table";
 
@@ -52,7 +53,13 @@ const Table = ({ data, availableStats }) => {
                   <td className="text-nowrap text-paper-500">{log.game.week}</td>
                   <td className="text-nowrap text-paper-500">{log.game.date}</td>
                   <td className="text-nowrap text-paper-500">{log.game.season_year}</td>
-                  <td className="text-nowrap text-paper-400">{log.game.short_name}</td>
+                  <td className="text-nowrap text-paper-400 hover:text-foreground">
+                    <Link
+                      to={`/games/${log.game.id}/boxscore`}
+                    >
+                      <span>{log.game.short_name}</span>
+                    </Link>
+                  </td>
                   <td className="text-nowrap text-paper-500">{log.game.away_score} - {log.game.home_score}</td>
                   {availableStats.map((statConfig) => (
                     <td key={statConfig.key} className="text-nowrap text-paper-200">

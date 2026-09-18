@@ -87,7 +87,7 @@ export default function SearchBar({ onSearchComplete }: SearchBarProp) {
           <Search size={18} className="text-paper-400" />
         </div>
         <input
-          className="block w-full p-4 pl-10 lg:p-2.5 lg:pl-10 text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200"
+          className="block w-full p-4 pl-10 lg:p-2.5 lg:pl-10 text-base sm:text-sm text-foreground border border-geodude-800 rounded-lg bg-geodude-900 focus:outline-none focus:ring-1 focus:ring-geodude-700 focus:border-transparent transition-all duration-200"
           type="text"
           placeholder="Search player name..."
           value={input}

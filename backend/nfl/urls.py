@@ -13,6 +13,7 @@ from .views import (
     PlayerVsUpcomingMatchupStatsView,
     PlayerFantasyRankingsView,
     PlayerTeammatesListAPIView,
+    BoxscoreAPIView,
     HistoricNFLSchedulesListAPIView,
     NFLScheduleView,
     ETLVersionView,
@@ -52,6 +53,7 @@ urlpatterns = [
     ),
     path('players/fantasy-rankings', PlayerSeasonStatsListView.as_view(), name='player-fantasy-rankings-view'),
     path('players/teammates', PlayerTeammatesListAPIView.as_view(), name='player-teammates'),
+    path('games/<int:pk>/boxscore', BoxscoreAPIView.as_view(), name='boxscore'),
     path('slates', HistoricNFLSchedulesListAPIView.as_view(), name='nfl-slates'),
 
     path('schedule/', NFLScheduleView.as_view(), name='schedule'),
