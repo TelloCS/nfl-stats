@@ -1,4 +1,5 @@
 import hashlib
+from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -35,6 +36,7 @@ from .serializers import (
     PlayerCareerStatsSerializer,
     PlayerTeammatesSerializer,
     GameSerializer,
+    GameSerializerV2,
     NFLScheduleSerializer
 )
 from .filters import (
@@ -532,6 +534,34 @@ class PlayerTeammatesListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
             'team',
             'player'
         ).order_by("player_id", "game_id").distinct("player_id")
+
+
+class BoxscoreAPIView(APIView):
+    renderer_classes = [ORJSONRenderer]
+
+    def get(self, request, pk):
+        try:
+            game = Game.objects.select_related(
+                "homeTeam",
+                "awayTeam",
+            ).get(pk=pk)
+        except Game.DoesNotExist:
+            return Response({"detail": "Game not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        game_stats = list(
+            PlayerGameStats.objects
+            .filter(game=game)
+            .select_related("player", "team")
+        )
+
+        serializer = GameSerializerV2(
+            game,
+            context={
+                "game_stats": game_stats,
+            },
+        )
+
+        return Response(serializer.data)
 
 
 class HistoricNFLSchedulesListAPIView(KeyBasedCacheMixin, generics.ListAPIView):

@@ -41,7 +41,7 @@ export const getTeamStatusClass = (teamScore, opponentScore) => {
   }
 
   if (score < oppScore) {
-    return "text-error-500 opacity-60";
+    return "text-error-500";
   }
 
   return "text-status-aware font-semibold";
