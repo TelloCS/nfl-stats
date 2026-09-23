@@ -40,10 +40,10 @@ export default function Boxscore() {
   if (!data) return null;
 
   return (
-    <div className="container mx-auto sm:p-4 md:px-8">
+    <div className="container mx-auto p-2 sm:p-4 md:px-8">
       <div className="flex flex-col">
         <div className="bg-geodude-950 border border-geodude-800 p-4 sm:p-6 mb-4 grid grid-cols-3 justify-center items-center">
-          <div className="grid-span-1 font-bold text-foreground text-3xl text-left">
+          <div className="grid-span-1 font-bold text-foreground text-base sm:text-3xl text-left">
             <Link
               key={data.awayTeam.id}
               to={`/teams/${data.awayTeam.slug}`}
@@ -53,7 +53,7 @@ export default function Boxscore() {
               </span>
             </Link>
           </div>
-          <div className="grid-span-1 font-bold text-paper-300 text-2xl text-center flex flex-row justify-center items-center gap-4">
+          <div className="grid-span-1 font-bold text-paper-300 text-base sm:text-2xl text-center flex flex-row justify-center items-center gap-4">
             <div className={awayStyle}>
               {data?.away_score ?? "-"}
             </div>
@@ -64,7 +64,7 @@ export default function Boxscore() {
               {data?.home_score ?? "-"}
             </div>
           </div>
-          <div className="grid-span-1 font-bold text-foreground text-3xl text-right">
+          <div className="grid-span-1 font-bold text-foreground text-base sm:text-3xl text-right">
             <Link
               key={data.homeTeam.id}
               to={`/teams/${data.homeTeam.slug}`}
@@ -112,7 +112,7 @@ const Table = ({ position, teamRoster }: TableProps) => {
       <table className="w-full border-collapse border-spacing-0 text-left">
         <thead className="bg-geodude-950 text-paper-400 h-[40px]">
           <tr className="border-b border-geodude-800 uppercase text-[10px] tracking-wider [&>th]:font-semibold [&>th]:px-2 [&>th]:py-3 [&>th]:text-left">
-            <th className="text-nowrap">Player</th>
+            <th className="text-nowrap sticky left-0 bg-geodude-950 z-10">Player</th>
             {positionStats.map((statDef) => (
               <th key={statDef.key} className="text-nowrap">
                 {statDef.label}
@@ -125,7 +125,7 @@ const Table = ({ position, teamRoster }: TableProps) => {
           {players.map((stats) => (
             <tr
               key={stats.player.id}
-              className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-xs text-paper-300 [&>td]:px-2 [&>td]:text-left group"
+              className="hover:bg-geodude-800/50 transition duration-150 h-[30px] text-[10px] md:text-sm text-paper-300 [&>td]:px-2 [&>td]:text-left group"
             >
               <td className='text-nowrap font-medium text-foreground sticky left-0 bg-geodude-900 group-hover:bg-geodude-800'>
                 <Link

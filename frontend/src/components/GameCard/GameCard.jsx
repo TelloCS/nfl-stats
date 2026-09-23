@@ -46,11 +46,11 @@ const GameCard = ({ event }) => {
         <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-geodude-800 flex justify-between text-[10px] sm:text-xs text-paper-400 font-mono">
           <span>
             <span className="hidden sm:inline">Line: </span>
-            <span className="text-paper-200">{gameOdds?.details ?? "N/A"}</span>
+            <span className="text-paper-200">{gameOdds?.details ?? "-"}</span>
           </span>
           <span>
             <span className="hidden sm:inline">O/U: </span>
-            <span className="text-paper-200">{gameOdds?.overUnder ?? "N/A"}</span>
+            <span className="text-paper-200">{gameOdds?.overUnder ?? "-"}</span>
           </span>
         </div>
 

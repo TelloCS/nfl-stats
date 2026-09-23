@@ -81,7 +81,7 @@ export default function Team() {
         </div>
 
         <div className="p-4 md:p-6">
-          <div className="p-4 border border-geodude-800">
+          <div className="p-4 border border-geodude-800 bg-geodude-950">
             <div className="flex flex-col sm:flex-row sm:items-center text-paper-400 justify-between mb-4 gap-4">
               <div className="flex flex-col text-center text-foreground sm:text-left">
                 <div className="text-xl sm:text-2xl">

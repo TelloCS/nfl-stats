@@ -416,6 +416,7 @@ def transform_team_stats(raw_data: dict, season_year: int, model: models.Model, 
         return None
     
     team_nicknames = {team.nickname: team for team in Team.objects.all()}
+    team_full_names = {team.full_name: team for team in Team.objects.all()}
     legacy_aliases = {
         "Football Team": "Commanders"
     }
@@ -424,7 +425,7 @@ def transform_team_stats(raw_data: dict, season_year: int, model: models.Model, 
         raw_team_name = str(item.get('Team', ''))
         lookup_name = legacy_aliases.get(raw_team_name, raw_team_name)
 
-        team_instance = team_nicknames.get(lookup_name)
+        team_instance = team_nicknames.get(lookup_name) or team_full_names.get(lookup_name)
         if not team_instance:
             logger.warning(f"Skipping stats for unknown team: {item['Team']}")
             continue
@@ -532,6 +533,7 @@ def transform(raw_payload: dict, config: dict) -> None:
         )
 
     if raw_payload.get('coverage_schemes', []):
+       print(raw_payload.get('coverage_schemes', []))
        transform_team_stats(
             raw_data=raw_payload.get('coverage_schemes', []),
             season_year=season_year,
@@ -540,6 +542,7 @@ def transform(raw_payload: dict, config: dict) -> None:
             label="TEAM COVERAGE_SCHEME_STATS"
         )
     if raw_payload.get('offense_tendencies', []):
+        print(raw_payload.get('offense_tendencies', []))
         transform_team_stats(
             raw_data=raw_payload.get('offense_tendencies', []),
             season_year=season_year,
@@ -548,6 +551,7 @@ def transform(raw_payload: dict, config: dict) -> None:
             label="TEAM TENDENCIES_STATS"
         )
     if raw_payload.get('coverage_position', []):
+        print(raw_payload.get('coverage_position', []))
         transform_team_stats(
             raw_data=raw_payload.get('coverage_position', []),
             season_year=season_year,
