@@ -19,7 +19,7 @@ function PlayerPerformanceSection({ data, onFilterChange, filters }) {
     }`;
 
   return (
-    <div className="bg-geodude-900 p-4 sm:p-6 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
+    <div className="bg-geodude-900 p-4 sm:rounded-md sm:border sm:border-geodude-800 flex flex-col">
 
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mb-4">

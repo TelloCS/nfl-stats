@@ -11,6 +11,12 @@ function MatchupAnalysisSection({ data, rankingData }) {
   const games = data?.stats;
 
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+  const [activeSeason, setActiveSeason] = useState(data?.active_season);
+
+  if (activeSeason !== data?.active_season) {
+    setActiveSeason(data?.active_season)
+    setSelectedGameIndex(0)
+  };
 
   const { teamOne, teamTwo } = useMemo(() => getMatchupTeams(games?.[selectedGameIndex]),
     [games, selectedGameIndex]
@@ -46,7 +52,7 @@ function MatchupAnalysisSection({ data, rankingData }) {
   if (!games || games.length === 0) return null;
 
   return (
-    <div className="bg-geodude-900 lg:col-span-1 p-4 sm:p-6 sm:rounded-md border-t sm:border border-geodude-800">
+    <div className="bg-geodude-900 lg:col-span-1 p-4 sm:rounded-md border-t sm:border border-geodude-800">
       <TableChartButton 
         selectedGameIndex={selectedGameIndex}
         setSelectedGameIndex={setSelectedGameIndex}

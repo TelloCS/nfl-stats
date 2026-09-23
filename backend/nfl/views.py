@@ -163,7 +163,7 @@ class TeamListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
 
 class PlayerListAPIView(KeyBasedCacheMixin, generics.ListAPIView):
     renderer_classes = [ORJSONRenderer]
-    queryset = Player.objects.select_related('team')
+    queryset = Player.objects.select_related('team').order_by('team')
     serializer_class = PlayerSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayerFilter

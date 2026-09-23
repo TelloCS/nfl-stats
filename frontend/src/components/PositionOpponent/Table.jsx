@@ -64,7 +64,13 @@ const ResultsTable = ({ isLoading, data, statsToShow, sortConfig, onHeaderClick 
                     <span className="cursor-pointer hover:text-status-info">{log.team.abbreviation}</span>
                 </Link>
               </td>
-              <td className="text-nowrap text-paper-400">{log.game.short_name}</td>
+              <td className="text-nowrap text-paper-400 hover:text-foreground">
+                <Link
+                  to={`/games/${log.game.id}/boxscore`}
+                >
+                  <span>{log.game.short_name}</span>
+                </Link>
+              </td>
               <td className="text-nowrap text-paper-500">{log.game.away_score} - {log.game.home_score}</td>
               {statsToShow.map((statConfig) => (
                 <td key={statConfig.key} className="text-nowrap text-paper-200">
